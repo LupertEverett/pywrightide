@@ -4,7 +4,7 @@ from pathlib import Path
 
 from PyQt5.QtWidgets import (QMainWindow, QWidget, QToolBar, QStatusBar,
                              QAction, QFileDialog, QLabel, QTabWidget, QMessageBox)
-from PyQt5.QtGui import QIcon, QKeySequence
+from PyQt5.QtGui import QIcon, QKeySequence, QCloseEvent
 from PyQt5.QtCore import Qt
 
 from .NewGameDialog import NewGameDialog
@@ -245,8 +245,31 @@ class IDEMainWindow(QMainWindow):
         self.tab_widget.setTabText(self.tab_widget.currentIndex(), new_name)
 
     def _handle_remove_tab(self, index):
+        if self.tab_widget.tabText(index) != "Game Properties":
+            tab: FileEditWidget = self.tab_widget.widget(index)
+
+            if tab.is_file_modified():
+                result = self._ask_for_closing_tab(index, False)
+
+                if result == QMessageBox.Cancel:
+                    return
+                # QMessageBox.No will just ignore the current file, so no special handling for it.
+                if result == QMessageBox.Yes:
+                    tab.save_to_file()
+
         self.tab_widget.removeTab(index)
         self.tab_widget.setMovable(self.tab_widget.count() > 1)
+
+    def _ask_for_closing_tab(self, index: int, multiple_windows: bool):
+        answers = (QMessageBox.Yes | QMessageBox.YesToAll | QMessageBox.No | QMessageBox.NoToAll |
+                   QMessageBox.Cancel) if multiple_windows \
+            else (QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel)
+
+        tab: FileEditWidget = self.tab_widget.widget(index)
+        tab_text = tab.file_name
+
+        return QMessageBox.question(self, "Confirm Save", "Would you like to save {}?".format(tab_text),
+                                    answers, QMessageBox.Cancel)
 
     def _handle_save_tab(self):
         if self.tab_widget.tabText(self.tab_widget.currentIndex()) != "Game Properties":
@@ -287,3 +310,51 @@ class IDEMainWindow(QMainWindow):
         QMessageBox.about(self, "About PyWright IDE", "PyWright IDE by LupertEverett\n"
                                                       "This program aims to make developing PyWright games easier\n"
                                                       "Made with PyQt5 and QScintilla")
+
+    def _save_all_modified_files(self):
+        for i in range(self.tab_widget.count()):
+            if self.tab_widget.tabText(i) == "Game Properties":
+                continue
+
+            tab: FileEditWidget = self.tab_widget.widget(i)
+
+            if tab.is_file_modified():
+                tab.save_to_file()
+
+        self._update_save_button()
+
+    def _get_modified_files_tab_indexes(self) -> list[int]:
+        result = []
+
+        for i in range(self.tab_widget.count()):
+            if self.tab_widget.tabText(i) == "Game Properties":
+                continue
+
+            tab: FileEditWidget = self.tab_widget.widget(i)
+
+            if tab.is_file_modified():
+                result.append(i)
+
+        return result
+
+    def closeEvent(self, event: QCloseEvent):
+        unsaved_tab_indexes = self._get_modified_files_tab_indexes()
+
+        for idx in unsaved_tab_indexes:
+            tab: FileEditWidget = self.tab_widget.widget(idx)
+
+            result = self._ask_for_closing_tab(idx, len(unsaved_tab_indexes) > 1)
+
+            if result == QMessageBox.Yes:
+                tab.save_to_file()
+            elif result == QMessageBox.YesToAll:
+                self._save_all_modified_files()
+                break
+            # QMessageBox.No will just ignore the current file, so no special handling for it.
+            elif result == QMessageBox.NoToAll:
+                break
+            elif result == QMessageBox.Cancel:
+                event.ignore()
+                return
+
+        event.accept()
