@@ -4,7 +4,7 @@ from pathlib import Path
 
 from PyQt5.QtWidgets import (QMainWindow, QWidget, QToolBar, QStatusBar,
                              QAction, QFileDialog, QLabel, QTabWidget, QMessageBox)
-from PyQt5.QtGui import QIcon
+from PyQt5.QtGui import QIcon, QKeySequence
 from PyQt5.QtCore import Qt
 
 from .NewGameDialog import NewGameDialog
@@ -49,6 +49,7 @@ class IDEMainWindow(QMainWindow):
         self.new_pywright_game_action.setEnabled(False)
         self.new_pywright_game_action.setStatusTip("Create a new PyWright Game")
         self.new_pywright_game_action.triggered.connect(self._handle_new_game)
+        self.new_pywright_game_action.setShortcut(QKeySequence("ctrl+n"))
 
         self.open_pywright_game_action = QAction(QIcon("res/icons/opengame.png"), "Open PyWright Game")
         self.open_pywright_game_action.setEnabled(False)
@@ -59,16 +60,19 @@ class IDEMainWindow(QMainWindow):
         self.new_file_action.setEnabled(False)
         self.new_file_action.setStatusTip("Create a new File")
         self.new_file_action.triggered.connect(lambda: self.open_new_editing_tab(""))
+        self.new_file_action.setShortcut(QKeySequence("Ctrl+t"))
 
         self.open_file_action = QAction(QIcon("res/icons/openfile.png"), "Open File")
         self.open_file_action.triggered.connect(self._handle_open_file)
         self.open_file_action.setStatusTip("Open an existing file")
         self.open_file_action.setEnabled(False)
+        self.open_file_action.setShortcut(QKeySequence("Ctrl+o"))
 
         self.save_file_action = QAction(QIcon("res/icons/save.png"), "Save File")
         self.save_file_action.setEnabled(False)
         self.save_file_action.setStatusTip("Save the file currently open")
         self.save_file_action.triggered.connect(self._handle_save_tab)
+        self.save_file_action.setShortcut(QKeySequence("Ctrl+s"))
 
         self.run_pywright_action = QAction(QIcon("res/icons/runpywright.png"), "Run PyWright")
         self.run_pywright_action.setEnabled(False)
@@ -100,6 +104,7 @@ class IDEMainWindow(QMainWindow):
                                                     result)
         find_pywright_installation_action.triggered.connect(self.handle_find_pywright_installation)
         find_pywright_installation_action.setStatusTip("Locate PyWright Installation Folder")
+        find_pywright_installation_action.setShortcut(QKeySequence("Ctrl+l"))
         result.addAction(find_pywright_installation_action)
 
         result.addSeparator()
