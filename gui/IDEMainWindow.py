@@ -150,15 +150,18 @@ class IDEMainWindow(QMainWindow):
                 QMessageBox.critical(self, "Error", "Could not find a PyWright installation")
                 return
 
-            self.selected_pywright_installation = picker
-            self.game_properties_widget = GamePropertiesWidget(self.selected_pywright_installation)
-            self.directory_view.clear_directory_view()
-            if self.tab_widget.count() > 0:
-                self.tab_widget.clear()
-            self.installation_path_label.setText(picker)
-            self._pick_pywright_executable(picker)
-            self.run_pywright_action.setStatusTip("Run PyWright executable ({})".format(self.pywright_executable_name))
-            self._update_toolbar_buttons()
+            if self._attempt_closing_unsaved_tabs():
+                self.selected_pywright_installation = picker
+                self.game_properties_widget = GamePropertiesWidget(self.selected_pywright_installation)
+                self.directory_view.clear_directory_view()
+                if self.tab_widget.count() > 0:
+                    self.tab_widget.clear()
+                self.installation_path_label.setText(picker)
+                self._pick_pywright_executable(picker)
+                self.run_pywright_action.setStatusTip(
+                    "Run PyWright executable ({})".format(self.pywright_executable_name)
+                )
+                self._update_toolbar_buttons()
 
     def check_legit_pywright(self, selected_directory) -> bool:
         """Returns true if the selected folder is a valid PyWright directory."""
@@ -174,6 +177,9 @@ class IDEMainWindow(QMainWindow):
                or Path("{}/PyWright.py".format(selected_directory)).exists()
 
     def _pick_pywright_executable(self, selected_directory):
+        """Picks a PyWright executable from the selected_directory.
+
+        :param selected_directory: Selected Directory, must be the root folder of the PyWright installation."""
         # Default to Windows, fallback to the generic py version.
         win_pywright = Path("{}/PyWright.exe".format(selected_directory))
         py_pywright = Path("{}/PyWright.py".format(selected_directory))
@@ -199,15 +205,18 @@ class IDEMainWindow(QMainWindow):
             self._switch_to_selected_game(open_game_dialog.selected_game)
 
     def _switch_to_selected_game(self, selected_game: str):
-        """Switchs the IDE to the selected PyWright game, closing all open tabs in the process"""
+        """Switches the IDE to the selected PyWright game, closing all open tabs in the process
 
-        self.selected_game = selected_game
-        game_path = str(Path("{}/games/{}".format(self.selected_pywright_installation, self.selected_game)))
-        self.game_properties_widget.load_game(game_path)
-        self.tab_widget.clear()
-        self.directory_view.update_directory_view(game_path)
-        self.open_game_properties_tab()
-        self._update_toolbar_buttons()
+        :param selected_game: Name of the selected PyWright game."""
+
+        if self._attempt_closing_unsaved_tabs():
+            self.selected_game = selected_game
+            game_path = str(Path("{}/games/{}".format(self.selected_pywright_installation, self.selected_game)))
+            self.game_properties_widget.load_game(game_path)
+            self.tab_widget.clear()
+            self.directory_view.update_directory_view(game_path)
+            self.open_game_properties_tab()
+            self._update_toolbar_buttons()
 
     def _handle_open_file(self):
         open_dialog = QFileDialog.getOpenFileName(self, "Open File",
@@ -260,9 +269,15 @@ class IDEMainWindow(QMainWindow):
         self.tab_widget.removeTab(index)
         self.tab_widget.setMovable(self.tab_widget.count() > 1)
 
-    def _ask_for_closing_tab(self, index: int, multiple_windows: bool):
+    def _ask_for_closing_tab(self, index: int, multiple_tabs: bool):
+        """Asks the user if they want to save the contents of the [index]th tab before closing it.
+
+        :param index: Index of the tab about to be closed
+
+        :param multiple_tabs: If set to True, 'Yes To All' and 'No To All' will be added to the possible answers"""
+
         answers = (QMessageBox.Yes | QMessageBox.YesToAll | QMessageBox.No | QMessageBox.NoToAll |
-                   QMessageBox.Cancel) if multiple_windows \
+                   QMessageBox.Cancel) if multiple_tabs \
             else (QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel)
 
         tab: FileEditWidget = self.tab_widget.widget(index)
@@ -311,15 +326,11 @@ class IDEMainWindow(QMainWindow):
                                                       "This program aims to make developing PyWright games easier\n"
                                                       "Made with PyQt5 and QScintilla")
 
-    def _save_all_modified_files(self):
-        for i in range(self.tab_widget.count()):
-            if self.tab_widget.tabText(i) == "Game Properties":
-                continue
+    def _save_all_modified_files(self, unsaved_tabs_indexes: list[int]):
+        for idx in unsaved_tabs_indexes:
+            tab: FileEditWidget = self.tab_widget.widget(idx)
 
-            tab: FileEditWidget = self.tab_widget.widget(i)
-
-            if tab.is_file_modified():
-                tab.save_to_file()
+            tab.save_to_file()
 
         self._update_save_button()
 
@@ -337,7 +348,7 @@ class IDEMainWindow(QMainWindow):
 
         return result
 
-    def closeEvent(self, event: QCloseEvent):
+    def _attempt_closing_unsaved_tabs(self) -> bool:
         unsaved_tab_indexes = self._get_modified_files_tab_indexes()
 
         for idx in unsaved_tab_indexes:
@@ -348,13 +359,19 @@ class IDEMainWindow(QMainWindow):
             if result == QMessageBox.Yes:
                 tab.save_to_file()
             elif result == QMessageBox.YesToAll:
-                self._save_all_modified_files()
-                break
+                self._save_all_modified_files(unsaved_tab_indexes)
+                return True
             # QMessageBox.No will just ignore the current file, so no special handling for it.
             elif result == QMessageBox.NoToAll:
-                break
+                return True
             elif result == QMessageBox.Cancel:
-                event.ignore()
-                return
+                return False
+
+        return True
+
+    def closeEvent(self, event: QCloseEvent):
+        if not self._attempt_closing_unsaved_tabs():
+            event.ignore()
+            return
 
         event.accept()
