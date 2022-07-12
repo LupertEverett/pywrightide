@@ -47,37 +47,51 @@ class IDEMainWindow(QMainWindow):
         # Actions
         self.new_pywright_game_action = QAction(QIcon("res/icons/newgame.png"), "New PyWright Game")
         self.new_pywright_game_action.setEnabled(False)
-        self.new_pywright_game_action.setStatusTip("Create a new PyWright Game")
         self.new_pywright_game_action.triggered.connect(self._handle_new_game)
-        self.new_pywright_game_action.setShortcut(QKeySequence("ctrl+n"))
+        self.new_pywright_game_action.setShortcut(QKeySequence("Ctrl+n"))
+        self.new_pywright_game_action.setStatusTip("Create a new PyWright Game [{}]".format(
+            self.new_pywright_game_action.shortcut().toString()
+        ))
 
         self.open_pywright_game_action = QAction(QIcon("res/icons/opengame.png"), "Open PyWright Game")
         self.open_pywright_game_action.setEnabled(False)
-        self.open_pywright_game_action.setStatusTip("Open an existing PyWright Game")
         self.open_pywright_game_action.triggered.connect(self._handle_open_game)
+        self.open_pywright_game_action.setShortcut(QKeySequence("Ctrl+Shift+o"))
+        self.open_pywright_game_action.setStatusTip("Open an existing PyWright Game [{}]".format(
+            self.open_pywright_game_action.shortcut().toString()
+        ))
 
         self.new_file_action = QAction(QIcon("res/icons/newfile.png"), "New file")
         self.new_file_action.setEnabled(False)
-        self.new_file_action.setStatusTip("Create a new File")
         self.new_file_action.triggered.connect(lambda: self.open_new_editing_tab(""))
         self.new_file_action.setShortcut(QKeySequence("Ctrl+t"))
+        self.new_file_action.setStatusTip("Create a new File [{}]".format(
+            self.new_file_action.shortcut().toString()
+        ))
 
         self.open_file_action = QAction(QIcon("res/icons/openfile.png"), "Open File")
         self.open_file_action.triggered.connect(self._handle_open_file)
-        self.open_file_action.setStatusTip("Open an existing file")
         self.open_file_action.setEnabled(False)
         self.open_file_action.setShortcut(QKeySequence("Ctrl+o"))
+        self.open_file_action.setStatusTip("Open an existing file [{}]".format(
+            self.open_file_action.shortcut().toString()
+        ))
 
         self.save_file_action = QAction(QIcon("res/icons/save.png"), "Save File")
         self.save_file_action.setEnabled(False)
-        self.save_file_action.setStatusTip("Save the file currently open")
         self.save_file_action.triggered.connect(self._handle_save_tab)
         self.save_file_action.setShortcut(QKeySequence("Ctrl+s"))
+        self.save_file_action.setStatusTip("Save the file currently open [{}]".format(
+            self.save_file_action.shortcut().toString()
+        ))
 
         self.run_pywright_action = QAction(QIcon("res/icons/runpywright.png"), "Run PyWright")
         self.run_pywright_action.setEnabled(False)
-        self.run_pywright_action.setStatusTip("Run PyWright executable (none found)")
         self.run_pywright_action.triggered.connect(self._handle_run_pywright)
+        self.run_pywright_action.setShortcut(QKeySequence("Ctrl+r"))
+        self.run_pywright_action.setStatusTip("Run PyWright executable (none found) [{}]".format(
+            self.run_pywright_action.shortcut().toString()
+        ))
 
         self.about_action = QAction(QIcon("res/icons/gameproperties.png"), "About")
         self.about_action.setStatusTip("About PyWright")
@@ -103,8 +117,10 @@ class IDEMainWindow(QMainWindow):
                                                     "Locate PyWright Installation",
                                                     result)
         find_pywright_installation_action.triggered.connect(self.handle_find_pywright_installation)
-        find_pywright_installation_action.setStatusTip("Locate PyWright Installation Folder")
         find_pywright_installation_action.setShortcut(QKeySequence("Ctrl+l"))
+        find_pywright_installation_action.setStatusTip("Locate PyWright Installation Folder [{}]".format(
+            find_pywright_installation_action.shortcut().toString()
+        ))
         result.addAction(find_pywright_installation_action)
 
         result.addSeparator()
@@ -159,7 +175,10 @@ class IDEMainWindow(QMainWindow):
                 self.installation_path_label.setText(picker)
                 self._pick_pywright_executable(picker)
                 self.run_pywright_action.setStatusTip(
-                    "Run PyWright executable ({})".format(self.pywright_executable_name)
+                    "Run PyWright executable ({}) [{}]".format(
+                        self.pywright_executable_name,
+                        self.run_pywright_action.shortcut().toString()
+                    )
                 )
                 self._update_toolbar_buttons()
 
