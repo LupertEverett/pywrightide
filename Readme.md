@@ -31,5 +31,5 @@ but you should be able to work with the available features just fine.
 ## Licenses / Credits
 
 The code is licensed under GPLv3, and the custom made icons 
-(a.k.a. everything in /res/icons/ except "pwicon.png", and its edited versions "ideicon.ico" and "ideicon.png")
+(a.k.a. everything in /res/icons/ except "pwicon.png", which comes from PyWright, and its edited versions "ideicon.ico" and "ideicon.png")
 are licensed with Creative Commons BY/NC/SA.
