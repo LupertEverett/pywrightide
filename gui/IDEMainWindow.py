@@ -94,7 +94,7 @@ class IDEMainWindow(QMainWindow):
         ))
 
         self.about_action = QAction(QIcon("res/icons/gameproperties.png"), "About")
-        self.about_action.setStatusTip("About PyWright")
+        self.about_action.setStatusTip("About PyWright IDE")
         self.about_action.triggered.connect(self._handle_about)
 
         # Toolbar and the central widget
@@ -109,6 +109,10 @@ class IDEMainWindow(QMainWindow):
         self.status_bar.addPermanentWidget(self.installation_path_label)
 
         self.setStatusBar(self.status_bar)
+
+        # Macros tracking
+        self._pywright_builtin_macros: list[str] = []
+        self._game_macros: list[str] = []
 
     def _create_top_toolbar(self) -> QToolBar:
         result = QToolBar(self)
@@ -174,6 +178,7 @@ class IDEMainWindow(QMainWindow):
                     self.tab_widget.clear()
                 self.installation_path_label.setText(picker)
                 self._pick_pywright_executable(picker)
+                self._parse_builtin_macros(picker)
                 self.run_pywright_action.setStatusTip(
                     "Run PyWright executable ({}) [{}]".format(
                         self.pywright_executable_name,
@@ -234,6 +239,7 @@ class IDEMainWindow(QMainWindow):
             self.game_properties_widget.load_game(game_path)
             self.tab_widget.clear()
             self.directory_view.update_directory_view(game_path)
+            self._parse_game_macros()
             self.open_game_properties_tab()
             self._update_toolbar_buttons()
 
@@ -252,6 +258,8 @@ class IDEMainWindow(QMainWindow):
         file_edit_widget = FileEditWidget(self.selected_pywright_installation, file_path)
         file_edit_widget.file_name_changed.connect(self._handle_rename_tab)
         file_edit_widget.file_modified.connect(self._update_save_button)
+        file_edit_widget.supply_builtin_macros_to_lexer(self._pywright_builtin_macros)
+        file_edit_widget.supply_game_macros_to_lexer(self._game_macros)
         file_name = Path(file_path).name
         self._open_new_tab(file_edit_widget, file_name if file_name != "" else "New File")
 
@@ -344,6 +352,44 @@ class IDEMainWindow(QMainWindow):
         QMessageBox.about(self, "About PyWright IDE", "PyWright IDE by LupertEverett\n"
                                                       "This program aims to make developing PyWright games easier\n"
                                                       "Made with PyQt5 and QScintilla")
+
+    def _parse_builtin_macros(self, pywright_install_dir: str):
+        core_macros_dir = Path("{}/core/macros".format(pywright_install_dir))
+        if not (core_macros_dir.exists() and core_macros_dir.is_dir()):
+            raise FileNotFoundError("core/macros dir does not exist!")
+
+        # Get a list of the .mcro files
+        macro_files_list = list(core_macros_dir.glob("*.mcro"))
+
+        self._pywright_builtin_macros.clear()
+
+        for macro_file_name in macro_files_list:
+            with open(macro_file_name, "r", encoding="UTF-8") as f:
+                lines = f.readlines()
+
+                for line in lines:
+                    if line.startswith("macro "):
+                        splitted_lines = line.split(maxsplit=1)
+                        self._pywright_builtin_macros.append(splitted_lines[1])
+
+    def _parse_game_macros(self):
+        game_path = Path("{}/games/{}".format(self.selected_pywright_installation, self.selected_game))
+
+        if not (game_path.exists() and game_path.is_dir()):
+            raise FileNotFoundError("Selected game doesn't exist!")
+
+        macro_files_list = game_path.glob("*.mcro")
+
+        self._game_macros.clear()
+
+        for macro_file_name in macro_files_list:
+            with open(macro_file_name, "r", encoding="UTF-8") as f:
+                lines = f.readlines()
+
+                for line in lines:
+                    if line.startswith("macro "):
+                        splitted_lines = line.split(maxsplit=1)
+                        self._game_macros.append(splitted_lines[1])
 
     def _save_all_modified_files(self, unsaved_tabs_indexes: list[int]):
         for idx in unsaved_tabs_indexes:

@@ -63,6 +63,12 @@ class FileEditWidget(QWidget):
             # Common sense: Newly opened files aren't modified.
             self.sci.setModified(False)
 
+    def supply_builtin_macros_to_lexer(self, builtin_macros: list[str]):
+        self._lexer.set_builtin_macros(builtin_macros)
+
+    def supply_game_macros_to_lexer(self, game_macros: list[str]):
+        self._lexer.set_game_macros(game_macros)
+
     def save_to_file(self):
         if not self._is_a_new_file:
             with open(self.file_path, "w") as f:
