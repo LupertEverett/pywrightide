@@ -10,17 +10,42 @@ font_size = 10
 
 # TODO: Check doc.txt for the entire list of commands and such
 
-commands = ["set", "sfx", "mus", "muslogic", "music_fade_out",
-            "fg", "bg", "ev", "in", "out", "zoom", "obj",
-            "gui", "Back", "Button", "Input", "Wait", "isempty", "is_ex",
-            "addev", "delev", "addvar",
-            "casemenu", "include",
-            "setflag", "noflag", "delflag", "flag", "hideevr", "nt",
-            "icon", "title", "author", "version",
-            "label", "examine", "region", "menu", "char", "goto",
-            "forgetlist", "showlist", "list", "li",
-            "pause", "savegame", "delete", "scroll", "shake",
-            "script", "macro", "endmacro", "guilty_words", "exit"]
+commands = [
+    # In the written order in doc.txt (with some additions):
+    # "To add various objects"
+    "emo",
+    "gui", "Back", "Button", "Wait", "Input",
+    "menu",
+    "list", "li", "showlist", "forgetlist", "forgetlistitem",
+    "present",
+    "examine", "region",
+    # "Various control commands"
+    "print", "include", "nt", "goto", "label", "penalty", "pause", "waitenter",
+    "mus", "sfx", "movie",
+    "exit", "endscript", "casemenu", "script", "top",
+    "cross", "endcross", "statement", "resume", "cross_restart", "clearcross",
+    "next_statement", "prev_statement",
+    # "Variables and flags to keep track of what happens"
+    "setflag", "delflag", "flag", "noflag", "set",
+    "setvar", "joinvar", "addvar", "subvar", "divvar", "mulvar", "absvar",
+    "random",
+    "is", "AND", "isnot", "isempty", "isnotempty", "isnumber",
+    "exportvars", "importvars", "savegame", "loadgame", "deletegame",
+    # "Working with evidence"
+    "addev", "delev",
+    # "Special effects"
+    "draw_off", "draw_on", "scroll", "rotate",
+    "notguilty", "guilty",
+    # macros
+    "macro", "endmacro"
+    # data.txt fields
+    "icon", "title", "author", "version",
+    # Misc. stuff
+    "muslogic", "music_fade_out", "music_fade_in",
+    "fg", "bg", "ev", "in", "out", "zoom", "obj", "is_ex",
+    "hideevr", "guilty_words", "char",
+    "delete", "shake", "scroll", "menu"
+]
 
 properties = ["_allow_saveload", "_order_cases", "_cr_button", "_list_bg_image", "_music_loop", "_music_fade",
               "_testimony_blinker", "ev_mode_bg_logic", "_bigbutton_bg", "_bigbutton_img",
