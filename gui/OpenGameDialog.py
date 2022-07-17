@@ -20,6 +20,7 @@ class OpenGameDialog(QDialog):
         self.buttonBox.rejected.connect(self.reject)
 
         self.list_widget = QListWidget()
+        self.list_widget.doubleClicked.connect(self._handle_list_widget_double_click)
 
         self.layout = QVBoxLayout()
 
@@ -37,6 +38,10 @@ class OpenGameDialog(QDialog):
 
         for game in games:
             self.list_widget.addItem(str(game.stem))
+
+    def _handle_list_widget_double_click(self):
+        if len(self.list_widget.selectedIndexes()) > 0:
+            self._handle_accept()
 
     def _handle_accept(self):
         self.selected_game = self.list_widget.currentItem().text()
