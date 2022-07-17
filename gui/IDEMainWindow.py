@@ -73,7 +73,7 @@ class IDEMainWindow(QMainWindow):
         self.open_file_action.triggered.connect(self._handle_open_file)
         self.open_file_action.setEnabled(False)
         self.open_file_action.setShortcut(QKeySequence("Ctrl+o"))
-        self.open_file_action.setStatusTip("Open an existing file [{}]".format(
+        self.open_file_action.setStatusTip("Open an existing File [{}]".format(
             self.open_file_action.shortcut().toString()
         ))
 
@@ -81,7 +81,7 @@ class IDEMainWindow(QMainWindow):
         self.save_file_action.setEnabled(False)
         self.save_file_action.triggered.connect(self._handle_save_tab)
         self.save_file_action.setShortcut(QKeySequence("Ctrl+s"))
-        self.save_file_action.setStatusTip("Save the file currently open [{}]".format(
+        self.save_file_action.setStatusTip("Save the currently open File [{}]".format(
             self.save_file_action.shortcut().toString()
         ))
 
