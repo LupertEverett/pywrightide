@@ -47,7 +47,7 @@ class FileEditWidget(QWidget):
         self.setLayout(self.layout)
 
         self.file_path = selected_file
-        self.file_name = ""
+        self.file_name = "New File"
 
         self._is_a_new_file = self.file_path == ""
 
@@ -83,7 +83,7 @@ class FileEditWidget(QWidget):
                                                   str(Path("{}/games".format(self.pywright_working_dir))),
                                                   "Text Files (*.txt)")
 
-        if save_dialog != "":
+        if save_dialog[0] != "":
             with open(save_dialog[0], "w") as f:
                 f.write(self.sci.text())
                 self._is_a_new_file = False
