@@ -56,7 +56,8 @@ class FileEditWidget(QWidget):
             self.fill_the_scintilla(self.file_path)
 
     def fill_the_scintilla(self, selected_file):
-        with open(selected_file, "r") as f:
+        # newline="" so the IDE does not mess with the EOL chars, fixes the gaps in new lines bug
+        with open(selected_file, "r", newline="") as f:
             lines = f.readlines()
             text = "".join(lines)
             self.sci.setText(text)
@@ -71,7 +72,8 @@ class FileEditWidget(QWidget):
 
     def save_to_file(self):
         if not self._is_a_new_file:
-            with open(self.file_path, "w") as f:
+            # newline="" so the IDE does not mess with the EOL chars, fixes the gaps in new lines bug
+            with open(self.file_path, "w", newline="") as f:
                 f.write(self.sci.text())
             self.sci.setModified(False)
             return
