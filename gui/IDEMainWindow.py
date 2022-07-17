@@ -32,7 +32,7 @@ class IDEMainWindow(QMainWindow):
 
         self.game_properties_widget = None  # Will be created later, when a PyWright root folder is selected
 
-        self.directory_view = DirectoryViewWidget()
+        self.directory_view = DirectoryViewWidget(self)
         self.logger_view = PyWrightLoggerWidget()
         self.logger_view.hide()
 
