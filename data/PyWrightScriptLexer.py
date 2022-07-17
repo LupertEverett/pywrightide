@@ -1,8 +1,6 @@
 # A custom lexer for PyWright scripts, mainly for syntax highlighting
 import re
 
-from pathlib import Path
-
 from PyQt5.QtGui import QColor, QFont
 
 from PyQt5.Qsci import QsciLexerCustom, QsciScintilla
