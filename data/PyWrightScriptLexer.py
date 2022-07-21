@@ -37,9 +37,15 @@ commands = [
     "macro", "endmacro",
     # data.txt fields
     "icon", "title", "author", "version",
+    # "Animation file commands" (these can be added here too)
+    "horizontal", "vertical", "length", "loops", "framedelay",
+    "blinkmode", "blipsound", "framecompress",
+    # "Art Types"
+    "fg", "bg", "ev",
+    # Not mentioned in doc.txt, but somewhere else
+    "zoom", "char", "delete", "shake", "is_ex", "setvar_ex",
     # Misc. stuff (some might be custom macros, or stuff that wasn't in 0.9880)
-    "fg", "bg", "ev", "in", "out", "zoom", "obj", "is_ex", "char",
-    "delete", "shake"
+    "in", "out", "obj"
 ]
 
 special_variables = [
@@ -69,16 +75,18 @@ special_variables = [
     # _case_0, _case_1, case_2... etc. are handled in a separate list
     # Misc. stuff that wasn't in the doc.txt (some might be custom macros, or stuff that wasn't in 0.9880)
     "_list_bg_image", "_music_fade", "ev_mode_bg_logic", "_bigbutton_bg",
-    "_production", "_ev_pages", "_ev"
+    "_production", "_ev_pages", "_ev", "_version"
 ]
 
 # Support up to 100 case definitions for a single game, this should be much more than enough.
 cases = ["_case_{}".format(num) for num in range(100)]
 
-parameters = ["start=", "end=", "e=", "x=", "y=", "z=", "name=", "speed=", "width=",
-              "graphic=", "graphichigh=", "fail=", "nametag=", "result=",
-              "stack", "nowait", "noclear", "hide", "fade", "true", "false", "noback", "sx", "sy",
-              "$_examine_clickx", "$_examine_clicky"]
+# Just for that sweet, sweet startswith()
+named_parameters = ("start=", "end=", "e=", "x=", "y=", "z=", "name=", "speed=", "width=",
+                    "graphic=", "graphichigh=", "fail=", "nametag=", "result=", "mag=", "frames=")
+
+parameters = ["stack", "nowait", "noclear", "hide", "fade", "true", "false", "noback", "sx", "sy",
+              "blink", "loop", "stop", "noauto", "password"]
 
 # Following might need some sort of regex for each
 # "{sound {str}}"
@@ -88,6 +96,21 @@ parameters = ["start=", "end=", "e=", "x=", "y=", "z=", "name=", "speed=", "widt
 # "{sfx {str}}
 # "{s {str}}"
 string_tokens = ["{n}", "{next}", "{f}", "{center}"]
+
+
+def is_string_number(string: str) -> bool:
+    if string.startswith("-"):
+        return is_string_number(string[1:])
+
+    return string.isnumeric() or is_string_float(string)
+
+
+def is_string_float(string: str) -> bool:
+    try:
+        float(string)
+        return True
+    except ValueError:
+        return False
 
 
 class PyWrightScriptLexer(QsciLexerCustom):
@@ -185,28 +208,41 @@ class PyWrightScriptLexer(QsciLexerCustom):
 
         text = self.parent().text()[start:end]
 
-        p = re.compile(r"//+[^\r\n]*|#+[^\r\n]*|\"+[^\r\n]*\"|\s+|\w+=?|\W")
+        p = re.compile(r"//+[^\r\n]*|#+[^\r\n]*|\"[^\r\n]*\"|\S+|\s+")
 
         token_list = [(token, len(bytearray(token, "utf-8"))) for token in p.findall(text)]
 
         for i, token in enumerate(token_list):
-            if token[0] in commands:
-                self.setStyling(token[1], 1)
-            elif token[0] in special_variables or token[0] in cases:
-                self.setStyling(token[1], 2)
-            elif token[0] in parameters:
-                self.setStyling(token[1], 3)
-            elif token[0].startswith("{") and token[0].endswith("}"):
-                self.setStyling(token[1], 3)
-            elif token[0].startswith("//") or token[0].startswith("#"):
-                self.setStyling(token[1], 4)
-            elif token[0].startswith("\"") and token[0].endswith("\""):
-                self.setStyling(token[1], 5)
-            elif token[0].isnumeric():
-                self.setStyling(token[1], 6)
-            elif token[0] in self.builtin_macros:
-                self.setStyling(token[1], 7)
-            elif token[0] in self.game_macros:
-                self.setStyling(token[1], 8)
-            else:
-                self.setStyling(token[1], 0)
+            self._set_styling_for_token(token)
+
+    def _set_styling_for_token(self, token: tuple[str, int]):
+        if token[0] in commands:
+            self.setStyling(token[1], 1)
+        elif token[0] in special_variables or token[0] in cases:
+            self.setStyling(token[1], 2)
+        elif token[0].startswith("$") and (token[0][1:] in special_variables
+                                           or token[0][1:] in parameters):
+            self.setStyling(token[1], 2)
+        elif token[0].startswith(named_parameters):
+            # Divide the = section and then colorize that instead
+            param_name = token[0].split("=", maxsplit=1)
+            param_0_len = len(param_name[0]) + 1  # + 1 for the "="
+            self.setStyling(param_0_len, 3)
+            param_1_token = (param_name[1], len(param_name[1]))
+            self._set_styling_for_token(param_1_token)
+        elif token[0] in parameters:
+            self.setStyling(token[1], 3)
+        elif token[0].startswith("{") and token[0].endswith("}"):
+            self.setStyling(token[1], 3)
+        elif token[0].startswith("//") or token[0].startswith("#"):
+            self.setStyling(token[1], 4)
+        elif token[0].startswith("\"") and token[0].endswith("\""):
+            self.setStyling(token[1], 5)
+        elif is_string_number(token[0]):
+            self.setStyling(token[1], 6)
+        elif token[0] in self.builtin_macros:
+            self.setStyling(token[1], 7)
+        elif token[0] in self.game_macros:
+            self.setStyling(token[1], 8)
+        else:
+            self.setStyling(token[1], 0)
