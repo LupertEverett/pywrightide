@@ -26,10 +26,10 @@ Once the command finishes its job, the compiled program can be found in /dist/py
 ## Notes
 
 Consider this a beta quality software. Some of the features are not yet planned or missing, 
-but you should be able to work with the available features just fine.
+but you should be able to work with what's available just fine.
 
 ## Licenses / Credits
 
-The code is licensed under GPLv3, and the custom made icons 
-(a.k.a. everything in /res/icons/ except "pwicon.png", which comes from PyWright, and its edited versions "ideicon.ico" and "ideicon.png")
+The code is licensed under GPLv3, and the custom made icons in /res/icons, barring the ones that utilize official artworks in any way
+(the icons that has the Blue Badger), "pwicon.png", which comes from PyWright, and its edited versions "ideicon.ico" and "ideicon.png",
 are licensed with Creative Commons BY/NC/SA.
