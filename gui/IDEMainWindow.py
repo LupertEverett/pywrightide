@@ -5,7 +5,7 @@ from pathlib import Path
 from PyQt5.QtWidgets import (QMainWindow, QWidget, QToolBar, QStatusBar,
                              QAction, QFileDialog, QLabel, QTabWidget, QMessageBox)
 from PyQt5.QtGui import QIcon, QKeySequence, QCloseEvent
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, QSettings
 
 from .NewGameDialog import NewGameDialog
 from .OpenGameDialog import OpenGameDialog
@@ -13,6 +13,12 @@ from .FileEditWidget import FileEditWidget
 from .GamePropertiesWidget import GamePropertiesWidget
 from .DirectoryViewWidget import DirectoryViewWidget
 from .PyWrightLoggerWidget import PyWrightLoggerWidget
+from .SettingsDialog import SettingsDialog
+
+from data import IDESettings
+
+# TODO: A Find dialog that checks thru the current tab, open tabs, and the whole project.
+# TODO: A Settings Dialog
 
 
 class IDEMainWindow(QMainWindow):
@@ -25,6 +31,10 @@ class IDEMainWindow(QMainWindow):
         self.selected_pywright_installation = ""
         self.selected_game = ""
         self.pywright_executable_name = ""
+
+        self.program_settings = QSettings("PyWrightIDE", "PyWrightIDE")
+        if len(self.program_settings.allKeys()) == 0:
+            self._default_settings()
 
         self.setWindowTitle("PyWright IDE")
         self.setWindowIcon(QIcon("res/icons/ideicon.png"))
@@ -93,6 +103,10 @@ class IDEMainWindow(QMainWindow):
             self.run_pywright_action.shortcut().toString()
         ))
 
+        self.settings_action = QAction(QIcon("res/icons/gameproperties.png"), "Settings")
+        self.settings_action.setStatusTip("Open Settings")
+        self.settings_action.triggered.connect(self._handle_settings)
+
         self.about_action = QAction(QIcon("res/icons/gameproperties.png"), "About")
         self.about_action.setStatusTip("About PyWright IDE")
         self.about_action.triggered.connect(self._handle_about)
@@ -154,6 +168,9 @@ class IDEMainWindow(QMainWindow):
         result.addAction(self.run_pywright_action)
 
         result.addSeparator()
+
+        self.settings_action.setParent(result)
+        result.addAction(self.settings_action)
 
         self.about_action.setParent(result)
         result.addAction(self.about_action)
@@ -348,6 +365,18 @@ class IDEMainWindow(QMainWindow):
         self.logger_view.show()
         self.logger_view.run_and_log(self.selected_pywright_installation, self.pywright_executable_name)
 
+    def _handle_settings(self):
+        settings_dialog = SettingsDialog(self.program_settings, self)
+        settings_dialog.settings_changed.connect(self._apply_settings)
+        settings_dialog.exec_()
+
+    def _apply_settings(self):
+        for idx in range(self.tab_widget.count()):
+            if self.tab_widget.tabText(idx) != "Game Properties":
+                tab: FileEditWidget = self.tab_widget.widget(idx)
+                tab.supply_font_properties_to_lexer(self.program_settings.value(IDESettings.FONT_NAME_KEY),
+                                                    int(self.program_settings.value(IDESettings.FONT_SIZE_KEY)))
+
     def _handle_about(self):
         QMessageBox.about(self, "About PyWright IDE", "PyWright IDE by LupertEverett\n"
                                                       "This program aims to make developing PyWright games easier\n"
@@ -433,6 +462,13 @@ class IDEMainWindow(QMainWindow):
                 return False
 
         return True
+
+    def _default_settings(self):
+        self.program_settings.setValue("editor/font/name", "Consolas")
+        self.program_settings.setValue("editor/font/size", 10)
+
+    def _save_settings(self):
+        self.program_settings.sync()
 
     def closeEvent(self, event: QCloseEvent):
         if not self._attempt_closing_unsaved_tabs():

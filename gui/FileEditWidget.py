@@ -70,6 +70,9 @@ class FileEditWidget(QWidget):
     def supply_game_macros_to_lexer(self, game_macros: list[str]):
         self._lexer.set_game_macros(game_macros)
 
+    def supply_font_properties_to_lexer(self, font_name: str, font_size: int):
+        self._lexer.set_font_properties(font_name, font_size)
+
     def save_to_file(self):
         if not self._is_a_new_file:
             # newline="" so the IDE does not mess with the EOL chars, fixes the gaps in new lines bug

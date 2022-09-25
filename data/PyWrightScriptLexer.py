@@ -2,11 +2,14 @@
 import re
 
 from PyQt5.QtGui import QColor, QFont
+from PyQt5.QtCore import QSettings
 
 from PyQt5.Qsci import QsciLexerCustom, QsciScintilla
 
-font_name = "Consolas"
-font_size = 10
+from data import IDESettings
+
+#font_name = "Consolas"
+#font_size = 10
 
 commands = [
     # In the written order in doc.txt (with some additions):
@@ -118,6 +121,17 @@ class PyWrightScriptLexer(QsciLexerCustom):
     def __init__(self, parent: QsciScintilla):
         super().__init__(parent)
 
+        settings = QSettings("PyWrightIDE", "PyWrightIDE")
+
+        if IDESettings.FONT_NAME_KEY not in settings.allKeys():
+            font_name = "Consolas"
+        else:
+            font_name = settings.value(IDESettings.FONT_NAME_KEY)
+        if IDESettings.FONT_SIZE_KEY not in settings.allKeys():
+            font_size = 10
+        else:
+            font_size = int(settings.value(IDESettings.FONT_SIZE_KEY))
+
         # Default Text Settings
         self.setDefaultColor(QColor("#ff000000"))
         self.setDefaultPaper(QColor("#ffffffff"))
@@ -171,6 +185,11 @@ class PyWrightScriptLexer(QsciLexerCustom):
 
         self.builtin_macros: list[str] = []
         self.game_macros: list[str] = []
+
+    def set_font_properties(self, font_name: str, font_size: int):
+        self.setDefaultFont(QFont(font_name, font_size))
+        for i in range(0, 9):
+            self.setFont(QFont(font_name, font_size, weight=QFont.Bold), i)
 
     def set_builtin_macros(self, new_list: list[str]):
         self.builtin_macros = new_list
