@@ -1,5 +1,5 @@
 from PyQt5.QtWidgets import (QDialog, QFontDialog, QGroupBox, QVBoxLayout, QHBoxLayout, QLineEdit,
-                             QSpinBox, QDialogButtonBox, QLabel, QPushButton)
+                             QSpinBox, QDialogButtonBox, QLabel, QPushButton, QCheckBox)
 from PyQt5.QtCore import QSettings, pyqtSignal
 from PyQt5.QtGui import QFont
 
@@ -16,6 +16,7 @@ class SettingsDialog(QDialog):
         # Prepare the main layout
         # Don't think we can put so much to here:
         # Fonts
+        # Continue from the last folder
         # Maybe an autosave feature
         # Color themes (or at least a dark theme toggle)
         self.setWindowTitle("PyWright IDE Settings")
@@ -23,7 +24,17 @@ class SettingsDialog(QDialog):
         self.settings = settings_object
         main_layout = QVBoxLayout()
 
-        font_group_box = QGroupBox("Font")
+        general_group_box = QGroupBox("General")
+        general_group_layout = QVBoxLayout()
+
+        self.autoreload_last_checkbox = QCheckBox("Autoreload the last open project")
+        self.autoreload_last_checkbox.setChecked(self.settings.value(IDESettings.AUTOLOAD_LAST_PROJECT_KEY, False, bool))
+
+        general_group_layout.addWidget(self.autoreload_last_checkbox)
+
+        general_group_box.setLayout(general_group_layout)
+
+        font_group_box = QGroupBox("Editor")
         font_group_layout = QVBoxLayout()
 
         font_name_line_layout = QHBoxLayout()
@@ -31,7 +42,8 @@ class SettingsDialog(QDialog):
         self.font_change_button = QPushButton("Change...")
         self.font_change_button.clicked.connect(self._handle_font_dialog)
 
-        font_name_line_layout.addWidget(QLabel("Name:"))
+        font_name_line_layout.addWidget(QLabel("Font Name:"))
+        font_name_line_layout.addStretch()
         font_name_line_layout.addWidget(self.font_name_line_edit)
         font_name_line_layout.addWidget(self.font_change_button)
 
@@ -40,7 +52,8 @@ class SettingsDialog(QDialog):
         self.font_size_spinbox.setValue(int(self.settings.value(IDESettings.FONT_SIZE_KEY)))
         self.font_size_spinbox.setMinimum(8)
         self.font_size_spinbox.setMaximum(72)
-        font_size_spinbox_layout.addWidget(QLabel("Size:"))
+        font_size_spinbox_layout.addWidget(QLabel("Font Size:"))
+        font_size_spinbox_layout.addStretch()
         font_size_spinbox_layout.addWidget(self.font_size_spinbox)
 
         font_group_layout.addLayout(font_name_line_layout)
@@ -55,6 +68,7 @@ class SettingsDialog(QDialog):
         self.button_box.rejected.connect(self.reject)
         self.button_box.accepted.connect(self._handle_accept)
 
+        main_layout.addWidget(general_group_box)
         main_layout.addWidget(font_group_box)
         main_layout.addWidget(self.button_box)
 
@@ -72,6 +86,7 @@ class SettingsDialog(QDialog):
     def _handle_apply(self):
         self.settings.setValue(IDESettings.FONT_NAME_KEY, self.font_name_line_edit.text())
         self.settings.setValue(IDESettings.FONT_SIZE_KEY, self.font_size_spinbox.value())
+        self.settings.setValue(IDESettings.AUTOLOAD_LAST_PROJECT_KEY, self.autoreload_last_checkbox.isChecked())
         self.settings_changed.emit()
 
     def _handle_accept(self):
