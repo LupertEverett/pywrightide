@@ -480,6 +480,7 @@ class IDEMainWindow(QMainWindow):
         self.program_settings.setValue(IDESettings.FONT_SIZE_KEY, 10)
         self.program_settings.setValue(IDESettings.AUTOLOAD_LAST_PROJECT_KEY, False)
         self.program_settings.setValue(IDESettings.AUTOLOAD_LAST_PROJECT_PATH_KEY, "")
+        self.program_settings.setValue(IDESettings.AUTOLOAD_LAST_GAME_NAME_KEY, "")
 
     def _save_settings(self):
         self.program_settings.sync()
