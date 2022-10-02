@@ -132,64 +132,59 @@ class PyWrightScriptLexer(QsciLexerCustom):
         else:
             font_size = int(settings.value(IDESettings.FONT_SIZE_KEY))
 
+        bold_font = settings.value(IDESettings.FONT_BOLD_KEY, True, bool)
+
         # Default Text Settings
         self.setDefaultColor(QColor("#ff000000"))
         self.setDefaultPaper(QColor("#ffffffff"))
-        self.setDefaultFont(QFont(font_name, font_size))
 
         # Colors per style
         # Style 0: Default
         self.setColor(QColor("#ff000000"), 0)  # black
         self.setPaper(QColor("#ffffffff"), 0)
-        self.setFont(QFont(font_name, font_size, weight=QFont.Bold), 0)
 
         # Style 1: Commands
         self.setColor(QColor("#ff00007f"), 1)  # blue
         self.setPaper(QColor("#ffffffff"), 1)
-        self.setFont(QFont(font_name, font_size, weight=QFont.Bold), 1)
 
         # Style 2: Special Variables (includes case names)
         self.setColor(QColor("#ff007f00"), 2)  # green
         self.setPaper(QColor("#ffffffff"), 2)
-        self.setFont(QFont(font_name, font_size, weight=QFont.Bold), 2)
 
         # Style 3: parameters
         self.setColor(QColor("#ff7f0000"), 3)  # red
         self.setPaper(QColor("#ffffffff"), 3)
-        self.setFont(QFont(font_name, font_size, weight=QFont.Bold), 3)
 
         # Style 4: line comments
         self.setColor(QColor("#ffa0a0a0"), 4)  # gray
         self.setPaper(QColor("#ffffffff"), 4)
-        self.setFont(QFont(font_name, font_size, weight=QFont.Bold), 4)
 
         # Style 5: Double-quoted strings
         self.setColor(QColor("#ff707000"), 5)  # ??? (I'm bad with colors)
         self.setPaper(QColor("#ffffffff"), 5)
-        self.setFont(QFont(font_name, font_size, weight=QFont.Bold), 5)
 
         # Style 6: Numbers
         self.setColor(QColor("#ff00a0a0"), 6)  # ??? (I'm bad with colors)
         self.setPaper(QColor("#ffffffff"), 6)
-        self.setFont(QFont(font_name, font_size, weight=QFont.Bold), 6)
 
         # Style 7: Builtin Macros
         self.setColor(QColor("#ff0000dd"), 7)  # (Cyan?)
         self.setPaper(QColor("#ffffffff"), 7)
-        self.setFont(QFont(font_name, font_size, weight=QFont.Bold), 7)
 
         # Style 8: Game Macros
         self.setColor(QColor("#ff4f00ff"), 8)  # (Idk anymore...)
         self.setPaper(QColor("#ffffffff"), 8)
-        self.setFont(QFont(font_name, font_size, weight=QFont.Bold), 8)
+
+        self.set_font_properties(font_name, font_size, bold_font)
 
         self.builtin_macros: list[str] = []
         self.game_macros: list[str] = []
 
-    def set_font_properties(self, font_name: str, font_size: int):
+    def set_font_properties(self, font_name: str, font_size: int, bold_font: bool):
         self.setDefaultFont(QFont(font_name, font_size))
+        font_weight = QFont.Bold if bold_font else QFont.Normal
         for i in range(0, 9):
-            self.setFont(QFont(font_name, font_size, weight=QFont.Bold), i)
+            self.setFont(QFont(font_name, font_size, weight=font_weight), i)
 
     def set_builtin_macros(self, new_list: list[str]):
         self.builtin_macros = new_list

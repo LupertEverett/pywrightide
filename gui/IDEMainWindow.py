@@ -387,7 +387,8 @@ class IDEMainWindow(QMainWindow):
             if self.tab_widget.tabText(idx) != "Game Properties":
                 tab: FileEditWidget = self.tab_widget.widget(idx)
                 tab.supply_font_properties_to_lexer(self.program_settings.value(IDESettings.FONT_NAME_KEY),
-                                                    int(self.program_settings.value(IDESettings.FONT_SIZE_KEY)))
+                                                    int(self.program_settings.value(IDESettings.FONT_SIZE_KEY)),
+                                                    self.program_settings.value(IDESettings.FONT_BOLD_KEY, True, bool))
 
     def _handle_about(self):
         QMessageBox.about(self, "About PyWright IDE", "PyWright IDE by LupertEverett\n"
@@ -478,6 +479,7 @@ class IDEMainWindow(QMainWindow):
     def _default_settings(self):
         self.program_settings.setValue(IDESettings.FONT_NAME_KEY, "Consolas")
         self.program_settings.setValue(IDESettings.FONT_SIZE_KEY, 10)
+        self.program_settings.setValue(IDESettings.FONT_BOLD_KEY, True)
         self.program_settings.setValue(IDESettings.AUTOLOAD_LAST_PROJECT_KEY, False)
         self.program_settings.setValue(IDESettings.AUTOLOAD_LAST_PROJECT_PATH_KEY, "")
         self.program_settings.setValue(IDESettings.AUTOLOAD_LAST_GAME_NAME_KEY, "")

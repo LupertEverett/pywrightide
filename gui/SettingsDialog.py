@@ -1,5 +1,5 @@
 from PyQt5.QtWidgets import (QDialog, QFontDialog, QGroupBox, QVBoxLayout, QHBoxLayout, QLineEdit,
-                             QSpinBox, QDialogButtonBox, QLabel, QPushButton, QCheckBox)
+                             QSpinBox, QDialogButtonBox, QLabel, QPushButton, QCheckBox, QFontComboBox)
 from PyQt5.QtCore import QSettings, pyqtSignal
 from PyQt5.QtGui import QFont
 
@@ -37,28 +37,34 @@ class SettingsDialog(QDialog):
         font_group_box = QGroupBox("Editor")
         font_group_layout = QVBoxLayout()
 
-        font_name_line_layout = QHBoxLayout()
+        font_name_layout = QHBoxLayout()
         self.font_name_line_edit = QLineEdit(self.settings.value(IDESettings.FONT_NAME_KEY))
-        self.font_change_button = QPushButton("Change...")
-        self.font_change_button.clicked.connect(self._handle_font_dialog)
+        self.font_name_combobox = QFontComboBox()
+        current_font = QFont(self.settings.value(IDESettings.FONT_NAME_KEY),
+                             self.settings.value(IDESettings.FONT_SIZE_KEY))
+        self.font_name_combobox.setCurrentFont(current_font)
 
-        font_name_line_layout.addWidget(QLabel("Font Name:"))
-        font_name_line_layout.addStretch()
-        font_name_line_layout.addWidget(self.font_name_line_edit)
-        font_name_line_layout.addWidget(self.font_change_button)
+        font_name_layout.addWidget(QLabel("Font:"))
+        font_name_layout.addStretch()
 
-        font_size_spinbox_layout = QHBoxLayout()
         self.font_size_spinbox = QSpinBox()
-        self.font_size_spinbox.setValue(int(self.settings.value(IDESettings.FONT_SIZE_KEY)))
+        self.font_size_spinbox.setValue(self.settings.value(IDESettings.FONT_SIZE_KEY, 10, int))
         self.font_size_spinbox.setMinimum(8)
         self.font_size_spinbox.setMaximum(72)
-        font_size_spinbox_layout.addWidget(QLabel("Font Size:"))
-        font_size_spinbox_layout.addStretch()
-        font_size_spinbox_layout.addWidget(self.font_size_spinbox)
+        self.font_size_spinbox.setToolTip("Font Size")
 
-        font_group_layout.addLayout(font_name_line_layout)
-        font_group_layout.addLayout(font_size_spinbox_layout)
+        self.bold_toggle_button = QPushButton("B")
+        self.bold_toggle_button.setCheckable(True)
+        self.bold_toggle_button.setChecked(self.settings.value(IDESettings.FONT_BOLD_KEY, True, bool))
+        self.bold_toggle_button.font().setBold(True)
+        self.bold_toggle_button.setFixedWidth(30)
+        self.bold_toggle_button.setToolTip("Bold")
 
+        font_name_layout.addWidget(self.font_name_combobox)
+        font_name_layout.addWidget(self.font_size_spinbox)
+        font_name_layout.addWidget(self.bold_toggle_button)
+
+        font_group_layout.addLayout(font_name_layout)
         font_group_box.setLayout(font_group_layout)
 
         self.button_box = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel | QDialogButtonBox.Apply)
@@ -74,18 +80,11 @@ class SettingsDialog(QDialog):
 
         self.setLayout(main_layout)
 
-    def _handle_font_dialog(self):
-        font_name = self.settings.value(IDESettings.FONT_NAME_KEY)
-        font_size = int(self.settings.value(IDESettings.FONT_SIZE_KEY))
-        font_tuple = QFontDialog.getFont(QFont(font_name, font_size, QFont.Bold), self, "Pick a font")
-
-        if font_tuple[1]:
-            self.font_name_line_edit.setText(font_tuple[0].family())
-            self.font_size_spinbox.setValue(font_tuple[0].pointSize())
-
     def _handle_apply(self):
-        self.settings.setValue(IDESettings.FONT_NAME_KEY, self.font_name_line_edit.text())
-        self.settings.setValue(IDESettings.FONT_SIZE_KEY, self.font_size_spinbox.value())
+        current_font = self.font_name_combobox.currentFont()
+        self.settings.setValue(IDESettings.FONT_NAME_KEY, current_font.family())
+        self.settings.setValue(IDESettings.FONT_SIZE_KEY, current_font.pointSize())
+        self.settings.setValue(IDESettings.FONT_BOLD_KEY, self.bold_toggle_button.isChecked())
         self.settings.setValue(IDESettings.AUTOLOAD_LAST_PROJECT_KEY, self.autoreload_last_checkbox.isChecked())
         self.settings_changed.emit()
 
