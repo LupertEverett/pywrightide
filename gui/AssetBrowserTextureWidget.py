@@ -75,7 +75,15 @@ class AssetManagerTextureWidget(QWidget):
 
         game_art_folders = [x.name for x in game_art_folder_path.iterdir() if x.is_dir()]
 
-        self._available_folders = global_art_folders + game_art_folders
+        # Iterate over subfolders as well
+
+        game_art_subfolders = []
+
+        for folder in game_art_folders:
+            folder_path = Path("{}/art/{}".format(self._selected_game.game_path, folder))
+            game_art_subfolders.extend([folder + "/" + x.name for x in folder_path.iterdir() if x.is_dir()])
+
+        self._available_folders = global_art_folders + game_art_folders + game_art_subfolders
 
     def refresh_art_folders(self):
         self._query_available_folders()
