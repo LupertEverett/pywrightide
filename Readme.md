@@ -15,6 +15,14 @@ For the source code version: Have all the dependencies installed, and then run P
 
 A compiled build for Windows is also available. Just download, extract and run PyWrightIDE.exe
 
+## Screenshots
+
+![](https://i.imgur.com/dNotKdt.png)
+
+![](https://i.imgur.com/NQpqlA0.png)
+
+![](https://i.imgur.com/qNM5rXP.png)
+
 ## Building for Windows
 
 Alongside the dependencies above, have pyinstaller installed via pip. Then run this command in the source code's root folder:
