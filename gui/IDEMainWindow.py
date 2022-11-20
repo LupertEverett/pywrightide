@@ -2,8 +2,8 @@
 
 from pathlib import Path
 
-from PyQt5.QtWidgets import (QMainWindow, QWidget, QToolBar, QStatusBar,
-                             QAction, QFileDialog, QLabel, QTabWidget, QMessageBox)
+from PyQt5.QtWidgets import (QMainWindow, QWidget, QToolBar, QStatusBar, QAction,
+                             QFileDialog, QLabel, QTabWidget, QMessageBox)
 from PyQt5.QtGui import QIcon, QKeySequence, QCloseEvent
 from PyQt5.QtCore import Qt, QSettings
 
@@ -14,11 +14,12 @@ from .GamePropertiesWidget import GamePropertiesWidget
 from .DirectoryViewWidget import DirectoryViewWidget
 from .PyWrightLoggerWidget import PyWrightLoggerWidget
 from .SettingsDialog import SettingsDialog
+from .AssetBrowserRootWidget import AssetBrowserRootWidget
 
 from data import IDESettings
+from data.PyWrightGame import PyWrightGame
 
 # TODO: A Find dialog that checks thru the current tab, open tabs, and the whole project.
-# TODO: A Settings Dialog
 
 
 class IDEMainWindow(QMainWindow):
@@ -29,7 +30,7 @@ class IDEMainWindow(QMainWindow):
 
         # Instance-wide variables
         self.selected_pywright_installation = ""
-        self.selected_game = ""
+        self.selected_game = PyWrightGame()
         self.pywright_executable_name = ""
 
         self.program_settings = QSettings("PyWrightIDE", "PyWrightIDE")
@@ -43,11 +44,19 @@ class IDEMainWindow(QMainWindow):
         self.game_properties_widget = None  # Will be created later, when a PyWright root folder is selected
 
         self.directory_view = DirectoryViewWidget(self)
+        self.asset_manager_widget = AssetBrowserRootWidget(self)
         self.logger_view = PyWrightLoggerWidget()
         self.logger_view.hide()
 
         self.directory_view.open_new_tab.connect(self.open_new_editing_tab)
         self.directory_view.open_game_properties_tab.connect(self.open_game_properties_tab)
+
+        self.asset_manager_widget.texture_browser\
+            .command_insert_at_cursor_requested.connect(self._handle_insert_into_cursor)
+        self.asset_manager_widget.texture_browser\
+            .game_icon_change_requested.connect(self._handle_game_icon_change_request)
+        self.asset_manager_widget.music_browser\
+            .command_insert_at_cursor_requested.connect(self._handle_insert_into_cursor)
 
         self.tab_widget = QTabWidget()
         self.tab_widget.setTabsClosable(True)
@@ -103,7 +112,7 @@ class IDEMainWindow(QMainWindow):
             self.run_pywright_action.shortcut().toString()
         ))
 
-        self.settings_action = QAction(QIcon("res/icons/gameproperties.png"), "Settings")
+        self.settings_action = QAction(QIcon("res/icons/cog.png"), "Settings")
         self.settings_action.setStatusTip("Open Settings")
         self.settings_action.triggered.connect(self._handle_settings)
 
@@ -114,8 +123,9 @@ class IDEMainWindow(QMainWindow):
         # Toolbar and the central widget
         self.addToolBar(self._create_top_toolbar())
         self.setCentralWidget(self.tab_widget)
-        self.addDockWidget(Qt.LeftDockWidgetArea, self.directory_view)
-        self.addDockWidget(Qt.BottomDockWidgetArea, self.logger_view)
+        self.addDockWidget(Qt.DockWidgetArea.LeftDockWidgetArea, self.directory_view)
+        self.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, self.asset_manager_widget)
+        self.addDockWidget(Qt.DockWidgetArea.BottomDockWidgetArea, self.logger_view)
 
         # Status bar
         self.status_bar = QStatusBar()
@@ -133,12 +143,13 @@ class IDEMainWindow(QMainWindow):
             autoload_path = self.program_settings.value(IDESettings.AUTOLOAD_LAST_PROJECT_PATH_KEY, "")
             if autoload_path != "":
                 self._pick_pywright_installation_folder(autoload_path)
-            autoload_game_name = self.program_settings.value(IDESettings.AUTOLOAD_LAST_GAME_NAME_KEY, "")
+            autoload_game_name: str = self.program_settings.value(IDESettings.AUTOLOAD_LAST_GAME_NAME_KEY, "")
             if autoload_game_name != "":
                 self._switch_to_selected_game(autoload_game_name)
 
     def _create_top_toolbar(self) -> QToolBar:
         result = QToolBar(self)
+        result.setWindowTitle("Main Toolbar")
 
         find_pywright_installation_action = QAction(QIcon("res/icons/pwicon.png"),
                                                     "Locate PyWright Installation",
@@ -245,7 +256,7 @@ class IDEMainWindow(QMainWindow):
     def _handle_new_game(self):
         new_game_dialog = NewGameDialog(self.selected_pywright_installation, self)
 
-        if new_game_dialog.exec_():
+        if new_game_dialog.exec():
             self._switch_to_selected_game(new_game_dialog.get_new_game_name())
 
     def _handle_open_game(self):
@@ -254,7 +265,7 @@ class IDEMainWindow(QMainWindow):
             return
 
         open_game_dialog = OpenGameDialog(self.selected_pywright_installation, self)
-        if open_game_dialog.exec_():
+        if open_game_dialog.exec():
             self._switch_to_selected_game(open_game_dialog.selected_game)
 
     def _switch_to_selected_game(self, selected_game: str):
@@ -263,14 +274,16 @@ class IDEMainWindow(QMainWindow):
         :param selected_game: Name of the selected PyWright game."""
 
         if self._attempt_closing_unsaved_tabs():
-            self.selected_game = selected_game
-            game_path = str(Path("{}/games/{}".format(self.selected_pywright_installation, self.selected_game)))
-            self.game_properties_widget.load_game(game_path)
+            self.selected_game.set_game_path("{}/games/{}".format(self.selected_pywright_installation, selected_game))
+            # TODO: Gradually switch from strings to PyWrightGame instances
+            # game_path = str(Path("{}/games/{}".format(self.selected_pywright_installation, self.selected_game)))
+            self.game_properties_widget.load_game(self.selected_game.game_path)
             self.tab_widget.clear()
-            self.directory_view.update_directory_view(game_path)
+            self.directory_view.update_directory_view(self.selected_game.game_path)
             self._parse_game_macros()
             self.open_game_properties_tab()
             self._update_toolbar_buttons()
+            self.asset_manager_widget.update_assets(self.selected_pywright_installation, self.selected_game)
 
     def _handle_open_file(self):
         open_dialog = QFileDialog.getOpenFileName(self, "Open File",
@@ -316,10 +329,10 @@ class IDEMainWindow(QMainWindow):
             if tab.is_file_modified():
                 result = self._ask_for_closing_tab(index, False)
 
-                if result == QMessageBox.Cancel:
+                if result == QMessageBox.StandardButton.Cancel:
                     return
                 # QMessageBox.No will just ignore the current file, so no special handling for it.
-                if result == QMessageBox.Yes:
+                if result == QMessageBox.StandardButton.Yes:
                     tab.save_to_file()
 
         self.tab_widget.removeTab(index)
@@ -332,15 +345,16 @@ class IDEMainWindow(QMainWindow):
 
         :param multiple_tabs: If set to True, 'Yes To All' and 'No To All' will be added to the possible answers"""
 
-        answers = (QMessageBox.Yes | QMessageBox.YesToAll | QMessageBox.No | QMessageBox.NoToAll |
-                   QMessageBox.Cancel) if multiple_tabs \
-            else (QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel)
+        answers = (QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.YesToAll |
+                   QMessageBox.StandardButton.No | QMessageBox.StandardButton.NoToAll |
+                   QMessageBox.StandardButton.Cancel) if multiple_tabs \
+            else (QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No | QMessageBox.StandardButton.Cancel)
 
         tab: FileEditWidget = self.tab_widget.widget(index)
         tab_text = tab.file_name
 
         return QMessageBox.question(self, "Confirm Save", "Would you like to save {}?".format(tab_text),
-                                    answers, QMessageBox.Cancel)
+                                    answers, QMessageBox.StandardButton.Cancel)
 
     def _handle_save_tab(self):
         if self.tab_widget.tabText(self.tab_widget.currentIndex()) != "Game Properties":
@@ -377,10 +391,35 @@ class IDEMainWindow(QMainWindow):
         self.logger_view.show()
         self.logger_view.run_and_log(self.selected_pywright_installation, self.pywright_executable_name)
 
+    def _handle_game_icon_change_request(self, icon_path: str):
+        # Don't do anything if there is no game selected
+        if not self.selected_game.is_a_game_selected():
+            QMessageBox.critical(self, "Error", "No game is selected!")
+            return
+
+        self.game_properties_widget.set_game_icon_path(icon_path)
+
+    def _handle_insert_into_cursor(self, command: str):
+        # Don't do anything if there are no tabs open
+        if self.tab_widget.count() == 0:
+            QMessageBox.critical(self, "Error", "There are no tabs open!")
+            return
+
+        tab_index = self.tab_widget.currentIndex()
+
+        # Don't do anything if Game Properties is open
+        if self.tab_widget.tabText(tab_index) == "Game Properties":
+            QMessageBox.critical(self, "Error", "Current tab is not a script editing tab!")
+            return
+
+        file_edit_widget: FileEditWidget = self.tab_widget.currentWidget()
+
+        file_edit_widget.insert_at_cursor_position(command)
+
     def _handle_settings(self):
         settings_dialog = SettingsDialog(self.program_settings, self)
         settings_dialog.settings_changed.connect(self._apply_settings)
-        settings_dialog.exec_()
+        settings_dialog.exec()
 
     def _apply_settings(self):
         for idx in range(self.tab_widget.count()):
@@ -415,7 +454,8 @@ class IDEMainWindow(QMainWindow):
                         self._pywright_builtin_macros.append(splitted_lines[1])
 
     def _parse_game_macros(self):
-        game_path = Path("{}/games/{}".format(self.selected_pywright_installation, self.selected_game))
+        # game_path = Path("{}/games/{}".format(self.selected_pywright_installation, self.selected_game))
+        game_path = Path("{}".format(self.selected_game.game_path))
 
         if not (game_path.exists() and game_path.is_dir()):
             raise FileNotFoundError("Selected game doesn't exist!")
@@ -463,15 +503,15 @@ class IDEMainWindow(QMainWindow):
 
             result = self._ask_for_closing_tab(idx, len(unsaved_tab_indexes) > 1)
 
-            if result == QMessageBox.Yes:
+            if result == QMessageBox.StandardButton.Yes:
                 tab.save_to_file()
-            elif result == QMessageBox.YesToAll:
+            elif result == QMessageBox.StandardButton.YesToAll:
                 self._save_all_modified_files(unsaved_tab_indexes)
                 return True
             # QMessageBox.No will just ignore the current file, so no special handling for it.
-            elif result == QMessageBox.NoToAll:
+            elif result == QMessageBox.StandardButton.NoToAll:
                 return True
-            elif result == QMessageBox.Cancel:
+            elif result == QMessageBox.StandardButton.Cancel:
                 return False
 
         return True
@@ -496,7 +536,7 @@ class IDEMainWindow(QMainWindow):
         if self.program_settings.value(IDESettings.AUTOLOAD_LAST_PROJECT_KEY, False):
             self.program_settings.setValue(IDESettings.AUTOLOAD_LAST_PROJECT_PATH_KEY,
                                            self.selected_pywright_installation)
-            self.program_settings.setValue(IDESettings.AUTOLOAD_LAST_GAME_NAME_KEY, self.selected_game)
+            self.program_settings.setValue(IDESettings.AUTOLOAD_LAST_GAME_NAME_KEY, self.selected_game.get_game_name())
         else:
             # Otherwise clear the paths, just in case
             self.program_settings.setValue(IDESettings.AUTOLOAD_LAST_PROJECT_PATH_KEY, "")

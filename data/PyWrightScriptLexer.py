@@ -8,9 +8,6 @@ from PyQt5.Qsci import QsciLexerCustom, QsciScintilla
 
 from data import IDESettings
 
-#font_name = "Consolas"
-#font_size = 10
-
 commands = [
     # In the written order in doc.txt (with some additions):
     # "To add various objects"

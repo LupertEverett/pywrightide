@@ -2,9 +2,9 @@
 
 from pathlib import Path
 
-from PyQt5.QtWidgets import (QTreeView, QFileSystemModel, QFileIconProvider,
+from PyQt5.QtWidgets import (QTreeView, QFileIconProvider, QFileSystemModel, QAction,
                              QWidget, QDockWidget, QHBoxLayout,
-                             QLabel, QPushButton, QMenu, QAction,
+                             QLabel, QPushButton, QMenu,
                              QMessageBox, QInputDialog, QLineEdit)
 from PyQt5.QtGui import QIcon, QMouseEvent, QDesktopServices
 from PyQt5.QtCore import Qt, QModelIndex, pyqtSignal, QUrl
@@ -29,9 +29,11 @@ class DirectoryViewWidget(QDockWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
 
+        self.setWindowTitle("Directory View")
+
         self._game_title_label = QLabel()
 
-        self._game_properties_button = QPushButton(QIcon("res/icons/gameproperties.png"), "")
+        self._game_properties_button = QPushButton(QIcon("res/icons/cog.png"), "")
         self._game_properties_button.setToolTip("Game Properties")
         self._game_properties_button.setEnabled(False)
         self._game_properties_button.setFlat(True)
@@ -77,12 +79,12 @@ class DirectoryViewWidget(QDockWidget):
         self._game_properties_button.setEnabled(True)
 
     def clear_directory_view(self):
-        self._directory_view.setModel(None)
+        self._directory_view.reset()
         self._game_title_label.setText("")
         self._game_properties_button.setEnabled(False)
 
     def _handle_tree_view_double_clicked(self, index: QModelIndex):
-        item_path = QFileSystemModel.filePath(self._directory_view.model(), index)
+        item_path = QFileSystemModel().filePath(index)
         if not Path(item_path).is_dir():
             self.open_new_tab.emit(item_path)
 

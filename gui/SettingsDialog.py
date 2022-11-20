@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import (QDialog, QFontDialog, QGroupBox, QVBoxLayout, QHBoxLayout, QLineEdit,
+from PyQt5.QtWidgets import (QDialog, QGroupBox, QVBoxLayout, QHBoxLayout, QLineEdit,
                              QSpinBox, QDialogButtonBox, QLabel, QPushButton, QCheckBox, QFontComboBox)
 from PyQt5.QtCore import QSettings, pyqtSignal
 from PyQt5.QtGui import QFont
@@ -67,9 +67,11 @@ class SettingsDialog(QDialog):
         font_group_layout.addLayout(font_name_layout)
         font_group_box.setLayout(font_group_layout)
 
-        self.button_box = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel | QDialogButtonBox.Apply)
+        self.button_box = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok |
+                                           QDialogButtonBox.StandardButton.Cancel |
+                                           QDialogButtonBox.StandardButton.Apply)
         # Obtain the Apply button
-        apply_button = self.button_box.button(QDialogButtonBox.Apply)
+        apply_button = self.button_box.button(QDialogButtonBox.StandardButton.Apply)
         apply_button.clicked.connect(self._handle_apply)
         self.button_box.rejected.connect(self.reject)
         self.button_box.accepted.connect(self._handle_accept)

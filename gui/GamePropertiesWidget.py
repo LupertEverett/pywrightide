@@ -80,3 +80,7 @@ class GamePropertiesWidget(QWidget):
                           self.game_data_widget.are_data_txt_areas_different()
         self._save_data_button.setEnabled(valid_to_change)
         self._revert_data_button.setEnabled(valid_to_change)
+
+    def set_game_icon_path(self, new_path: str):
+        self.game_data_widget.set_game_icon_path_textfield(new_path)
+

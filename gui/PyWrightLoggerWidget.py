@@ -10,17 +10,19 @@ class PyWrightLoggerWidget(QDockWidget):
     def __init__(self):
         super().__init__()
 
+        self.setWindowTitle("Logger")
+
         self.logger_text_edit = QPlainTextEdit()
         self.logger_text_edit.setEnabled(False)
 
         self.pywright_process = QProcess(None)
-        self.pywright_process.setProcessChannelMode(QProcess.MergedChannels)
+        self.pywright_process.setProcessChannelMode(QProcess.ProcessChannelMode.MergedChannels)
         self.pywright_process.started.connect(self._on_process_started)
         self.pywright_process.readyReadStandardOutput.connect(self._log_to_text_edit)
         self.pywright_process.finished.connect(self._on_process_finished)
 
         self.setWidget(self.logger_text_edit)
-        self.setFeatures(QDockWidget.DockWidgetClosable)
+        self.setFeatures(QDockWidget.DockWidgetFeature.DockWidgetClosable)
 
         self._hide_button = QPushButton(QIcon("res/icons/minus.png"), "")
         self._hide_button.setFlat(True)

@@ -102,6 +102,10 @@ class GameDataWidget(QWidget):
         self._game_icon_lineedit.setText(self._selected_game.game_icon_path)
         self._game_author_lineedit.setText(self._selected_game.game_author)
 
+    def set_game_icon_path_textfield(self, new_path: str):
+        self._game_icon_lineedit.setText(new_path)
+        self._handle_data_txt_fields_change()
+
     def _handle_data_txt_fields_change(self):
         self.data_txt_fields_changed.emit()
 

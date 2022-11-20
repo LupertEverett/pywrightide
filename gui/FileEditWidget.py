@@ -95,6 +95,14 @@ class FileEditWidget(QWidget):
                 self.file_name = Path(self.file_path).name
                 self.file_name_changed.emit(self.file_name)
 
+    def insert_at_cursor_position(self, text: str):
+        [line, index] = self.sci.getCursorPosition()
+
+        if self.sci.lineLength(line) == 0 or index < self.sci.lineLength(line) - 1:
+            self.sci.insertAt(text + "\n", line, 0)
+        else:
+            self.sci.insert("\n" + text)
+
     def is_file_modified(self) -> bool:
         return self.sci.isModified()
 

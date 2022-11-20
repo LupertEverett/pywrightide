@@ -21,6 +21,9 @@ class PyWrightGame:
     def set_game_path(self, new_game_path: str):
         self.game_path = new_game_path
 
+    def get_game_name(self):
+        return Path(self.game_path).name
+
     def clear_data_txt_fields(self):
         self.game_version = ""
         self.game_title = ""
