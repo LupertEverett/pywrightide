@@ -57,6 +57,8 @@ class IDEMainWindow(QMainWindow):
             .game_icon_change_requested.connect(self._handle_game_icon_change_request)
         self.asset_manager_widget.music_browser\
             .command_insert_at_cursor_requested.connect(self._handle_insert_into_cursor)
+        self.asset_manager_widget.sfx_browser \
+            .command_insert_at_cursor_requested.connect(self._handle_insert_into_cursor)
 
         self.tab_widget = QTabWidget()
         self.tab_widget.setTabsClosable(True)

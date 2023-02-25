@@ -19,9 +19,11 @@ class AssetBrowserRootWidget(QDockWidget):
 
         self.texture_browser = AssetManagerTextureWidget(self)
         self.music_browser = AssetBrowserAudioWidget(AudioType.Music, self)
+        self.sfx_browser = AssetBrowserAudioWidget(AudioType.Sfx, self)
 
         self.tab_widget.addTab(self.texture_browser, "Textures")
         self.tab_widget.addTab(self.music_browser, "Music")
+        self.tab_widget.addTab(self.sfx_browser, "SFX")
 
     def update_assets(self, pywright_path: str, selected_game: PyWrightGame):
         self.texture_browser.select_pywright(pywright_path)
@@ -31,3 +33,7 @@ class AssetBrowserRootWidget(QDockWidget):
         self.music_browser.select_pywright(pywright_path)
         self.music_browser.set_selected_game(selected_game)
         self.music_browser.refresh_music_folders()
+
+        self.sfx_browser.select_pywright(pywright_path)
+        self.sfx_browser.set_selected_game(selected_game)
+        self.sfx_browser.refresh_music_folders()
