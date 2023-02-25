@@ -41,7 +41,7 @@ class AssetBrowserAudioWidget(QWidget):
         self._audio_list_widget = QListWidget(self)
         self._audio_list_widget.setDragEnabled(False)
         self._audio_list_widget.setContextMenuPolicy(Qt.CustomContextMenu)
-        self._audio_list_widget.customContextMenuRequested.connect(self._handle_music_context_menu)
+        self._audio_list_widget.customContextMenuRequested.connect(self._handle_audio_context_menu)
         # self._audio_list_widget.itemSelectionChanged.connect(self._handle_current_change)
 
         self._audio_folders_combo_box = QComboBox()
@@ -111,7 +111,7 @@ class AssetBrowserAudioWidget(QWidget):
         self._audio_list_widget.clear()
         self._audio_list_widget.addItems(items)
 
-    def _handle_music_context_menu(self, position):
+    def _handle_audio_context_menu(self, position):
         if not self._selected_game.is_a_game_selected():
             return
 
@@ -157,11 +157,11 @@ class AssetBrowserAudioWidget(QWidget):
         clipboard.setText(item + ".ogg", QClipboard.Clipboard)
 
     def _handle_insert_into_cursor(self):
-        music_name = self._audio_list_widget.selectedItems()[0].text()
+        audio_name = self._audio_list_widget.selectedItems()[0].text()
 
         # Construct the final command and emit it
-        final_command = "mus {}".format(music_name) if self.__AUDIO_FOLDER == MUSIC_FOLDER_NAME \
-            else "sfx {}".format(music_name)
+        final_command = "mus {}".format(audio_name) if self.__AUDIO_FOLDER == MUSIC_FOLDER_NAME \
+            else "sfx {}".format(audio_name)
 
         self.command_insert_at_cursor_requested.emit(final_command)
 
