@@ -3,7 +3,7 @@
 from PyQt5.QtWidgets import QDockWidget, QTabWidget
 
 from .AssetBrowserTextureWidget import AssetManagerTextureWidget
-from .AssetBrowserMusicWidget import AssetBrowserMusicWidget
+from .AssetBrowserAudioWidget import AssetBrowserAudioWidget, AudioType
 from data.PyWrightGame import PyWrightGame
 
 
@@ -18,7 +18,7 @@ class AssetBrowserRootWidget(QDockWidget):
         self.setWidget(self.tab_widget)
 
         self.texture_browser = AssetManagerTextureWidget(self)
-        self.music_browser = AssetBrowserMusicWidget(self)
+        self.music_browser = AssetBrowserAudioWidget(AudioType.Music, self)
 
         self.tab_widget.addTab(self.texture_browser, "Textures")
         self.tab_widget.addTab(self.music_browser, "Music")
