@@ -24,7 +24,7 @@ class AudioType(Enum):
 class AssetBrowserAudioWidget(QWidget):
 
     # Sends the URL of the music to play
-    audio_play_requested = pyqtSignal(str)
+    audio_play_requested = pyqtSignal(str, AudioType)
 
     audio_stop_requested = pyqtSignal()
 
@@ -36,31 +36,33 @@ class AssetBrowserAudioWidget(QWidget):
         self._pywright_dir = ""
         self._selected_game = PyWrightGame()
 
+        self.__audio_type = audio_type
         self.__AUDIO_FOLDER = MUSIC_FOLDER_NAME if audio_type == AudioType.Music else SFX_FOLDER_NAME
 
         self._audio_list_widget = QListWidget(self)
         self._audio_list_widget.setDragEnabled(False)
         self._audio_list_widget.setContextMenuPolicy(Qt.CustomContextMenu)
         self._audio_list_widget.customContextMenuRequested.connect(self._handle_audio_context_menu)
-        # self._audio_list_widget.itemSelectionChanged.connect(self._handle_current_change)
+        self._audio_list_widget.itemSelectionChanged.connect(self._handle_current_change)
+        self._audio_list_widget.doubleClicked.connect(self._handle_play_pressed)
 
         self._audio_folders_combo_box = QComboBox()
         self._audio_folders_combo_box.currentIndexChanged.connect(self._refresh_music_list_view)
 
-        # self._play_button = QPushButton("Play")
-        # self._play_button.pressed.connect(self._handle_play_pressed)
-        # self._play_button.setEnabled(len(self._audio_list_widget.selectedItems()) > 0)
-        # self._stop_button = QPushButton("Stop")
-        # self._stop_button.pressed.connect(self._handle_stop_pressed)
+        self._play_button = QPushButton("Play")
+        self._play_button.pressed.connect(self._handle_play_pressed)
+        self._play_button.setEnabled(len(self._audio_list_widget.selectedItems()) > 0)
+        self._stop_button = QPushButton("Stop")
+        self._stop_button.pressed.connect(self._handle_stop_pressed)
 
-        # media_controls_layout = QHBoxLayout()
+        media_controls_layout = QHBoxLayout()
 
-        # media_controls_layout.addWidget(self._play_button)
-        # media_controls_layout.addWidget(self._stop_button)
+        media_controls_layout.addWidget(self._play_button)
+        media_controls_layout.addWidget(self._stop_button)
 
         main_layout = QVBoxLayout()
 
-        # main_layout.addLayout(media_controls_layout)
+        main_layout.addLayout(media_controls_layout)
         main_layout.addWidget(self._audio_folders_combo_box)
         main_layout.addWidget(self._audio_list_widget)
 
@@ -165,26 +167,26 @@ class AssetBrowserAudioWidget(QWidget):
 
         self.command_insert_at_cursor_requested.emit(final_command)
 
-    # def _handle_current_change(self):
-    #     self._play_button.setEnabled(len(self._audio_list_widget.selectedItems()) > 0)
-    #
-    # def _handle_play_pressed(self):
-    #     if self._pywright_dir == "":
-    #         return
-    #     if not self._selected_game.is_a_game_selected():
-    #         return
-    #
-    #     folder_text = self._audio_folders_combo_box.currentText()
-    #     is_global = folder_text == "Global"
-    #
-    #     selected_music = self._audio_list_widget.selectedItems()[0].text()
-    #
-    #     file_path = Path("{}/{}/{}.ogg".format(self._pywright_dir if is_global else self._selected_game.game_path,
-    #                                               self.__AUDIO_FOLDER,
-    #                                               selected_music))
-    #
-    #     # Construct a path for the Music
-    #     self.audio_play_requested.emit(str(file_path))
-    #
-    # def _handle_stop_pressed(self):
-    #     self.audio_stop_requested.emit()
+    def _handle_current_change(self):
+        self._play_button.setEnabled(len(self._audio_list_widget.selectedItems()) > 0)
+
+    def _handle_play_pressed(self):
+        if self._pywright_dir == "":
+            return
+        if not self._selected_game.is_a_game_selected():
+            return
+
+        folder_text = self._audio_folders_combo_box.currentText()
+        is_global = folder_text == "Global"
+
+        selected_music = self._audio_list_widget.selectedItems()[0].text()
+
+        file_path = Path("{}/{}/{}.ogg".format(self._pywright_dir if is_global else self._selected_game.game_path,
+                                               self.__AUDIO_FOLDER,
+                                               selected_music))
+
+        # Construct a path for the Music
+        self.audio_play_requested.emit(str(file_path), self.__audio_type)
+
+    def _handle_stop_pressed(self):
+        self.audio_stop_requested.emit()
