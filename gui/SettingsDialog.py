@@ -41,7 +41,7 @@ class SettingsDialog(QDialog):
         self.font_name_line_edit = QLineEdit(self.settings.value(IDESettings.FONT_NAME_KEY))
         self.font_name_combobox = QFontComboBox()
         current_font = QFont(self.settings.value(IDESettings.FONT_NAME_KEY),
-                             self.settings.value(IDESettings.FONT_SIZE_KEY))
+                             self.settings.value(IDESettings.FONT_SIZE_KEY, 10, int))
         self.font_name_combobox.setCurrentFont(current_font)
 
         font_name_layout.addWidget(QLabel("Font:"))
