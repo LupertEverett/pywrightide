@@ -1,8 +1,8 @@
 # Provides ways to view various assets (textures, sound, music...)
 
 from PyQt5.QtWidgets import QDockWidget, QTabWidget
-from PyQt5.QtMultimedia import QMediaPlayer, QMediaContent, QAudio
-from PyQt5.QtCore import QUrl
+
+import pygame.mixer
 
 from .AssetBrowserTextureWidget import AssetManagerTextureWidget
 from .AssetBrowserAudioWidget import AssetBrowserAudioWidget, AudioType
@@ -19,7 +19,7 @@ class AssetBrowserRootWidget(QDockWidget):
 
         self.setWidget(self.tab_widget)
 
-        self.audio_player = QMediaPlayer(self)
+        pygame.mixer.init()
 
         self.texture_browser = AssetManagerTextureWidget(self)
         self.music_browser = AssetBrowserAudioWidget(AudioType.Music, self)
@@ -48,13 +48,13 @@ class AssetBrowserRootWidget(QDockWidget):
         self.sfx_browser.set_selected_game(selected_game)
         self.sfx_browser.refresh_music_folders()
 
-    def _handle_audio_player_play(self, path: str, audio_type: AudioType):
-        if self.audio_player.state() == QMediaPlayer.PlayingState:
-            self._handle_audio_player_stop()
-
-        self.audio_player.setMedia(QMediaContent(QUrl.fromLocalFile(path)))
-        self.audio_player.setVolume(50)
-        self.audio_player.play()
+    def _handle_audio_player_play(self, path: str):
+        if pygame.mixer.get_busy():
+            pygame.mixer.stop()
+        pygame.mixer.Sound(path).play()
 
     def _handle_audio_player_stop(self):
-        self.audio_player.stop()
+        pygame.mixer.stop()
+
+    def closeEvent(self, event) -> None:
+        pygame.mixer.quit()

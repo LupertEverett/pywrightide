@@ -8,6 +8,7 @@ Includes a tabbed text editor with syntax highlighting, dialogs to create new ga
 
 * A recent Python version
 * PyQt5 and QScintilla for Python
+* pygame (only for playing sounds)
 
 ## Usage
 

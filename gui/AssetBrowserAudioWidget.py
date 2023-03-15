@@ -1,6 +1,4 @@
-# Music browser for Asset Browser
-# Note that Qt on Windows doesn't support playing .ogg files for one reason or another,
-# so music playback is not possible for the time being
+# Music/SFX browser component for Asset Browser
 
 from pathlib import Path
 from enum import Enum
@@ -24,7 +22,7 @@ class AudioType(Enum):
 class AssetBrowserAudioWidget(QWidget):
 
     # Sends the URL of the music to play
-    audio_play_requested = pyqtSignal(str, AudioType)
+    audio_play_requested = pyqtSignal(str)
 
     audio_stop_requested = pyqtSignal()
 
@@ -186,7 +184,7 @@ class AssetBrowserAudioWidget(QWidget):
                                                selected_music))
 
         # Construct a path for the Music
-        self.audio_play_requested.emit(str(file_path), self.__audio_type)
+        self.audio_play_requested.emit(str(file_path))
 
     def _handle_stop_pressed(self):
         self.audio_stop_requested.emit()
