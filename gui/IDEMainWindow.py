@@ -544,4 +544,5 @@ class IDEMainWindow(QMainWindow):
             self.program_settings.setValue(IDESettings.AUTOLOAD_LAST_PROJECT_PATH_KEY, "")
             self.program_settings.setValue(IDESettings.AUTOLOAD_LAST_GAME_NAME_KEY, "")
 
+        self.asset_manager_widget.deinit()
         event.accept()

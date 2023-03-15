@@ -56,5 +56,5 @@ class AssetBrowserRootWidget(QDockWidget):
     def _handle_audio_player_stop(self):
         pygame.mixer.stop()
 
-    def closeEvent(self, event) -> None:
+    def deinit(self):
         pygame.mixer.quit()
