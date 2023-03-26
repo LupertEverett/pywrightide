@@ -109,3 +109,14 @@ class FileEditWidget(QWidget):
     def _emit_file_modified(self):
         self.sci.setModified(True)
         self.file_modified.emit()
+
+    def search_in_file(self, text_to_find: str):
+        cursor_pos = self.sci.SendScintilla(QsciScintilla.SCI_GETCURRENTPOS, 0, 0)
+        self.sci.SendScintilla(QsciScintilla.SCI_SETTARGETSTART, cursor_pos, 0)
+        self.sci.SendScintilla(QsciScintilla.SCI_SETTARGETEND, len(self.sci.text()), 0)
+        pos = self.sci.SendScintilla(QsciScintilla.SCI_SEARCHINTARGET, len(text_to_find), text_to_find.encode("utf-8"))
+
+        if pos == -1:
+            return
+
+        self.sci.SendScintilla(QsciScintilla.SCI_SETSEL, pos, pos + len(text_to_find))

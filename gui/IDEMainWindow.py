@@ -14,7 +14,7 @@ from .GamePropertiesWidget import GamePropertiesWidget
 from .DirectoryViewWidget import DirectoryViewWidget
 from .PyWrightLoggerWidget import PyWrightLoggerWidget
 from .SettingsDialog import SettingsDialog
-from .FindReplaceDialog import FindReplaceDialog, SearchScope
+from .FindReplaceDialog import FindReplaceDialog, SearchScope, FindType
 from .AssetBrowserRootWidget import AssetBrowserRootWidget
 
 from data import IDESettings
@@ -404,7 +404,13 @@ class IDEMainWindow(QMainWindow):
 
     def _handle_find_replace(self):
         self.find_replace_dialog = FindReplaceDialog(self)
+        self.find_replace_dialog.find_requested.connect(self._handle_find_replace_signals)
         self.find_replace_dialog.exec_()
+
+    def _handle_find_replace_signals(self, text: str, find_type: FindType, search_scope: SearchScope):
+        if self.tab_widget.tabText(self.tab_widget.currentIndex()) != "Game Properties":
+            file_widget: FileEditWidget = self.tab_widget.currentWidget()
+            file_widget.search_in_file(text)
 
     def _handle_run_pywright(self):
         self.logger_view.show()

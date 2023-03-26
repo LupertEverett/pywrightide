@@ -43,12 +43,14 @@ class FindReplaceDialog(QDialog):
 
         self._find_previous_button = QPushButton("Find Previous")
         self._find_next_button = QPushButton("Find Next")
+        self._find_next_button.pressed.connect(self._handle_find_next)
         self._find_all_button = QPushButton("Find All")
 
         self._replace_next_button = QPushButton("Replace Next")
         self._replace_all_button = QPushButton("Replace All")
 
         self._close_button = QPushButton("Close")
+        self._close_button.pressed.connect(self.close)
 
         self.search_scope: SearchScope = SearchScope.SINGLE_FILE
 
@@ -108,3 +110,8 @@ class FindReplaceDialog(QDialog):
             self.search_scope = SearchScope.OPEN_TABS
         elif self._scope_entire_project_radio_button.isChecked():
             self.search_scope = SearchScope.ENTIRE_PROJECT
+
+    def _handle_find_next(self):
+        find_text = self._find_line_edit.text()
+        if find_text != "":
+            self.find_requested.emit(find_text, FindType.FIND_NEXT, self.search_scope)
