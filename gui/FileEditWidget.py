@@ -9,6 +9,7 @@ from PyQt5.QtCore import pyqtSignal
 from PyQt5.Qsci import *
 
 from data.PyWrightScriptLexer import PyWrightScriptLexer
+from .FindReplaceDialog import FindType
 
 
 class FileEditWidget(QWidget):
@@ -110,7 +111,13 @@ class FileEditWidget(QWidget):
         self.sci.setModified(True)
         self.file_modified.emit()
 
-    def search_in_file(self, text_to_find: str):
+    def search_in_file(self, text_to_find: str, find_type: FindType):
+        if find_type == FindType.FIND_NEXT:
+            self.find_next_in_file(text_to_find)
+        elif find_type == FindType.FIND_PREVIOUS:
+            self.find_previous_in_file(text_to_find)
+
+    def find_next_in_file(self, text_to_find: str):
         cursor_pos = self.sci.SendScintilla(QsciScintilla.SCI_GETCURRENTPOS, 0, 0)
         self.sci.SendScintilla(QsciScintilla.SCI_SETTARGETSTART, cursor_pos, 0)
         self.sci.SendScintilla(QsciScintilla.SCI_SETTARGETEND, len(self.sci.text()), 0)
@@ -120,3 +127,15 @@ class FileEditWidget(QWidget):
             return
 
         self.sci.SendScintilla(QsciScintilla.SCI_SETSEL, pos, pos + len(text_to_find))
+
+    def find_previous_in_file(self, text_to_find: str):
+        cursor_pos = self.sci.SendScintilla(QsciScintilla.SCI_GETANCHOR, 0, 0)
+        self.sci.SendScintilla(QsciScintilla.SCI_SETTARGETSTART, cursor_pos, 0)
+        self.sci.SendScintilla(QsciScintilla.SCI_SETTARGETEND, 0, 0)  # Position at 0 so Scintilla searches backwards
+        pos = self.sci.SendScintilla(QsciScintilla.SCI_SEARCHINTARGET, len(text_to_find), text_to_find.encode("utf-8"))
+
+        if pos == -1:
+            return
+
+        self.sci.SendScintilla(QsciScintilla.SCI_SETSEL, pos, pos + len(text_to_find))
+

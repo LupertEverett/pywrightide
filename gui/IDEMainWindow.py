@@ -410,7 +410,7 @@ class IDEMainWindow(QMainWindow):
     def _handle_find_replace_signals(self, text: str, find_type: FindType, search_scope: SearchScope):
         if self.tab_widget.tabText(self.tab_widget.currentIndex()) != "Game Properties":
             file_widget: FileEditWidget = self.tab_widget.currentWidget()
-            file_widget.search_in_file(text)
+            file_widget.search_in_file(text, find_type)
 
     def _handle_run_pywright(self):
         self.logger_view.show()

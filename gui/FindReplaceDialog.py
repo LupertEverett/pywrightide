@@ -42,6 +42,7 @@ class FindReplaceDialog(QDialog):
         self._replace_line_edit.setMaximumWidth(500)
 
         self._find_previous_button = QPushButton("Find Previous")
+        self._find_previous_button.pressed.connect(self._handle_find_previous)
         self._find_next_button = QPushButton("Find Next")
         self._find_next_button.pressed.connect(self._handle_find_next)
         self._find_all_button = QPushButton("Find All")
@@ -110,6 +111,11 @@ class FindReplaceDialog(QDialog):
             self.search_scope = SearchScope.OPEN_TABS
         elif self._scope_entire_project_radio_button.isChecked():
             self.search_scope = SearchScope.ENTIRE_PROJECT
+
+    def _handle_find_previous(self):
+        find_text = self._find_line_edit.text()
+        if find_text != "":
+            self.find_requested.emit(find_text, FindType.FIND_PREVIOUS, self.search_scope)
 
     def _handle_find_next(self):
         find_text = self._find_line_edit.text()
