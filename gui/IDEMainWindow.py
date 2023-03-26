@@ -14,6 +14,7 @@ from .GamePropertiesWidget import GamePropertiesWidget
 from .DirectoryViewWidget import DirectoryViewWidget
 from .PyWrightLoggerWidget import PyWrightLoggerWidget
 from .SettingsDialog import SettingsDialog
+from .FindReplaceDialog import FindReplaceDialog, SearchScope
 from .AssetBrowserRootWidget import AssetBrowserRootWidget
 
 from data import IDESettings
@@ -106,6 +107,13 @@ class IDEMainWindow(QMainWindow):
             self.save_file_action.shortcut().toString()
         ))
 
+        self.find_replace_dialog_action = QAction("Find/Replace")
+        self.find_replace_dialog_action.triggered.connect(self._handle_find_replace)
+        self.find_replace_dialog_action.setShortcut(QKeySequence("Ctrl+f"))
+        self.find_replace_dialog_action.setStatusTip("Find/Replace words [{}]".format(
+            self.find_replace_dialog_action.shortcut().toString()
+        ))
+
         self.run_pywright_action = QAction(QIcon("res/icons/runpywright.png"), "Run PyWright")
         self.run_pywright_action.setEnabled(False)
         self.run_pywright_action.triggered.connect(self._handle_run_pywright)
@@ -183,6 +191,11 @@ class IDEMainWindow(QMainWindow):
 
         self.save_file_action.setParent(result)
         result.addAction(self.save_file_action)
+
+        result.addSeparator()
+
+        self.find_replace_dialog_action.setParent(result)
+        result.addAction(self.find_replace_dialog_action)
 
         result.addSeparator()
 
@@ -388,6 +401,10 @@ class IDEMainWindow(QMainWindow):
         self.open_file_action.setEnabled(has_pywright_game)
         # Let's not enable the save button yet.
         self.run_pywright_action.setEnabled(has_pywright)
+
+    def _handle_find_replace(self):
+        self.find_replace_dialog = FindReplaceDialog(self)
+        self.find_replace_dialog.exec_()
 
     def _handle_run_pywright(self):
         self.logger_view.show()
