@@ -140,14 +140,14 @@ class IDEMainWindow(QMainWindow):
         self._pywright_builtin_macros: list[str] = []
         self._game_macros: list[str] = []
 
-        # Try to load the last open project here, if the option is enabled.
+        # Try to load the last open project here, if the option is enabled, and the project folder still exists.
         if self.program_settings.value(IDESettings.AUTOLOAD_LAST_PROJECT_KEY, False, bool):
-            autoload_path = self.program_settings.value(IDESettings.AUTOLOAD_LAST_PROJECT_PATH_KEY, "")
-            if autoload_path != "":
+            autoload_path: str = self.program_settings.value(IDESettings.AUTOLOAD_LAST_PROJECT_PATH_KEY, "")
+            if autoload_path != "" and Path(autoload_path).exists() and Path(autoload_path).is_dir():
                 self._pick_pywright_installation_folder(autoload_path)
-            autoload_game_name: str = self.program_settings.value(IDESettings.AUTOLOAD_LAST_GAME_NAME_KEY, "")
-            if autoload_game_name != "":
-                self._switch_to_selected_game(autoload_game_name)
+                autoload_game_name: str = self.program_settings.value(IDESettings.AUTOLOAD_LAST_GAME_NAME_KEY, "")
+                if autoload_game_name != "" and Path(autoload_game_name).exists():
+                    self._switch_to_selected_game(autoload_game_name)
 
     def _create_top_toolbar(self) -> QToolBar:
         result = QToolBar(self)
