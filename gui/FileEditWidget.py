@@ -19,6 +19,8 @@ class FileEditWidget(QWidget):
     # This will signal the IDE on *where* to move
     # For example if FindType is PREVIOUS, this will try to make the IDE switch to a tab that's left to this one.
     move_to_tab_requested = pyqtSignal(str, FindType)
+    # This one only goes forwards
+    replace_next_in_next_tabs_requested = pyqtSignal(str, str)
 
     def __init__(self, pywright_dir, selected_file=""):
         super().__init__()
@@ -155,12 +157,17 @@ class FileEditWidget(QWidget):
 
     def replace_in_file(self, text_to_find: str, text_to_replace: str, replace_type: ReplaceType, search_scope: SearchScope):
         if replace_type == ReplaceType.REPLACE_NEXT:
-            self.replace_next_in_file(text_to_find, text_to_replace)
+            self.replace_next_in_file(text_to_find, text_to_replace, search_scope)
         elif replace_type == ReplaceType.REPLACE_ALL:
             self.replace_all_in_file(text_to_find, text_to_replace)
 
-    def replace_next_in_file(self, text_to_find: str, text_to_replace: str):
-        self.find_next_in_file(text_to_find, SearchScope.SINGLE_FILE, from_top=False)
+    def replace_next_in_file(self, text_to_find: str, text_to_replace: str, search_scope: SearchScope):
+        find_pos = self.find_next_in_file(text_to_find, SearchScope.SINGLE_FILE, from_top=False)
+
+        if find_pos == -1 and search_scope == SearchScope.OPEN_TABS:
+            self.replace_next_in_next_tabs_requested.emit(text_to_find, text_to_replace)
+            return
+
         self.sci.SendScintilla(QsciScintilla.SCI_REPLACESEL, 0, text_to_replace.encode("utf-8"))
 
         # Select the newly replaced text.

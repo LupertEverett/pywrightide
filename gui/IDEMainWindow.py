@@ -318,6 +318,7 @@ class IDEMainWindow(QMainWindow):
         file_edit_widget.supply_builtin_macros_to_lexer(self._pywright_builtin_macros)
         file_edit_widget.supply_game_macros_to_lexer(self._game_macros)
         file_edit_widget.move_to_tab_requested.connect(self._handle_move_to_tab)
+        file_edit_widget.replace_next_in_next_tabs_requested.connect(self.replace_next_in_next_tabs)
         file_name = Path(file_path).name
         self._open_new_tab(file_edit_widget, file_name if file_name != "" else "New File")
 
@@ -402,7 +403,6 @@ class IDEMainWindow(QMainWindow):
             tab_text = self.tab_widget.currentWidget().file_name
             # Prepend a * to the tab name if the file is modified
             self.tab_widget.setTabText(idx, "*" + tab_text if condition else tab_text)
-
 
     def _update_toolbar_buttons(self):
         has_pywright = self.selected_pywright_installation != ""
@@ -504,6 +504,30 @@ class IDEMainWindow(QMainWindow):
 
         # If we cannot find anything, inform the user and stop.
         QMessageBox.information(self, "Find/Replace", "First tab has been reached. The text couldn't be found.")
+
+    def replace_next_in_next_tabs(self, text_to_find: str, text_to_replace: str):
+        tabs_count = self.tab_widget.count()
+        current_position = self.tab_widget.currentIndex()
+
+        if current_position == tabs_count - 1:
+            QMessageBox.information(self, "Find/Replace", "Last tab has been reached. Text to replace couldn't be found.")
+            return
+
+        for idx in range(current_position + 1, tabs_count):
+            if self.tab_widget.tabText(idx) == "Game Properties":
+                continue
+
+            curr_widget: FileEditWidget = self.tab_widget.widget(idx)
+            pos = curr_widget.find_next_in_file(text_to_find, SearchScope.SINGLE_FILE, from_top=True)
+
+            if pos == -1:
+                continue
+
+            self.tab_widget.setCurrentIndex(idx)
+            curr_widget.replace_next_in_file(text_to_find, text_to_replace, SearchScope.SINGLE_FILE)
+            return
+
+        QMessageBox.information(self, "Find/Replace", "Last tab has been reached. Text to replace couldn't be found.")
 
     def replace_all_in_all_open_tabs(self, text_to_find: str, text_to_replace: str):
         tab_count = self.tab_widget.count()
