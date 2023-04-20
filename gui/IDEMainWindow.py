@@ -392,6 +392,18 @@ class IDEMainWindow(QMainWindow):
         # Prepend a * to the tab name if the file is modified
         self.tab_widget.setTabText(self.tab_widget.currentIndex(), "*" + tab_text if condition else tab_text)
 
+    def _update_tab_modified_infos(self):
+        # Like _update_save_button() but for all tabs
+        for idx in range(self.tab_widget.count()):
+            if self.tab_widget.tabText(idx) == "Game Properties":
+                continue
+
+            condition = self.tab_widget.currentWidget().is_file_modified()
+            tab_text = self.tab_widget.currentWidget().file_name
+            # Prepend a * to the tab name if the file is modified
+            self.tab_widget.setTabText(idx, "*" + tab_text if condition else tab_text)
+
+
     def _update_toolbar_buttons(self):
         has_pywright = self.selected_pywright_installation != ""
         has_pywright_game = self.selected_game != ""
@@ -422,6 +434,9 @@ class IDEMainWindow(QMainWindow):
         if self.tab_widget.count() == 0:
             # If nothing is open, inform the user and do nothing.
             QMessageBox.information(self, "Find/Replace", "There are no tabs open.")
+            return
+        if replace_type == ReplaceType.REPLACE_ALL and search_scope == SearchScope.OPEN_TABS:
+            self.replace_all_in_all_open_tabs(text_to_find, text_to_replace)
             return
         if self.tab_widget.tabText(self.tab_widget.currentIndex()) != "Game Properties":
             file_widget: FileEditWidget = self.tab_widget.currentWidget()
@@ -489,6 +504,17 @@ class IDEMainWindow(QMainWindow):
 
         # If we cannot find anything, inform the user and stop.
         QMessageBox.information(self, "Find/Replace", "First tab has been reached. The text couldn't be found.")
+
+    def replace_all_in_all_open_tabs(self, text_to_find: str, text_to_replace: str):
+        tab_count = self.tab_widget.count()
+
+        for idx in range(tab_count):
+            if self.tab_widget.tabText(idx) == "Game Properties":
+                continue
+
+            curr_tab: FileEditWidget = self.tab_widget.widget(idx)
+            curr_tab.replace_all_in_file(text_to_find, text_to_replace)
+        self._update_tab_modified_infos()
 
     def _handle_run_pywright(self):
         self.logger_view.show()
