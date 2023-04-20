@@ -3,7 +3,7 @@
 
 from pathlib import Path
 
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QFileDialog
+from PyQt5.QtWidgets import QWidget, QVBoxLayout, QFileDialog, QMessageBox
 from PyQt5.QtCore import pyqtSignal
 
 from PyQt5.Qsci import *
@@ -131,6 +131,7 @@ class FileEditWidget(QWidget):
         pos = self.sci.SendScintilla(QsciScintilla.SCI_SEARCHINTARGET, len(text_to_find), text_to_find.encode("utf-8"))
 
         if pos == -1 and search_scope == SearchScope.SINGLE_FILE:
+            QMessageBox.critical(self.parent(), "Find/Replace", "End of file reached")
             return pos
         if pos == -1 and search_scope == SearchScope.OPEN_TABS:
             self.move_to_tab_requested.emit(text_to_find, FindType.FIND_NEXT)
@@ -148,6 +149,7 @@ class FileEditWidget(QWidget):
         pos = self.sci.SendScintilla(QsciScintilla.SCI_SEARCHINTARGET, len(text_to_find), text_to_find.encode("utf-8"))
 
         if pos == -1 and search_scope == SearchScope.SINGLE_FILE:
+            QMessageBox.critical(self.parent(), "Find/Replace", "Beginning of file reached")
             return
         if pos == -1 and search_scope == SearchScope.OPEN_TABS:
             self.move_to_tab_requested.emit(text_to_find, FindType.FIND_PREVIOUS)
