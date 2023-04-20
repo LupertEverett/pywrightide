@@ -18,11 +18,13 @@ A compiled build for Windows is also available. Just download, extract and run P
 
 ## Screenshots
 
-![](https://i.imgur.com/dNotKdt.png)
+![](https://i.imgur.com/oqsCuvX.png)
 
-![](https://i.imgur.com/NQpqlA0.png)
+![](https://i.imgur.com/WXe6BjV.png)
 
-![](https://i.imgur.com/qNM5rXP.png)
+![](https://i.imgur.com/BvEYvaq.png)
+
+![](https://i.imgur.com/sz1tJgm.png)
 
 ## Building for Windows
 
