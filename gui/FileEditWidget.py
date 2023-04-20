@@ -3,18 +3,24 @@
 
 from pathlib import Path
 
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QFileDialog
+from PyQt5.QtWidgets import QWidget, QVBoxLayout, QFileDialog, QMessageBox
 from PyQt5.QtCore import pyqtSignal
 
 from PyQt5.Qsci import *
 
 from data.PyWrightScriptLexer import PyWrightScriptLexer
+from .FindReplaceDialog import FindType, ReplaceType, SearchScope
 
 
 class FileEditWidget(QWidget):
 
     file_name_changed = pyqtSignal(str)
     file_modified = pyqtSignal()
+    # This will signal the IDE on *where* to move
+    # For example if FindType is PREVIOUS, this will try to make the IDE switch to a tab that's left to this one.
+    move_to_tab_requested = pyqtSignal(str, FindType)
+    # This one only goes forwards
+    replace_next_in_next_tabs_requested = pyqtSignal(str, str)
 
     def __init__(self, pywright_dir, selected_file=""):
         super().__init__()
@@ -109,3 +115,72 @@ class FileEditWidget(QWidget):
     def _emit_file_modified(self):
         self.sci.setModified(True)
         self.file_modified.emit()
+
+    def search_in_file(self, text_to_find: str, find_type: FindType, search_scope: SearchScope):
+        if find_type == FindType.FIND_NEXT:
+            self.find_next_in_file(text_to_find, search_scope, from_top=False)
+        elif find_type == FindType.FIND_PREVIOUS:
+            self.find_previous_in_file(text_to_find, search_scope, from_bottom=False)
+
+    def find_next_in_file(self, text_to_find: str, search_scope: SearchScope, from_top: bool):
+        if from_top:
+            self.sci.SendScintilla(QsciScintilla.SCI_SETCURRENTPOS, 0, 0)
+        cursor_pos = self.sci.SendScintilla(QsciScintilla.SCI_GETCURRENTPOS, 0, 0)
+        self.sci.SendScintilla(QsciScintilla.SCI_SETTARGETSTART, cursor_pos, 0)
+        self.sci.SendScintilla(QsciScintilla.SCI_SETTARGETEND, len(self.sci.text()), 0)
+        pos = self.sci.SendScintilla(QsciScintilla.SCI_SEARCHINTARGET, len(text_to_find), text_to_find.encode("utf-8"))
+
+        if pos == -1 and search_scope == SearchScope.SINGLE_FILE:
+            QMessageBox.information(self.parent(), "Find/Replace", "End of file reached")
+            return pos
+        if pos == -1 and search_scope == SearchScope.OPEN_TABS:
+            self.move_to_tab_requested.emit(text_to_find, FindType.FIND_NEXT)
+            return pos
+
+        self.sci.SendScintilla(QsciScintilla.SCI_SETSEL, pos, pos + len(text_to_find))
+        return pos
+
+    def find_previous_in_file(self, text_to_find: str, search_scope: SearchScope, from_bottom: bool):
+        if from_bottom:
+            self.sci.SendScintilla(QsciScintilla.SCI_SETANCHOR, len(self.sci.text()), 0)
+        cursor_pos = self.sci.SendScintilla(QsciScintilla.SCI_GETANCHOR, 0, 0)
+        self.sci.SendScintilla(QsciScintilla.SCI_SETTARGETSTART, cursor_pos, 0)
+        self.sci.SendScintilla(QsciScintilla.SCI_SETTARGETEND, 0, 0)  # Position at 0 so Scintilla searches backwards
+        pos = self.sci.SendScintilla(QsciScintilla.SCI_SEARCHINTARGET, len(text_to_find), text_to_find.encode("utf-8"))
+
+        if pos == -1 and search_scope == SearchScope.SINGLE_FILE:
+            QMessageBox.information(self.parent(), "Find/Replace", "Beginning of file reached")
+            return
+        if pos == -1 and search_scope == SearchScope.OPEN_TABS:
+            self.move_to_tab_requested.emit(text_to_find, FindType.FIND_PREVIOUS)
+            return
+
+        self.sci.SendScintilla(QsciScintilla.SCI_SETSEL, pos, pos + len(text_to_find))
+
+    def replace_in_file(self, text_to_find: str, text_to_replace: str, replace_type: ReplaceType, search_scope: SearchScope):
+        if replace_type == ReplaceType.REPLACE_NEXT:
+            self.replace_next_in_file(text_to_find, text_to_replace, search_scope)
+        elif replace_type == ReplaceType.REPLACE_ALL:
+            self.replace_all_in_file(text_to_find, text_to_replace)
+
+    def replace_next_in_file(self, text_to_find: str, text_to_replace: str, search_scope: SearchScope):
+        find_pos = self.find_next_in_file(text_to_find, SearchScope.SINGLE_FILE, from_top=False)
+
+        if find_pos == -1 and search_scope == SearchScope.OPEN_TABS:
+            self.replace_next_in_next_tabs_requested.emit(text_to_find, text_to_replace)
+            return
+
+        self.sci.SendScintilla(QsciScintilla.SCI_REPLACESEL, 0, text_to_replace.encode("utf-8"))
+
+        # Select the newly replaced text.
+        pos = self.sci.SendScintilla(QsciScintilla.SCI_GETCURRENTPOS, 0, 0)
+        self.sci.SendScintilla(QsciScintilla.SCI_SETSEL, pos - len(text_to_replace), pos)
+
+    def replace_all_in_file(self, text_to_find: str, text_to_replace: str):
+        pos = self.find_next_in_file(text_to_find, SearchScope.SINGLE_FILE, from_top=True)
+        while True:
+            if pos == -1:
+                return
+
+            self.sci.SendScintilla(QsciScintilla.SCI_REPLACESEL, 0, text_to_replace.encode("utf-8"))
+            pos = self.find_next_in_file(text_to_find, SearchScope.SINGLE_FILE, from_top=False)
