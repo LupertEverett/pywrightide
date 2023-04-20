@@ -152,3 +152,10 @@ class FileEditWidget(QWidget):
 
         self.sci.SendScintilla(QsciScintilla.SCI_SETSEL, pos, pos + len(text_to_find))
 
+    def replace_next_in_file(self, text_to_find: str, text_to_replace: str):
+        self.find_next_in_file(text_to_find, SearchScope.SINGLE_FILE, from_top=False)
+        self.sci.SendScintilla(QsciScintilla.SCI_REPLACESEL, 0, text_to_replace.encode("utf-8"))
+
+        # Select the newly replaced text.
+        pos = self.sci.SendScintilla(QsciScintilla.SCI_GETCURRENTPOS, 0, 0)
+        self.sci.SendScintilla(QsciScintilla.SCI_SETSEL, pos - len(text_to_replace), pos)

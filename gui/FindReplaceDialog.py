@@ -5,14 +5,14 @@ from enum import Enum
 
 from PyQt5.QtWidgets import (QDialog, QPushButton, QRadioButton,
                              QButtonGroup, QGroupBox, QVBoxLayout,
-                             QHBoxLayout, QLineEdit, QLabel)
+                             QHBoxLayout, QLineEdit, QLabel, QMessageBox)
 from PyQt5.QtCore import pyqtSignal
 
 
 class SearchScope(Enum):
     SINGLE_FILE = 0
     OPEN_TABS = 1
-    ENTIRE_PROJECT = 2
+    # ENTIRE_PROJECT = 2
 
 
 class FindType(Enum):
@@ -48,6 +48,7 @@ class FindReplaceDialog(QDialog):
         self._find_all_button = QPushButton("Find All")
 
         self._replace_next_button = QPushButton("Replace Next")
+        self._replace_next_button.pressed.connect(self._handle_replace_next)
         self._replace_all_button = QPushButton("Replace All")
 
         self._close_button = QPushButton("Close")
@@ -61,9 +62,9 @@ class FindReplaceDialog(QDialog):
         self._scope_open_tabs_radio_button = QRadioButton("Open Tabs")
         self._scope_open_tabs_radio_button.setChecked(self.search_scope == SearchScope.OPEN_TABS)
         self._scope_open_tabs_radio_button.clicked.connect(self._handle_radio_buttons)
-        self._scope_entire_project_radio_button = QRadioButton("Entire Project")
-        self._scope_entire_project_radio_button.setChecked(self.search_scope == SearchScope.ENTIRE_PROJECT)
-        self._scope_entire_project_radio_button.clicked.connect(self._handle_radio_buttons)
+        # self._scope_entire_project_radio_button = QRadioButton("Entire Project")
+        # self._scope_entire_project_radio_button.setChecked(self.search_scope == SearchScope.ENTIRE_PROJECT)
+        # self._scope_entire_project_radio_button.clicked.connect(self._handle_radio_buttons)
 
         self._scope_group_box = QGroupBox("Search Scope")
         self._scope_group_box_layout = QVBoxLayout()
@@ -71,11 +72,11 @@ class FindReplaceDialog(QDialog):
         self._scope_radio_buttons_group = QButtonGroup()
         self._scope_radio_buttons_group.addButton(self._scope_single_file_radio_button)
         self._scope_radio_buttons_group.addButton(self._scope_open_tabs_radio_button)
-        self._scope_radio_buttons_group.addButton(self._scope_entire_project_radio_button)
+        # self._scope_radio_buttons_group.addButton(self._scope_entire_project_radio_button)
 
         self._scope_group_box_layout.addWidget(self._scope_single_file_radio_button)
         self._scope_group_box_layout.addWidget(self._scope_open_tabs_radio_button)
-        self._scope_group_box_layout.addWidget(self._scope_entire_project_radio_button)
+        # self._scope_group_box_layout.addWidget(self._scope_entire_project_radio_button)
         self._scope_group_box.setLayout(self._scope_group_box_layout)
 
         find_row_layout = QHBoxLayout()
@@ -109,8 +110,8 @@ class FindReplaceDialog(QDialog):
             self.search_scope = SearchScope.SINGLE_FILE
         elif self._scope_open_tabs_radio_button.isChecked():
             self.search_scope = SearchScope.OPEN_TABS
-        elif self._scope_entire_project_radio_button.isChecked():
-            self.search_scope = SearchScope.ENTIRE_PROJECT
+        # elif self._scope_entire_project_radio_button.isChecked():
+        #     self.search_scope = SearchScope.ENTIRE_PROJECT
 
     def _handle_find_previous(self):
         find_text = self._find_line_edit.text()
@@ -121,3 +122,17 @@ class FindReplaceDialog(QDialog):
         find_text = self._find_line_edit.text()
         if find_text != "":
             self.find_requested.emit(find_text, FindType.FIND_NEXT, self.search_scope)
+
+    def _handle_replace_next(self):
+        find_text = self._find_line_edit.text()
+        replace_text = self._replace_line_edit.text()
+
+        if find_text.isspace() or find_text == "":
+            QMessageBox.critical(self, "Error", "Find text cannot be empty!")
+            return
+
+        if replace_text.isspace() or replace_text == "":
+            QMessageBox.critical(self, "Error", "Replace text cannot be empty!")
+            return
+
+        self.replace_requested.emit(find_text, replace_text, ReplaceType.REPLACE_NEXT, self.search_scope)
