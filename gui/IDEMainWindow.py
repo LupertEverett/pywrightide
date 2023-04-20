@@ -425,7 +425,7 @@ class IDEMainWindow(QMainWindow):
             return
         if self.tab_widget.tabText(self.tab_widget.currentIndex()) != "Game Properties":
             file_widget: FileEditWidget = self.tab_widget.currentWidget()
-            file_widget.replace_next_in_file(text_to_find, text_to_replace)
+            file_widget.replace_in_file(text_to_find, text_to_replace, replace_type, search_scope)
 
     def _handle_move_to_tab(self, text_to_find: str, find_type: FindType):
         if find_type == FindType.FIND_NEXT:

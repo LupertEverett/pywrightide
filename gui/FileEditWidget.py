@@ -9,7 +9,7 @@ from PyQt5.QtCore import pyqtSignal
 from PyQt5.Qsci import *
 
 from data.PyWrightScriptLexer import PyWrightScriptLexer
-from .FindReplaceDialog import FindType, SearchScope
+from .FindReplaceDialog import FindType, ReplaceType, SearchScope
 
 
 class FileEditWidget(QWidget):
@@ -129,12 +129,13 @@ class FileEditWidget(QWidget):
         pos = self.sci.SendScintilla(QsciScintilla.SCI_SEARCHINTARGET, len(text_to_find), text_to_find.encode("utf-8"))
 
         if pos == -1 and search_scope == SearchScope.SINGLE_FILE:
-            return
+            return pos
         if pos == -1 and search_scope == SearchScope.OPEN_TABS:
             self.move_to_tab_requested.emit(text_to_find, FindType.FIND_NEXT)
-            return
+            return pos
 
         self.sci.SendScintilla(QsciScintilla.SCI_SETSEL, pos, pos + len(text_to_find))
+        return pos
 
     def find_previous_in_file(self, text_to_find: str, search_scope: SearchScope, from_bottom: bool):
         if from_bottom:
@@ -152,6 +153,12 @@ class FileEditWidget(QWidget):
 
         self.sci.SendScintilla(QsciScintilla.SCI_SETSEL, pos, pos + len(text_to_find))
 
+    def replace_in_file(self, text_to_find: str, text_to_replace: str, replace_type: ReplaceType, search_scope: SearchScope):
+        if replace_type == ReplaceType.REPLACE_NEXT:
+            self.replace_next_in_file(text_to_find, text_to_replace)
+        elif replace_type == ReplaceType.REPLACE_ALL:
+            self.replace_all_in_file(text_to_find, text_to_replace)
+
     def replace_next_in_file(self, text_to_find: str, text_to_replace: str):
         self.find_next_in_file(text_to_find, SearchScope.SINGLE_FILE, from_top=False)
         self.sci.SendScintilla(QsciScintilla.SCI_REPLACESEL, 0, text_to_replace.encode("utf-8"))
@@ -159,3 +166,12 @@ class FileEditWidget(QWidget):
         # Select the newly replaced text.
         pos = self.sci.SendScintilla(QsciScintilla.SCI_GETCURRENTPOS, 0, 0)
         self.sci.SendScintilla(QsciScintilla.SCI_SETSEL, pos - len(text_to_replace), pos)
+
+    def replace_all_in_file(self, text_to_find: str, text_to_replace: str):
+        pos = self.find_next_in_file(text_to_find, SearchScope.SINGLE_FILE, from_top=True)
+        while True:
+            if pos == -1:
+                return
+
+            self.sci.SendScintilla(QsciScintilla.SCI_REPLACESEL, 0, text_to_replace.encode("utf-8"))
+            pos = self.find_next_in_file(text_to_find, SearchScope.SINGLE_FILE, from_top=False)

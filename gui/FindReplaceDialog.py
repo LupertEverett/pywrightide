@@ -50,6 +50,7 @@ class FindReplaceDialog(QDialog):
         self._replace_next_button = QPushButton("Replace Next")
         self._replace_next_button.pressed.connect(self._handle_replace_next)
         self._replace_all_button = QPushButton("Replace All")
+        self._replace_all_button.pressed.connect(self._handle_replace_all)
 
         self._close_button = QPushButton("Close")
         self._close_button.pressed.connect(self.close)
@@ -115,13 +116,19 @@ class FindReplaceDialog(QDialog):
 
     def _handle_find_previous(self):
         find_text = self._find_line_edit.text()
-        if find_text != "":
-            self.find_requested.emit(find_text, FindType.FIND_PREVIOUS, self.search_scope)
+        if find_text.isspace() or find_text == "":
+            QMessageBox.critical(self, "Error", "Find text cannot be empty!")
+            return
+
+        self.find_requested.emit(find_text, FindType.FIND_PREVIOUS, self.search_scope)
 
     def _handle_find_next(self):
         find_text = self._find_line_edit.text()
-        if find_text != "":
-            self.find_requested.emit(find_text, FindType.FIND_NEXT, self.search_scope)
+        if find_text.isspace() or find_text == "":
+            QMessageBox.critical(self, "Error", "Find text cannot be empty!")
+            return
+
+        self.find_requested.emit(find_text, FindType.FIND_NEXT, self.search_scope)
 
     def _handle_replace_next(self):
         find_text = self._find_line_edit.text()
@@ -136,3 +143,17 @@ class FindReplaceDialog(QDialog):
             return
 
         self.replace_requested.emit(find_text, replace_text, ReplaceType.REPLACE_NEXT, self.search_scope)
+
+    def _handle_replace_all(self):
+        find_text = self._find_line_edit.text()
+        replace_text = self._replace_line_edit.text()
+
+        if find_text.isspace() or find_text == "":
+            QMessageBox.critical(self, "Error", "Find text cannot be empty!")
+            return
+
+        if replace_text.isspace() or replace_text == "":
+            QMessageBox.critical(self, "Error", "Replace text cannot be empty!")
+            return
+
+        self.replace_requested.emit(find_text, replace_text, ReplaceType.REPLACE_ALL, self.search_scope)
