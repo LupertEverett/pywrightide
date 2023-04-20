@@ -20,8 +20,6 @@ from .AssetBrowserRootWidget import AssetBrowserRootWidget
 from data import IDESettings
 from data.PyWrightGame import PyWrightGame
 
-# TODO: A Find dialog that checks thru the current tab, open tabs, and the whole project.
-
 
 class IDEMainWindow(QMainWindow):
     """Main Window of the PyWright IDE"""
@@ -41,6 +39,8 @@ class IDEMainWindow(QMainWindow):
         self.setWindowTitle("PyWright IDE")
         self.setWindowIcon(QIcon("res/icons/ideicon.png"))
         self.setMinimumSize(1024, 768)
+        if self.program_settings.value(IDESettings.WINDOW_GEOMETRY_KEY) is not None:
+            self.restoreGeometry(bytes(self.program_settings.value(IDESettings.WINDOW_GEOMETRY_KEY)))
 
         self.game_properties_widget = None  # Will be created later, when a PyWright root folder is selected
 
@@ -154,7 +154,7 @@ class IDEMainWindow(QMainWindow):
             if autoload_path != "" and Path(autoload_path).exists() and Path(autoload_path).is_dir():
                 self._pick_pywright_installation_folder(autoload_path)
                 autoload_game_name: str = self.program_settings.value(IDESettings.AUTOLOAD_LAST_GAME_NAME_KEY, "")
-                if autoload_game_name != "" and Path(autoload_game_name).exists():
+                if autoload_game_name != "":
                     self._switch_to_selected_game(autoload_game_name)
 
     def _create_top_toolbar(self) -> QToolBar:
@@ -676,6 +676,7 @@ class IDEMainWindow(QMainWindow):
         self.program_settings.setValue(IDESettings.AUTOLOAD_LAST_PROJECT_KEY, False)
         self.program_settings.setValue(IDESettings.AUTOLOAD_LAST_PROJECT_PATH_KEY, "")
         self.program_settings.setValue(IDESettings.AUTOLOAD_LAST_GAME_NAME_KEY, "")
+        self.program_settings.setValue(IDESettings.WINDOW_GEOMETRY_KEY, None)
 
     def _save_settings(self):
         self.program_settings.sync()
@@ -694,6 +695,8 @@ class IDEMainWindow(QMainWindow):
             # Otherwise clear the paths, just in case
             self.program_settings.setValue(IDESettings.AUTOLOAD_LAST_PROJECT_PATH_KEY, "")
             self.program_settings.setValue(IDESettings.AUTOLOAD_LAST_GAME_NAME_KEY, "")
+
+        self.program_settings.setValue(IDESettings.WINDOW_GEOMETRY_KEY, self.saveGeometry())
 
         self.asset_manager_widget.deinit()
         event.accept()
