@@ -107,7 +107,7 @@ class IDEMainWindow(QMainWindow):
             self.save_file_action.shortcut().toString()
         ))
 
-        self.find_replace_dialog_action = QAction("Find/Replace")
+        self.find_replace_dialog_action = QAction(QIcon("res/icons/Binoculars.png"), "Find/Replace")
         self.find_replace_dialog_action.triggered.connect(self._handle_find_replace)
         self.find_replace_dialog_action.setShortcut(QKeySequence("Ctrl+f"))
         self.find_replace_dialog_action.setStatusTip("Find/Replace words [{}]".format(
