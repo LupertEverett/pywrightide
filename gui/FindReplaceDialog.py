@@ -35,6 +35,7 @@ class FindReplaceDialog(QDialog):
         super().__init__(parent)
 
         self.setWindowTitle("Find/Replace")
+        self.setMinimumWidth(640)
 
         self._find_line_edit = QLineEdit()
         self._find_line_edit.setMaximumWidth(500)
@@ -45,7 +46,7 @@ class FindReplaceDialog(QDialog):
         self._find_previous_button.pressed.connect(self._handle_find_previous)
         self._find_next_button = QPushButton("Find Next")
         self._find_next_button.pressed.connect(self._handle_find_next)
-        self._find_all_button = QPushButton("Find All")
+        # self._find_all_button = QPushButton("Find All")
 
         self._replace_next_button = QPushButton("Replace Next")
         self._replace_next_button.pressed.connect(self._handle_replace_next)
@@ -92,7 +93,7 @@ class FindReplaceDialog(QDialog):
 
         bottom_buttons_layout.addWidget(self._find_previous_button)
         bottom_buttons_layout.addWidget(self._find_next_button)
-        bottom_buttons_layout.addWidget(self._find_all_button)
+        # bottom_buttons_layout.addWidget(self._find_all_button)
         bottom_buttons_layout.addWidget(self._replace_next_button)
         bottom_buttons_layout.addWidget(self._replace_all_button)
         bottom_buttons_layout.addWidget(self._close_button)
