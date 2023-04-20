@@ -9,13 +9,16 @@ from PyQt5.QtCore import pyqtSignal
 from PyQt5.Qsci import *
 
 from data.PyWrightScriptLexer import PyWrightScriptLexer
-from .FindReplaceDialog import FindType
+from .FindReplaceDialog import FindType, SearchScope
 
 
 class FileEditWidget(QWidget):
 
     file_name_changed = pyqtSignal(str)
     file_modified = pyqtSignal()
+    # This will signal the IDE on *where* to move
+    # For example if FindType is PREVIOUS, this will try to make the IDE switch to a tab that's left to this one.
+    move_to_tab_requested = pyqtSignal(str, FindType)
 
     def __init__(self, pywright_dir, selected_file=""):
         super().__init__()
@@ -111,30 +114,40 @@ class FileEditWidget(QWidget):
         self.sci.setModified(True)
         self.file_modified.emit()
 
-    def search_in_file(self, text_to_find: str, find_type: FindType):
+    def search_in_file(self, text_to_find: str, find_type: FindType, search_scope: SearchScope):
         if find_type == FindType.FIND_NEXT:
-            self.find_next_in_file(text_to_find)
+            self.find_next_in_file(text_to_find, search_scope, from_top=False)
         elif find_type == FindType.FIND_PREVIOUS:
-            self.find_previous_in_file(text_to_find)
+            self.find_previous_in_file(text_to_find, search_scope, from_bottom=False)
 
-    def find_next_in_file(self, text_to_find: str):
+    def find_next_in_file(self, text_to_find: str, search_scope: SearchScope, from_top: bool):
+        if from_top:
+            self.sci.SendScintilla(QsciScintilla.SCI_SETCURRENTPOS, 0, 0)
         cursor_pos = self.sci.SendScintilla(QsciScintilla.SCI_GETCURRENTPOS, 0, 0)
         self.sci.SendScintilla(QsciScintilla.SCI_SETTARGETSTART, cursor_pos, 0)
         self.sci.SendScintilla(QsciScintilla.SCI_SETTARGETEND, len(self.sci.text()), 0)
         pos = self.sci.SendScintilla(QsciScintilla.SCI_SEARCHINTARGET, len(text_to_find), text_to_find.encode("utf-8"))
 
-        if pos == -1:
+        if pos == -1 and search_scope == SearchScope.SINGLE_FILE:
+            return
+        if pos == -1 and search_scope == SearchScope.OPEN_TABS:
+            self.move_to_tab_requested.emit(text_to_find, FindType.FIND_NEXT)
             return
 
         self.sci.SendScintilla(QsciScintilla.SCI_SETSEL, pos, pos + len(text_to_find))
 
-    def find_previous_in_file(self, text_to_find: str):
+    def find_previous_in_file(self, text_to_find: str, search_scope: SearchScope, from_bottom: bool):
+        if from_bottom:
+            self.sci.SendScintilla(QsciScintilla.SCI_SETANCHOR, len(self.sci.text()), 0)
         cursor_pos = self.sci.SendScintilla(QsciScintilla.SCI_GETANCHOR, 0, 0)
         self.sci.SendScintilla(QsciScintilla.SCI_SETTARGETSTART, cursor_pos, 0)
         self.sci.SendScintilla(QsciScintilla.SCI_SETTARGETEND, 0, 0)  # Position at 0 so Scintilla searches backwards
         pos = self.sci.SendScintilla(QsciScintilla.SCI_SEARCHINTARGET, len(text_to_find), text_to_find.encode("utf-8"))
 
-        if pos == -1:
+        if pos == -1 and search_scope == SearchScope.SINGLE_FILE:
+            return
+        if pos == -1 and search_scope == SearchScope.OPEN_TABS:
+            self.move_to_tab_requested.emit(text_to_find, FindType.FIND_PREVIOUS)
             return
 
         self.sci.SendScintilla(QsciScintilla.SCI_SETSEL, pos, pos + len(text_to_find))

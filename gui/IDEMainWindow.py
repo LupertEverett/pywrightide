@@ -317,6 +317,7 @@ class IDEMainWindow(QMainWindow):
         file_edit_widget.file_modified.connect(self._update_save_button)
         file_edit_widget.supply_builtin_macros_to_lexer(self._pywright_builtin_macros)
         file_edit_widget.supply_game_macros_to_lexer(self._game_macros)
+        file_edit_widget.move_to_tab_requested.connect(self._handle_move_to_tab)
         file_name = Path(file_path).name
         self._open_new_tab(file_edit_widget, file_name if file_name != "" else "New File")
 
@@ -408,9 +409,76 @@ class IDEMainWindow(QMainWindow):
         self.find_replace_dialog.exec_()
 
     def _handle_find_replace_signals(self, text: str, find_type: FindType, search_scope: SearchScope):
+        if self.tab_widget.count() == 0:
+            # If nothing is open, inform the user and do nothing.
+            QMessageBox.information(self, "Find/Replace", "There are no tabs open.")
+            return
         if self.tab_widget.tabText(self.tab_widget.currentIndex()) != "Game Properties":
             file_widget: FileEditWidget = self.tab_widget.currentWidget()
-            file_widget.search_in_file(text, find_type)
+            file_widget.search_in_file(text, find_type, search_scope)
+
+    def _handle_move_to_tab(self, text_to_find: str, find_type: FindType):
+        if find_type == FindType.FIND_NEXT:
+            self._try_to_move_forwards_in_tabs(text_to_find)
+        elif find_type == FindType.FIND_PREVIOUS:
+            self._try_to_move_backwards_in_tabs(text_to_find)
+
+    def _try_to_move_forwards_in_tabs(self, text_to_find: str):
+        tabs_count = self.tab_widget.count()
+        current_position = self.tab_widget.currentIndex()
+        # If we're already at the last tab, inform the user and do nothing.
+        if current_position == tabs_count - 1:
+            QMessageBox.information(self, "Find/Replace", "Last tab has been reached. The text couldn't be found.")
+            return
+
+        for idx in range(current_position + 1, tabs_count):
+            if self.tab_widget.tabText(idx) == "Game Properties":
+                continue
+
+            curr_widget: FileEditWidget = self.tab_widget.widget(idx)
+            # Do a search in the selected tab.
+            curr_text = curr_widget.sci.text()
+            pos = curr_text.find(text_to_find)
+
+            # If we don't have a match, then continue
+            if pos == -1:
+                continue
+
+            # If we're here, then we have a match.
+            self.tab_widget.setCurrentIndex(idx)
+            curr_widget.find_next_in_file(text_to_find, SearchScope.SINGLE_FILE, from_top=True)
+            return
+
+        # If we cannot find anything, inform the user and stop.
+        QMessageBox.information(self, "Find/Replace", "Last tab has been reached. The text couldn't be found.")
+
+    def _try_to_move_backwards_in_tabs(self, text_to_find: str):
+        current_position = self.tab_widget.currentIndex()
+        # If we're already at the first tab, inform the user and do nothing.
+        if current_position == 0:
+            QMessageBox.information(self, "Find/Replace", "First tab has been reached. The text couldn't be found.")
+            return
+
+        for idx in range(current_position).__reversed__():
+            if self.tab_widget.tabText(idx) == "Game Properties":
+                continue
+
+            curr_widget: FileEditWidget = self.tab_widget.widget(idx)
+            # Do a search in the selected tab.
+            curr_text = curr_widget.sci.text()
+            pos = curr_text.rfind(text_to_find)
+
+            # If we don't have a match, then continue
+            if pos == -1:
+                continue
+
+            # If we're here, then we have a match.
+            self.tab_widget.setCurrentIndex(idx)
+            curr_widget.find_previous_in_file(text_to_find, SearchScope.SINGLE_FILE, from_bottom=True)
+            return
+
+        # If we cannot find anything, inform the user and stop.
+        QMessageBox.information(self, "Find/Replace", "First tab has been reached. The text couldn't be found.")
 
     def _handle_run_pywright(self):
         self.logger_view.show()
