@@ -419,7 +419,7 @@ class IDEMainWindow(QMainWindow):
         self.find_replace_dialog = FindReplaceDialog(self)
         self.find_replace_dialog.find_requested.connect(self._handle_find_signals)
         self.find_replace_dialog.replace_requested.connect(self._handle_replace_signals)
-        self.find_replace_dialog.exec_()
+        self.find_replace_dialog.show()
 
     def _handle_find_signals(self, text: str, find_type: FindType, search_scope: SearchScope):
         if self.tab_widget.count() == 0:
