@@ -171,7 +171,6 @@ class IDEMainWindow(QMainWindow):
 
         if self.attempt_closing_unsaved_tabs():
             self.selected_game.load_game(Path("{}/games/{}".format(self.selected_pywright_installation, selected_game)))
-            # TODO: Gradually switch from strings to PyWrightGame instances
             self.game_properties_widget.load_game(self.selected_game)
             self.tab_widget.clear()
             self.directory_view.update_directory_view(self.selected_game)
