@@ -64,10 +64,8 @@ class GamePropertiesWidget(QWidget):
         result.setLayout(intro_txt_group_layout)
         return result
 
-    def load_game(self, game_path: str):
-        self._selected_game.set_game_path(game_path)
-        self._selected_game.clear_data_txt_fields()
-        self._selected_game.clear_case_list()
+    def load_game(self, selected_game: PyWrightGame):
+        self._selected_game = selected_game
         self.game_data_widget.load_data_txt(self._selected_game)
         self._game_intro_widget.load_intro_txt(self._selected_game)
 

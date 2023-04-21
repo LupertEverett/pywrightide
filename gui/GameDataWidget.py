@@ -84,7 +84,6 @@ class GameDataWidget(QWidget):
     def load_data_txt(self, selected_game: PyWrightGame):
         self._selected_game = selected_game
         if self._selected_game.is_a_game_selected():
-            self._selected_game.load_data_txt()
             self.populate_game_info()
 
     def save_data_txt(self):
