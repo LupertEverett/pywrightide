@@ -13,16 +13,22 @@ class PyWrightGame:
         self.game_icon_path: str = ""
         self.game_author: str = ""
         self.game_cases: list[str] = []
-        self.game_path: str = ""
+        self.game_path: Path = Path("")
+        self.game_macros: list[str] = []
 
     def is_a_game_selected(self) -> bool:
-        return self.game_path != ""
+        return self.game_path.name != ""
 
     def set_game_path(self, new_game_path: str):
-        self.game_path = new_game_path
+        self.game_path = Path(new_game_path)
 
     def get_game_name(self):
-        return Path(self.game_path).name
+        return self.game_path.name
+
+    def clear(self):
+        self.clear_case_list()
+        self.clear_data_txt_fields()
+        self.game_macros.clear()
 
     def clear_data_txt_fields(self):
         self.game_version = ""
@@ -167,8 +173,38 @@ class PyWrightGame:
         # Create the folder now.
         path.mkdir()
 
-        self.game_path = game_path
+        # Also create additional subfolders (so that we don't crash after creating a new game + it is more convenient):
+        Path("{}/art".format(game_path)).mkdir()
+        Path("{}/music".format(game_path)).mkdir()
+        Path("{}/sfx".format(game_path)).mkdir()
+
+        self.game_path = path
         self.set_data_txt_fields(version, title, icon_path, author)
 
         self.write_data_txt()
         self.write_intro_txt()
+
+    def load_game(self, game_path: Path):
+        self.game_path = game_path
+        self.clear_data_txt_fields()
+        self.clear_case_list()
+        self.load_data_txt()
+        self.load_intro_txt()
+        self.parse_game_macros()
+
+    def parse_game_macros(self):
+        if not (self.game_path.exists() and self.game_path.is_dir()):
+            raise FileNotFoundError("Selected game doesn't exist!")
+
+        macro_files_list = self.game_path.glob("*.mcro")
+
+        self.game_macros.clear()
+
+        for macro_file_name in macro_files_list:
+            with open(macro_file_name, "r", encoding="UTF-8") as f:
+                lines = f.readlines()
+
+                for line in lines:
+                    if line.startswith("macro "):
+                        splitted_lines = line.split(maxsplit=1)
+                        self.game_macros.append(splitted_lines[1])

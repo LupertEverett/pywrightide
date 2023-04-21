@@ -55,7 +55,6 @@ class GameIntroWidget(QWidget):
     def load_intro_txt(self, selected_game: PyWrightGame):
         self._selected_game = selected_game
         if selected_game.is_a_game_selected():
-            self._selected_game.load_intro_txt()
             self._populate_cases_list()
 
     def save_intro_txt(self):

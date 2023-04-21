@@ -95,7 +95,6 @@ class IDEMainWindow(QMainWindow):
 
         # Macros tracking
         self._pywright_builtin_macros: list[str] = []
-        self._game_macros: list[str] = []
 
         # Try to load the last open project here, if the option is enabled, and the project folder still exists.
         if self.program_settings.value(IDESettings.AUTOLOAD_LAST_PROJECT_KEY, False, bool):
@@ -104,7 +103,12 @@ class IDEMainWindow(QMainWindow):
                 self.pick_pywright_installation_folder(autoload_path)
                 autoload_game_name: str = self.program_settings.value(IDESettings.AUTOLOAD_LAST_GAME_NAME_KEY, "")
                 if autoload_game_name != "":
-                    self._switch_to_selected_game(autoload_game_name)
+                    # Check if it is an actual game folder within the selected PyWright installation
+                    game_path = Path("{}/games/{}".format(autoload_path, autoload_game_name))
+                    if game_path.exists() and game_path.is_dir():
+                        self._switch_to_selected_game(autoload_game_name)
+                    else:
+                        self.program_settings.setValue(IDESettings.AUTOLOAD_LAST_GAME_NAME_KEY, "")
 
     def pick_pywright_installation_folder(self, folder_path: str):
         self.selected_pywright_installation = folder_path
@@ -166,13 +170,11 @@ class IDEMainWindow(QMainWindow):
         :param selected_game: Name of the selected PyWright game."""
 
         if self.attempt_closing_unsaved_tabs():
-            self.selected_game.set_game_path("{}/games/{}".format(self.selected_pywright_installation, selected_game))
+            self.selected_game.load_game(Path("{}/games/{}".format(self.selected_pywright_installation, selected_game)))
             # TODO: Gradually switch from strings to PyWrightGame instances
-            # game_path = str(Path("{}/games/{}".format(self.selected_pywright_installation, self.selected_game)))
-            self.game_properties_widget.load_game(self.selected_game.game_path)
+            self.game_properties_widget.load_game(self.selected_game)
             self.tab_widget.clear()
-            self.directory_view.update_directory_view(self.selected_game.game_path)
-            self._parse_game_macros()
+            self.directory_view.update_directory_view(self.selected_game)
             self.open_game_properties_tab()
             self._top_toolbar.update_toolbar_buttons(self.selected_pywright_installation != "",
                                                      self.selected_game.get_game_name() != "")
@@ -194,7 +196,7 @@ class IDEMainWindow(QMainWindow):
         file_edit_widget.file_name_changed.connect(self._handle_rename_tab)
         file_edit_widget.file_modified.connect(self._update_save_button_and_current_tab)
         file_edit_widget.supply_builtin_macros_to_lexer(self._pywright_builtin_macros)
-        file_edit_widget.supply_game_macros_to_lexer(self._game_macros)
+        file_edit_widget.supply_game_macros_to_lexer(self.selected_game.game_macros)
         file_edit_widget.move_to_tab_requested.connect(self._handle_move_to_tab)
         file_edit_widget.replace_next_in_next_tabs_requested.connect(self.replace_next_in_next_tabs)
         file_name = Path(file_path).name
@@ -462,26 +464,6 @@ class IDEMainWindow(QMainWindow):
                     if line.startswith("macro "):
                         splitted_lines = line.split(maxsplit=1)
                         self._pywright_builtin_macros.append(splitted_lines[1])
-
-    def _parse_game_macros(self):
-        # game_path = Path("{}/games/{}".format(self.selected_pywright_installation, self.selected_game))
-        game_path = Path("{}".format(self.selected_game.game_path))
-
-        if not (game_path.exists() and game_path.is_dir()):
-            raise FileNotFoundError("Selected game doesn't exist!")
-
-        macro_files_list = game_path.glob("*.mcro")
-
-        self._game_macros.clear()
-
-        for macro_file_name in macro_files_list:
-            with open(macro_file_name, "r", encoding="UTF-8") as f:
-                lines = f.readlines()
-
-                for line in lines:
-                    if line.startswith("macro "):
-                        splitted_lines = line.split(maxsplit=1)
-                        self._game_macros.append(splitted_lines[1])
 
     def _save_all_modified_files(self, unsaved_tabs_indexes: list[int]):
         for idx in unsaved_tabs_indexes:

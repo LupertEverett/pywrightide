@@ -72,16 +72,19 @@ class AssetManagerTextureWidget(QWidget):
         global_art_folders = ["global/" + x.name for x in global_art_folder_path.iterdir() if x.is_dir()]
 
         game_art_folder_path = Path("{}/art/".format(self._selected_game.game_path))
-
-        game_art_folders = [x.name for x in game_art_folder_path.iterdir() if x.is_dir()]
-
-        # Iterate over subfolders as well
-
+        game_art_folders = []
         game_art_subfolders = []
 
-        for folder in game_art_folders:
-            folder_path = Path("{}/art/{}".format(self._selected_game.game_path, folder))
-            game_art_subfolders.extend([folder + "/" + x.name for x in folder_path.iterdir() if x.is_dir()])
+        if game_art_folder_path.exists():
+            game_art_folders = [x.name for x in game_art_folder_path.iterdir() if x.is_dir()]
+
+            # Iterate over subfolders as well
+
+            game_art_subfolders = []
+
+            for folder in game_art_folders:
+                folder_path = Path("{}/art/{}".format(self._selected_game.game_path, folder))
+                game_art_subfolders.extend([folder + "/" + x.name for x in folder_path.iterdir() if x.is_dir()])
 
         self._available_folders = global_art_folders + game_art_folders + game_art_subfolders
 

@@ -52,7 +52,7 @@ class DirectoryViewWidget(QDockWidget):
         self.setFeatures(QDockWidget.NoDockWidgetFeatures)
         self.setMinimumWidth(300)
 
-    def update_directory_view(self, game_root_path: str):
+    def update_directory_view(self, selected_game: PyWrightGame):
         fs_model = QFileSystemModel()
         icon_provider = QFileIconProvider()
 
@@ -62,10 +62,12 @@ class DirectoryViewWidget(QDockWidget):
         fs_model.setNameFilters(name_filter)
         fs_model.setNameFilterDisables(False)
 
-        self._game_title_label.setText(Path(game_root_path).name)
+        self._pywright_game = selected_game
+
+        self._game_title_label.setText(self._pywright_game.get_game_name())
 
         self._directory_view.setModel(fs_model)
-        self._directory_view.setRootIndex(fs_model.setRootPath(game_root_path))
+        self._directory_view.setRootIndex(fs_model.setRootPath(str(self._pywright_game.game_path)))
         self._directory_view.setIndentation(20)
         self._directory_view.setSortingEnabled(True)
         self._directory_view.sortByColumn(0, Qt.AscendingOrder)
@@ -74,12 +76,10 @@ class DirectoryViewWidget(QDockWidget):
         self._directory_view.hideColumn(2)
         self._directory_view.hideColumn(3)
 
-        self._pywright_game.set_game_path(game_root_path)
-
         self._game_properties_button.setEnabled(True)
 
     def clear_directory_view(self):
-        self._directory_view.reset()
+        self._directory_view.setModel(None)
         self._game_title_label.setText("")
         self._game_properties_button.setEnabled(False)
 
