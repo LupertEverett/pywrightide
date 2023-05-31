@@ -184,6 +184,18 @@ class PyWrightGame:
         self.write_data_txt()
         self.write_intro_txt()
 
+    def remove_case(self, case_name: str, also_remove_folder: bool):
+        try:
+            self.game_cases.remove(case_name)
+            self.write_intro_txt()
+
+            if also_remove_folder:
+                import shutil
+                case_dir = Path("{}/{}".format(self.game_path, case_name))
+                shutil.rmtree(case_dir)
+        except ValueError:
+            pass
+
     def load_game(self, game_path: Path):
         self.game_path = game_path
         self.clear_data_txt_fields()

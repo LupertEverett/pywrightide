@@ -1,6 +1,6 @@
 # Handles the data in intro.txt of the selected PyWright game
 
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QListWidget, QToolBar, QAction
+from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QListWidget, QToolBar, QAction, QMessageBox
 from PyQt5.QtGui import QIcon
 
 from .AddNewCaseDialog import AddNewCaseDialog
@@ -34,6 +34,7 @@ class GameIntroWidget(QWidget):
         self.add_existing_case_action = QAction(QIcon(add_existing_case_icon_path),
                                                 "Add Existing Case", self._widget_toolbar)
         self.remove_case_action = QAction(QIcon(remove_case_icon_path), "Remove Case", self._widget_toolbar)
+        self.remove_case_action.triggered.connect(self._handle_remove_case)
         self.case_properties_action = QAction(QIcon(case_properties_icon_path),
                                               "Case Properties", self._widget_toolbar)
 
@@ -82,3 +83,15 @@ class GameIntroWidget(QWidget):
         if add_new_case_dialog.exec_():
             self._selected_game.create_new_case(add_new_case_dialog.new_case)
             self._populate_cases_list()
+
+    def _handle_remove_case(self):
+        if QMessageBox.question(self, "Are you sure?", "Are you sure you want to remove this case?",
+                                QMessageBox.Yes | QMessageBox.No, QMessageBox.No) == QMessageBox.No:
+            return
+
+        also_remove_folder = QMessageBox.question(self, "Also remove the folder?",
+                                                  "Would you like to remove the folder as well?",
+                                                  QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+        selected_case: str = self._game_cases_list_widget.currentItem().text()
+        self._selected_game.remove_case(selected_case, also_remove_folder == QMessageBox.Yes)
+        self._populate_cases_list()
