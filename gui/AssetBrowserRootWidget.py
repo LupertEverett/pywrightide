@@ -1,6 +1,7 @@
 # Provides ways to view various assets (textures, sound, music...)
 
 from PyQt5.QtWidgets import QDockWidget, QTabWidget
+from PyQt5.QtGui import QHideEvent
 
 import pygame.mixer
 
@@ -47,6 +48,12 @@ class AssetBrowserRootWidget(QDockWidget):
         self.sfx_browser.select_pywright(pywright_path)
         self.sfx_browser.set_selected_game(selected_game)
         self.sfx_browser.refresh_music_folders()
+
+    def hideEvent(self, a0: QHideEvent) -> None:
+        from .IDEMainWindow import IDEMainWindow
+        ide_main_window: IDEMainWindow = self.parent()
+        ide_main_window.update_toolbar_buttons(ide_main_window.selected_pywright_installation != "",
+                                               ide_main_window.selected_game.get_game_name() != "")
 
     def _handle_audio_player_play(self, path: str):
         if pygame.mixer.get_busy():

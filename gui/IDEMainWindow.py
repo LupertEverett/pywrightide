@@ -2,10 +2,9 @@
 
 from pathlib import Path
 
-from PyQt5.QtWidgets import (QMainWindow, QWidget, QToolBar, QStatusBar, QAction,
-                             QFileDialog, QLabel, QTabWidget, QMessageBox)
-from PyQt5.QtGui import QIcon, QKeySequence, QCloseEvent
-from PyQt5.QtCore import Qt, QSettings
+from PyQt5.QtWidgets import (QMainWindow, QWidget, QStatusBar, QFileDialog, QLabel, QTabWidget, QMessageBox)
+from PyQt5.QtGui import QIcon, QCloseEvent
+from PyQt5.QtCore import Qt
 
 from .MainWindowTopToolbar import MainWindowTopToolbar
 from .NewGameDialog import NewGameDialog
@@ -33,15 +32,14 @@ class IDEMainWindow(QMainWindow):
         self.selected_game = PyWrightGame()
         self.pywright_executable_name = ""
 
-        self.program_settings = QSettings("PyWrightIDE", "PyWrightIDE")
-        if len(self.program_settings.allKeys()) == 0:
-            self._default_settings()
+        if len(IDESettings.all_keys()) == 0:
+            IDESettings.reset_settings()
 
         self.setWindowTitle("PyWright IDE")
         self.setWindowIcon(QIcon("res/icons/ideicon.png"))
         self.setMinimumSize(1024, 768)
-        if self.program_settings.value(IDESettings.WINDOW_GEOMETRY_KEY) is not None:
-            self.restoreGeometry(bytes(self.program_settings.value(IDESettings.WINDOW_GEOMETRY_KEY)))
+        if IDESettings.window_geometry_data_exists():
+            self.restoreGeometry(IDESettings.get_window_geometry())
 
         self.game_properties_widget = None  # Will be created later, when a PyWright root folder is selected
 
@@ -97,18 +95,18 @@ class IDEMainWindow(QMainWindow):
         self._pywright_builtin_macros: list[str] = []
 
         # Try to load the last open project here, if the option is enabled, and the project folder still exists.
-        if self.program_settings.value(IDESettings.AUTOLOAD_LAST_PROJECT_KEY, False, bool):
-            autoload_path: str = self.program_settings.value(IDESettings.AUTOLOAD_LAST_PROJECT_PATH_KEY, "")
+        if IDESettings.get_autoload_last_project_check():
+            autoload_path: str = IDESettings.get_autoload_last_project_path()
             if autoload_path != "" and Path(autoload_path).exists() and Path(autoload_path).is_dir():
                 self.pick_pywright_installation_folder(autoload_path)
-                autoload_game_name: str = self.program_settings.value(IDESettings.AUTOLOAD_LAST_GAME_NAME_KEY, "")
+                autoload_game_name: str = IDESettings.get_autoload_last_game_name()
                 if autoload_game_name != "":
                     # Check if it is an actual game folder within the selected PyWright installation
                     game_path = Path("{}/games/{}".format(autoload_path, autoload_game_name))
                     if game_path.exists() and game_path.is_dir():
                         self._switch_to_selected_game(autoload_game_name)
                     else:
-                        self.program_settings.setValue(IDESettings.AUTOLOAD_LAST_GAME_NAME_KEY, "")
+                        IDESettings.set_autoload_last_game_name("")
 
     def pick_pywright_installation_folder(self, folder_path: str):
         self.selected_pywright_installation = folder_path
@@ -433,7 +431,7 @@ class IDEMainWindow(QMainWindow):
         file_edit_widget.insert_at_cursor_position(command)
 
     def _handle_settings(self):
-        settings_dialog = SettingsDialog(self.program_settings, self)
+        settings_dialog = SettingsDialog(self)
         settings_dialog.settings_changed.connect(self._apply_settings)
         settings_dialog.exec()
 
@@ -441,9 +439,10 @@ class IDEMainWindow(QMainWindow):
         for idx in range(self.tab_widget.count()):
             if self.tab_widget.tabText(idx) != "Game Properties":
                 tab: FileEditWidget = self.tab_widget.widget(idx)
-                tab.supply_font_properties_to_lexer(self.program_settings.value(IDESettings.FONT_NAME_KEY),
-                                                    int(self.program_settings.value(IDESettings.FONT_SIZE_KEY)),
-                                                    self.program_settings.value(IDESettings.FONT_BOLD_KEY, True, bool))
+                tab.supply_font_properties_to_lexer(IDESettings.get_font_name(),
+                                                    IDESettings.get_font_size(),
+                                                    IDESettings.get_font_boldness())
+        self._top_toolbar.update_toolbar_icons()
 
     def _parse_builtin_macros(self, pywright_install_dir: str):
         core_macros_dir = Path("{}/core/macros".format(pywright_install_dir))
@@ -508,17 +507,8 @@ class IDEMainWindow(QMainWindow):
 
         return True
 
-    def _default_settings(self):
-        self.program_settings.setValue(IDESettings.FONT_NAME_KEY, "Consolas")
-        self.program_settings.setValue(IDESettings.FONT_SIZE_KEY, 10)
-        self.program_settings.setValue(IDESettings.FONT_BOLD_KEY, True)
-        self.program_settings.setValue(IDESettings.AUTOLOAD_LAST_PROJECT_KEY, False)
-        self.program_settings.setValue(IDESettings.AUTOLOAD_LAST_PROJECT_PATH_KEY, "")
-        self.program_settings.setValue(IDESettings.AUTOLOAD_LAST_GAME_NAME_KEY, "")
-        self.program_settings.setValue(IDESettings.WINDOW_GEOMETRY_KEY, None)
-
-    def _save_settings(self):
-        self.program_settings.sync()
+    def update_toolbar_buttons(self, has_pywright: bool, has_pywright_game: bool):
+        self._top_toolbar.update_toolbar_buttons(has_pywright, has_pywright_game)
 
     def closeEvent(self, event: QCloseEvent):
         if not self.attempt_closing_unsaved_tabs():
@@ -526,16 +516,15 @@ class IDEMainWindow(QMainWindow):
             return
 
         # Save the last open project's path in here, if the autoload last project option is enabled
-        if self.program_settings.value(IDESettings.AUTOLOAD_LAST_PROJECT_KEY, False):
-            self.program_settings.setValue(IDESettings.AUTOLOAD_LAST_PROJECT_PATH_KEY,
-                                           self.selected_pywright_installation)
-            self.program_settings.setValue(IDESettings.AUTOLOAD_LAST_GAME_NAME_KEY, self.selected_game.get_game_name())
+        if IDESettings.get_autoload_last_project_check():
+            IDESettings.set_autoload_last_project_path(self.selected_pywright_installation)
+            IDESettings.set_autoload_last_game_name(self.selected_game.get_game_name())
         else:
             # Otherwise clear the paths, just in case
-            self.program_settings.setValue(IDESettings.AUTOLOAD_LAST_PROJECT_PATH_KEY, "")
-            self.program_settings.setValue(IDESettings.AUTOLOAD_LAST_GAME_NAME_KEY, "")
+            IDESettings.set_autoload_last_project_path("")
+            IDESettings.set_autoload_last_game_name("")
 
-        self.program_settings.setValue(IDESettings.WINDOW_GEOMETRY_KEY, self.saveGeometry())
+        IDESettings.set_window_geometry(self.saveGeometry())
 
         self.asset_manager_widget.deinit()
         event.accept()

@@ -12,6 +12,8 @@ from PyQt5.QtCore import Qt, QModelIndex, pyqtSignal, QUrl
 from .AddNewCaseDialog import AddNewCaseDialog
 from data.PyWrightGame import PyWrightGame
 
+import data.IconThemes as IconThemes
+
 important_files = ("data.txt", "intro.txt", "evidence.txt")
 non_sub_scriptable_extensions = (".mcro",
                                  ".examine.txt", ".move.txt", ".talk.txt", ".present.txt",
@@ -33,7 +35,8 @@ class DirectoryViewWidget(QDockWidget):
 
         self._game_title_label = QLabel()
 
-        self._game_properties_button = QPushButton(QIcon("res/icons/cog.png"), "")
+        game_properties_icon_path = IconThemes.icon_path_from_theme(IconThemes.ICON_NAME_SETTINGS)
+        self._game_properties_button = QPushButton(QIcon(game_properties_icon_path), "")
         self._game_properties_button.setToolTip("Game Properties")
         self._game_properties_button.setEnabled(False)
         self._game_properties_button.setFlat(True)

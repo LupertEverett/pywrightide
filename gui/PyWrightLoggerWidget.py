@@ -1,7 +1,7 @@
 from pathlib import Path
 
 from PyQt5.QtWidgets import QWidget, QDockWidget, QPlainTextEdit, QHBoxLayout, QLabel, QPushButton
-from PyQt5.QtGui import QIcon
+from PyQt5.QtGui import QIcon, QHideEvent
 from PyQt5.QtCore import QProcess
 
 
@@ -70,3 +70,10 @@ class PyWrightLoggerWidget(QDockWidget):
             self.logger_text_edit.appendPlainText("PyWright exited successfully!")
         else:
             self.logger_text_edit.appendPlainText("PyWright exited with code {} ({})".format(exit_code, exit_status))
+
+    def hideEvent(self, a0: QHideEvent) -> None:
+        from .IDEMainWindow import IDEMainWindow
+        ide_main_window: IDEMainWindow = self.parent()
+        ide_main_window.update_toolbar_buttons(ide_main_window.selected_pywright_installation != "",
+                                               ide_main_window.selected_game.get_game_name() != "")
+

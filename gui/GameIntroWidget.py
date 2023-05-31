@@ -7,6 +7,8 @@ from .AddNewCaseDialog import AddNewCaseDialog
 
 from data.PyWrightGame import PyWrightGame
 
+import data.IconThemes as IconThemes
+
 
 class GameIntroWidget(QWidget):
 
@@ -23,12 +25,16 @@ class GameIntroWidget(QWidget):
 
         self._widget_toolbar = QToolBar()
 
-        self.add_new_case_action = QAction(QIcon("res/icons/plus.png"),"New Case", self._widget_toolbar)
+        add_new_case_icon_path = IconThemes.icon_path_from_theme(IconThemes.ICON_NAME_PLUS)
+        add_existing_case_icon_path = IconThemes.icon_path_from_theme(IconThemes.ICON_NAME_DOUBLE_PLUS)
+        remove_case_icon_path = IconThemes.icon_path_from_theme(IconThemes.ICON_NAME_MINUS)
+        case_properties_icon_path = IconThemes.icon_path_from_theme(IconThemes.ICON_NAME_SETTINGS)
+        self.add_new_case_action = QAction(QIcon(add_new_case_icon_path),"New Case", self._widget_toolbar)
         self.add_new_case_action.triggered.connect(self._handle_add_new_case)
-        self.add_existing_case_action = QAction(QIcon("res/icons/doubleplus.png"),
+        self.add_existing_case_action = QAction(QIcon(add_existing_case_icon_path),
                                                 "Add Existing Case", self._widget_toolbar)
-        self.remove_case_action = QAction(QIcon("res/icons/minus.png"), "Remove Case", self._widget_toolbar)
-        self.case_properties_action = QAction(QIcon("res/icons/gameproperties.png"),
+        self.remove_case_action = QAction(QIcon(remove_case_icon_path), "Remove Case", self._widget_toolbar)
+        self.case_properties_action = QAction(QIcon(case_properties_icon_path),
                                               "Case Properties", self._widget_toolbar)
 
         # Main Layout

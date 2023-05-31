@@ -5,6 +5,7 @@ from PyQt5.QtWidgets import QToolBar, QAction, QWidget, QFileDialog, QMessageBox
 from PyQt5.QtGui import QIcon, QKeySequence
 
 import gui.IDEMainWindow
+import data.IconThemes as IconThemes
 
 
 class MainWindowTopToolbar(QToolBar):
@@ -18,7 +19,8 @@ class MainWindowTopToolbar(QToolBar):
         # For easier access to the Main Window we're attached to
         self.ide_main_window: gui.IDEMainWindow.IDEMainWindow = parent
 
-        self.find_pywright_installation_action = QAction(QIcon("res/icons/pwicon.png"),
+        find_pywright_icon_path = IconThemes.icon_path_from_theme(IconThemes.ICON_NAME_FIND_PYWRIGHT)
+        self.find_pywright_installation_action = QAction(QIcon(find_pywright_icon_path),
                                                          "Locate PyWright Installation",
                                                          self)
         self.find_pywright_installation_action.triggered.connect(self.handle_find_pywright_installation)
@@ -28,7 +30,8 @@ class MainWindowTopToolbar(QToolBar):
         ))
 
         # Actions
-        self.new_pywright_game_action = QAction(QIcon("res/icons/newgame.png"), "New PyWright Game")
+        new_game_icon_path = IconThemes.icon_path_from_theme(IconThemes.ICON_NAME_NEW_GAME)
+        self.new_pywright_game_action = QAction(QIcon(new_game_icon_path), "New PyWright Game")
         self.new_pywright_game_action.setEnabled(False)
         # self.new_pywright_game_action.triggered.connect(self._handle_new_game)
         self.new_pywright_game_action.setShortcut(QKeySequence("Ctrl+n"))
@@ -36,7 +39,8 @@ class MainWindowTopToolbar(QToolBar):
             self.new_pywright_game_action.shortcut().toString()
         ))
 
-        self.open_pywright_game_action = QAction(QIcon("res/icons/opengame.png"), "Open PyWright Game")
+        open_game_icon_path = IconThemes.icon_path_from_theme(IconThemes.ICON_NAME_OPEN_GAME)
+        self.open_pywright_game_action = QAction(QIcon(open_game_icon_path), "Open PyWright Game")
         self.open_pywright_game_action.setEnabled(False)
         # self.open_pywright_game_action.triggered.connect(self._handle_open_game)
         self.open_pywright_game_action.setShortcut(QKeySequence("Ctrl+Shift+o"))
@@ -44,7 +48,8 @@ class MainWindowTopToolbar(QToolBar):
             self.open_pywright_game_action.shortcut().toString()
         ))
 
-        self.new_file_action = QAction(QIcon("res/icons/newfile.png"), "New File")
+        new_file_icon_path = IconThemes.icon_path_from_theme(IconThemes.ICON_NAME_NEW_FILE)
+        self.new_file_action = QAction(QIcon(new_file_icon_path), "New File")
         self.new_file_action.setEnabled(False)
         # self.new_file_action.triggered.connect(lambda: self.open_new_editing_tab(""))
         self.new_file_action.setShortcut(QKeySequence("Ctrl+t"))
@@ -52,7 +57,8 @@ class MainWindowTopToolbar(QToolBar):
             self.new_file_action.shortcut().toString()
         ))
 
-        self.open_file_action = QAction(QIcon("res/icons/openfile.png"), "Open File")
+        open_file_icon_path = IconThemes.icon_path_from_theme(IconThemes.ICON_NAME_OPEN_FILE)
+        self.open_file_action = QAction(QIcon(open_file_icon_path), "Open File")
         # self.open_file_action.triggered.connect(self._handle_open_file)
         self.open_file_action.setEnabled(False)
         self.open_file_action.setShortcut(QKeySequence("Ctrl+o"))
@@ -60,7 +66,8 @@ class MainWindowTopToolbar(QToolBar):
             self.open_file_action.shortcut().toString()
         ))
 
-        self.save_file_action = QAction(QIcon("res/icons/save.png"), "Save File")
+        save_file_icon_path = IconThemes.icon_path_from_theme(IconThemes.ICON_NAME_SAVE_FILE)
+        self.save_file_action = QAction(QIcon(save_file_icon_path), "Save File")
         self.save_file_action.setEnabled(False)
         # self.save_file_action.triggered.connect(self._handle_save_tab)
         self.save_file_action.setShortcut(QKeySequence("Ctrl+s"))
@@ -68,14 +75,43 @@ class MainWindowTopToolbar(QToolBar):
             self.save_file_action.shortcut().toString()
         ))
 
-        self.find_replace_dialog_action = QAction(QIcon("res/icons/Binoculars.png"), "Find/Replace")
+        find_replace_icon_path = IconThemes.icon_path_from_theme(IconThemes.ICON_NAME_FIND_REPLACE)
+        self.find_replace_dialog_action = QAction(QIcon(find_replace_icon_path), "Find/Replace")
         # self.find_replace_dialog_action.triggered.connect(self._handle_find_replace)
         self.find_replace_dialog_action.setShortcut(QKeySequence("Ctrl+f"))
         self.find_replace_dialog_action.setStatusTip("Find/Replace words [{}]".format(
             self.find_replace_dialog_action.shortcut().toString()
         ))
 
-        self.run_pywright_action = QAction(QIcon("res/icons/runpywright.png"), "Run PyWright")
+        directory_view_toggle_icon_path = IconThemes.icon_path_from_theme(IconThemes.ICON_NAME_DIRECTORY_VIEW_TOGGLE)
+        self.directory_view_toggle_action = QAction(QIcon(directory_view_toggle_icon_path), "Toggle Directory View")
+        self.directory_view_toggle_action.setCheckable(True)
+        self.directory_view_toggle_action.setChecked(not self.ide_main_window.directory_view.isHidden())
+        self.directory_view_toggle_action.triggered.connect(lambda: self.ide_main_window.directory_view.setHidden(
+            not self.directory_view_toggle_action.isChecked()
+        ))
+        self.directory_view_toggle_action.setStatusTip("Toggle Directory View ON or OFF")
+
+        asset_browser_toggle_icon_path = IconThemes.icon_path_from_theme(IconThemes.ICON_NAME_ASSET_BROWSER_TOGGLE)
+        self.asset_browser_toggle_action = QAction(QIcon(asset_browser_toggle_icon_path), "Toggle Asset Browser")
+        self.asset_browser_toggle_action.setCheckable(True)
+        self.asset_browser_toggle_action.setChecked(not self.ide_main_window.asset_manager_widget.isHidden())
+        self.asset_browser_toggle_action.triggered.connect(lambda: self.ide_main_window.asset_manager_widget.setHidden(
+            not self.asset_browser_toggle_action.isChecked()
+        ))
+        self.asset_browser_toggle_action.setStatusTip("Toggle Asset Browser ON or OFF")
+
+        logger_toggle_icon_path = IconThemes.icon_path_from_theme(IconThemes.ICON_NAME_LOGGER_TOGGLE)
+        self.logger_toggle_action = QAction(QIcon(logger_toggle_icon_path), "Toggle Logger View")
+        self.logger_toggle_action.setCheckable(True)
+        self.logger_toggle_action.setChecked(not self.ide_main_window.logger_view.isHidden())
+        self.logger_toggle_action.triggered.connect(lambda: self.ide_main_window.logger_view.setHidden(
+            not self.logger_toggle_action.isChecked()
+        ))
+        self.logger_toggle_action.setStatusTip("Toggle Logger View ON or OFF")
+
+        run_pywright_icon_path = IconThemes.icon_path_from_theme(IconThemes.ICON_NAME_RUN_PYWRIGHT)
+        self.run_pywright_action = QAction(QIcon(run_pywright_icon_path), "Run PyWright")
         self.run_pywright_action.setEnabled(False)
         self.run_pywright_action.triggered.connect(self._handle_run_pywright)
         self.run_pywright_action.setShortcut(QKeySequence("Ctrl+r"))
@@ -83,11 +119,13 @@ class MainWindowTopToolbar(QToolBar):
             self.run_pywright_action.shortcut().toString()
         ))
 
-        self.settings_action = QAction(QIcon("res/icons/cog.png"), "Settings")
+        settings_icon_path = IconThemes.icon_path_from_theme(IconThemes.ICON_NAME_SETTINGS)
+        self.settings_action = QAction(QIcon(settings_icon_path), "Settings")
         self.settings_action.setStatusTip("Open Settings")
         # self.settings_action.triggered.connect(self._handle_settings)
 
-        self.about_action = QAction(QIcon("res/icons/gameproperties.png"), "About")
+        about_icon_path = IconThemes.icon_path_from_theme(IconThemes.ICON_NAME_ABOUT)
+        self.about_action = QAction(QIcon(about_icon_path), "About")
         self.about_action.setStatusTip("About PyWright IDE")
         self.about_action.triggered.connect(self._handle_about)
 
@@ -103,6 +141,10 @@ class MainWindowTopToolbar(QToolBar):
         self.addAction(self.save_file_action)
         self.addSeparator()
         self.addAction(self.find_replace_dialog_action)
+        self.addSeparator()
+        self.addAction(self.directory_view_toggle_action)
+        self.addAction(self.asset_browser_toggle_action)
+        self.addAction(self.logger_toggle_action)
         self.addSeparator()
         self.addAction(self.run_pywright_action)
         self.addSeparator()
@@ -123,6 +165,7 @@ class MainWindowTopToolbar(QToolBar):
 
     def _handle_run_pywright(self):
         self.ide_main_window.logger_view.show()
+        self.logger_toggle_action.setChecked(True)  # Since we open the logger, makes sense to set this checked also
         self.ide_main_window.logger_view.run_and_log(self.ide_main_window.selected_pywright_installation,
                                                      self.ide_main_window.pywright_executable_name)
 
@@ -141,6 +184,49 @@ class MainWindowTopToolbar(QToolBar):
         self.open_file_action.setEnabled(has_pywright_game)
         # Let's not enable the save button yet, and handle it in update_save_button() instead.
         self.run_pywright_action.setEnabled(has_pywright)
+        self.directory_view_toggle_action.setChecked(not self.ide_main_window.directory_view.isHidden())
+        self.asset_browser_toggle_action.setChecked(not self.ide_main_window.asset_manager_widget.isHidden())
+        self.logger_toggle_action.setChecked(not self.ide_main_window.logger_view.isHidden())
+
+    def update_toolbar_icons(self):
+        find_pywright_icon_path = IconThemes.icon_path_from_theme(IconThemes.ICON_NAME_FIND_PYWRIGHT)
+        self.find_pywright_installation_action.setIcon(QIcon(find_pywright_icon_path))
+
+        new_game_icon_path = IconThemes.icon_path_from_theme(IconThemes.ICON_NAME_NEW_GAME)
+        self.new_pywright_game_action.setIcon(QIcon(new_game_icon_path))
+
+        open_game_icon_path = IconThemes.icon_path_from_theme(IconThemes.ICON_NAME_OPEN_GAME)
+        self.open_pywright_game_action.setIcon(QIcon(open_game_icon_path))
+
+        new_file_icon_path = IconThemes.icon_path_from_theme(IconThemes.ICON_NAME_NEW_FILE)
+        self.new_file_action.setIcon(QIcon(new_file_icon_path))
+
+        open_file_icon_path = IconThemes.icon_path_from_theme(IconThemes.ICON_NAME_OPEN_FILE)
+        self.open_file_action.setIcon(QIcon(open_file_icon_path))
+
+        save_file_icon_path = IconThemes.icon_path_from_theme(IconThemes.ICON_NAME_SAVE_FILE)
+        self.save_file_action.setIcon(QIcon(save_file_icon_path))
+
+        find_replace_icon_path = IconThemes.icon_path_from_theme(IconThemes.ICON_NAME_FIND_REPLACE)
+        self.find_replace_dialog_action.setIcon(QIcon(find_replace_icon_path))
+
+        directory_view_toggle_icon_path = IconThemes.icon_path_from_theme(IconThemes.ICON_NAME_DIRECTORY_VIEW_TOGGLE)
+        self.directory_view_toggle_action.setIcon(QIcon(directory_view_toggle_icon_path))
+
+        asset_browser_toggle_icon_path = IconThemes.icon_path_from_theme(IconThemes.ICON_NAME_ASSET_BROWSER_TOGGLE)
+        self.asset_browser_toggle_action.setIcon(QIcon(asset_browser_toggle_icon_path))
+
+        logger_toggle_icon_path = IconThemes.icon_path_from_theme(IconThemes.ICON_NAME_LOGGER_TOGGLE)
+        self.logger_toggle_action.setIcon(QIcon(logger_toggle_icon_path))
+
+        run_pywright_icon_path = IconThemes.icon_path_from_theme(IconThemes.ICON_NAME_RUN_PYWRIGHT)
+        self.run_pywright_action.setIcon(QIcon(run_pywright_icon_path))
+
+        settings_icon_path = IconThemes.icon_path_from_theme(IconThemes.ICON_NAME_SETTINGS)
+        self.settings_action.setIcon(QIcon(settings_icon_path))
+
+        about_icon_path = IconThemes.icon_path_from_theme(IconThemes.ICON_NAME_ABOUT)
+        self.about_action.setIcon(QIcon(about_icon_path))
 
     def update_save_button(self, is_file_modified: bool):
         """Updates the Save File button depending on whether the currently open tab has the file modified or not.
