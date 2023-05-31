@@ -4,6 +4,7 @@ from PyQt5.QtWidgets import QWidget, QDockWidget, QPlainTextEdit, QHBoxLayout, Q
 from PyQt5.QtGui import QIcon, QHideEvent
 from PyQt5.QtCore import QProcess
 
+import data.IconThemes as IconThemes
 
 class PyWrightLoggerWidget(QDockWidget):
 
@@ -24,7 +25,8 @@ class PyWrightLoggerWidget(QDockWidget):
         self.setWidget(self.logger_text_edit)
         self.setFeatures(QDockWidget.DockWidgetFeature.DockWidgetClosable)
 
-        self._hide_button = QPushButton(QIcon("res/icons/minus.png"), "")
+        hide_icon_path = IconThemes.icon_path_from_theme(IconThemes.ICON_NAME_MINUS)
+        self._hide_button = QPushButton(QIcon(hide_icon_path), "")
         self._hide_button.setFlat(True)
         self._hide_button.clicked.connect(self.hide)
         self._hide_button.setFixedWidth(30)
