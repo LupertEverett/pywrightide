@@ -22,14 +22,12 @@ class SettingsDialog(QDialog):
         # Color themes (or at least a dark theme toggle)
         self.setWindowTitle("PyWright IDE Settings")
 
-        # self.settings = settings_object
         main_layout = QVBoxLayout()
 
         general_group_box = QGroupBox("General")
         general_group_layout = QVBoxLayout()
 
         self.autoreload_last_checkbox = QCheckBox("Autoreload the last open project")
-        # self.autoreload_last_checkbox.setChecked(self.settings.value(IDESettings.AUTOLOAD_LAST_PROJECT_KEY, False, bool))
         self.autoreload_last_checkbox.setChecked(IDESettings.get_autoload_last_project_check())
 
         icon_theme_section_layout = QHBoxLayout()
@@ -49,8 +47,6 @@ class SettingsDialog(QDialog):
 
         font_name_layout = QHBoxLayout()
         self.font_name_combobox = QFontComboBox()
-        # current_font = QFont(self.settings.value(IDESettings.FONT_NAME_KEY),
-        #                      self.settings.value(IDESettings.FONT_SIZE_KEY, 10, int))
         current_font = QFont(IDESettings.get_font_name(),
                              IDESettings.get_font_size())
         self.font_name_combobox.setCurrentFont(current_font)
@@ -59,7 +55,6 @@ class SettingsDialog(QDialog):
         font_name_layout.addStretch()
 
         self.font_size_spinbox = QSpinBox()
-        # self.font_size_spinbox.setValue(self.settings.value(IDESettings.FONT_SIZE_KEY, 10, int))
         self.font_size_spinbox.setValue(IDESettings.get_font_size())
         self.font_size_spinbox.setMinimum(8)
         self.font_size_spinbox.setMaximum(72)
@@ -67,7 +62,6 @@ class SettingsDialog(QDialog):
 
         self.bold_toggle_button = QPushButton("B")
         self.bold_toggle_button.setCheckable(True)
-        # self.bold_toggle_button.setChecked(self.settings.value(IDESettings.FONT_BOLD_KEY, True, bool))
         self.bold_toggle_button.setChecked(IDESettings.get_font_boldness())
         self.bold_toggle_button.font().setBold(True)
         self.bold_toggle_button.setFixedWidth(30)
@@ -97,10 +91,6 @@ class SettingsDialog(QDialog):
 
     def _handle_apply(self):
         current_font = self.font_name_combobox.currentFont()
-        # self.settings.setValue(IDESettings.FONT_NAME_KEY, current_font.family())
-        # self.settings.setValue(IDESettings.FONT_SIZE_KEY, current_font.pointSize())
-        # self.settings.setValue(IDESettings.FONT_BOLD_KEY, self.bold_toggle_button.isChecked())
-        # self.settings.setValue(IDESettings.AUTOLOAD_LAST_PROJECT_KEY, self.autoreload_last_checkbox.isChecked())
         IDESettings.set_font_name(current_font.family())
         IDESettings.set_font_size(self.font_size_spinbox.value())
         IDESettings.set_font_boldness(self.bold_toggle_button.isChecked())
