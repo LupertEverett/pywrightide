@@ -15,6 +15,9 @@ class MainWindowTopToolbar(QToolBar):
         super().__init__(parent)
         self.setWindowTitle("Main Toolbar")
         self.setMovable(False)
+        # We must not be able to disable the toolbar
+        self.toggleViewAction().setEnabled(False)
+        self.toggleViewAction().setVisible(False)
 
         # For easier access to the Main Window we're attached to
         self.ide_main_window: gui.IDEMainWindow.IDEMainWindow = parent
