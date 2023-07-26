@@ -4,6 +4,7 @@ from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QLis
 from PyQt5.QtGui import QIcon
 
 from .AddNewCaseDialog import AddNewCaseDialog
+from .AddExistingCaseDialog import AddExistingCaseDialog
 
 from data.PyWrightGame import PyWrightGame
 
@@ -33,6 +34,7 @@ class GameIntroWidget(QWidget):
         self.add_new_case_action.triggered.connect(self._handle_add_new_case)
         self.add_existing_case_action = QAction(QIcon(add_existing_case_icon_path),
                                                 "Add Existing Case", self._widget_toolbar)
+        self.add_existing_case_action.triggered.connect(self._handle_add_existing_case)
         self.remove_case_action = QAction(QIcon(remove_case_icon_path), "Remove Case", self._widget_toolbar)
         self.remove_case_action.triggered.connect(self._handle_remove_case)
         self.case_properties_action = QAction(QIcon(case_properties_icon_path),
@@ -82,6 +84,11 @@ class GameIntroWidget(QWidget):
 
         if add_new_case_dialog.exec_():
             self._selected_game.create_new_case(add_new_case_dialog.new_case)
+            self._populate_cases_list()
+
+    def _handle_add_existing_case(self):
+        add_existing_case_dialog = AddExistingCaseDialog(self._selected_game, self)
+        if add_existing_case_dialog.exec_():
             self._populate_cases_list()
 
     def _handle_remove_case(self):
