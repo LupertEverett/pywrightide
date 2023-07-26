@@ -76,6 +76,4 @@ class PyWrightLoggerWidget(QDockWidget):
     def hideEvent(self, a0: QHideEvent) -> None:
         from .IDEMainWindow import IDEMainWindow
         ide_main_window: IDEMainWindow = self.parent()
-        ide_main_window.update_toolbar_buttons(ide_main_window.selected_pywright_installation != "",
-                                               ide_main_window.selected_game.get_game_name() != "")
-
+        ide_main_window.update_toolbar_toggle_buttons()

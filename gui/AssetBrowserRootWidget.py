@@ -15,6 +15,7 @@ class AssetBrowserRootWidget(QDockWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setWindowTitle("Asset Browser")
+        self.visibilityChanged.connect(self._handle_visibility_change)
 
         self.tab_widget = QTabWidget(self)
 
@@ -49,11 +50,10 @@ class AssetBrowserRootWidget(QDockWidget):
         self.sfx_browser.set_selected_game(selected_game)
         self.sfx_browser.refresh_music_folders()
 
-    def hideEvent(self, a0: QHideEvent) -> None:
+    def _handle_visibility_change(self):
         from .IDEMainWindow import IDEMainWindow
         ide_main_window: IDEMainWindow = self.parent()
-        ide_main_window.update_toolbar_buttons(ide_main_window.selected_pywright_installation != "",
-                                               ide_main_window.selected_game.get_game_name() != "")
+        ide_main_window.update_toolbar_toggle_buttons()
 
     def _handle_audio_player_play(self, path: str):
         if pygame.mixer.get_busy():
