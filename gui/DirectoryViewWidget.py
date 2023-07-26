@@ -101,7 +101,7 @@ class DirectoryViewWidget(QDockWidget):
         layout.addWidget(self._game_title_label)
         layout.addStretch()
         layout.addWidget(self._game_properties_button)
-        layout.setContentsMargins(4, 2, 2, 0)
+        layout.setContentsMargins(4, 2, 2, 2)
 
         result.setLayout(layout)
         return result
