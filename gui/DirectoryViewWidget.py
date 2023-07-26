@@ -32,6 +32,7 @@ class DirectoryViewWidget(QDockWidget):
         super().__init__(parent)
 
         self.setWindowTitle("Directory View")
+        self.visibilityChanged.connect(self._handle_visibility_change)
 
         self._game_title_label = QLabel()
 
@@ -48,11 +49,13 @@ class DirectoryViewWidget(QDockWidget):
         self._directory_view.setContextMenuPolicy(Qt.CustomContextMenu)
         self._directory_view.customContextMenuRequested.connect(self._handle_view_context_menu)
 
+        self._top_widget = self._create_custom_title_bar()
+
         self._pywright_game = PyWrightGame()
 
         self.setWidget(self._directory_view)
         self.setTitleBarWidget(self._create_custom_title_bar())
-        self.setFeatures(QDockWidget.NoDockWidgetFeatures)
+        self.setFeatures(QDockWidget.DockWidgetClosable | QDockWidget.DockWidgetMovable)
         self.setMinimumWidth(300)
 
     def update_directory_view(self, selected_game: PyWrightGame):
@@ -98,7 +101,7 @@ class DirectoryViewWidget(QDockWidget):
         layout.addWidget(self._game_title_label)
         layout.addStretch()
         layout.addWidget(self._game_properties_button)
-        layout.setContentsMargins(4, 2, 2, 2)
+        layout.setContentsMargins(4, 2, 2, 0)
 
         result.setLayout(layout)
         return result
@@ -316,6 +319,10 @@ class DirectoryViewWidget(QDockWidget):
         if prompt == QMessageBox.Yes:
             model.remove(index)
 
+    def _handle_visibility_change(self):
+        from .IDEMainWindow import IDEMainWindow
+        ide_main_window: IDEMainWindow = self.parent()
+        ide_main_window.update_toolbar_toggle_buttons()
 
 class DeselectableTreeView(QTreeView):
     """Custom Tree View that has the ability to unselect items when clicked on an empty area"""
