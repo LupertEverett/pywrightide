@@ -90,8 +90,8 @@ class MainWindowTopToolbar(QToolBar):
         self.directory_view_toggle_action = QAction(QIcon(directory_view_toggle_icon_path), "Toggle Directory View")
         self.directory_view_toggle_action.setCheckable(True)
         self.directory_view_toggle_action.setChecked(not self.ide_main_window.directory_view.isHidden())
-        self.directory_view_toggle_action.triggered.connect(lambda: self.ide_main_window.directory_view.setHidden(
-            not self.directory_view_toggle_action.isChecked()
+        self.directory_view_toggle_action.triggered.connect(lambda: self.ide_main_window.directory_view.setVisible(
+            self.directory_view_toggle_action.isChecked()
         ))
         self.directory_view_toggle_action.setStatusTip("Toggle Directory View ON or OFF")
 
@@ -99,8 +99,8 @@ class MainWindowTopToolbar(QToolBar):
         self.asset_browser_toggle_action = QAction(QIcon(asset_browser_toggle_icon_path), "Toggle Asset Browser")
         self.asset_browser_toggle_action.setCheckable(True)
         self.asset_browser_toggle_action.setChecked(not self.ide_main_window.asset_manager_widget.isHidden())
-        self.asset_browser_toggle_action.triggered.connect(lambda: self.ide_main_window.asset_manager_widget.setHidden(
-            not self.asset_browser_toggle_action.isChecked()
+        self.asset_browser_toggle_action.triggered.connect(lambda: self.ide_main_window.asset_manager_widget.setVisible(
+            self.asset_browser_toggle_action.isChecked()
         ))
         self.asset_browser_toggle_action.setStatusTip("Toggle Asset Browser ON or OFF")
 
@@ -108,8 +108,8 @@ class MainWindowTopToolbar(QToolBar):
         self.logger_toggle_action = QAction(QIcon(logger_toggle_icon_path), "Toggle Logger View")
         self.logger_toggle_action.setCheckable(True)
         self.logger_toggle_action.setChecked(not self.ide_main_window.logger_view.isHidden())
-        self.logger_toggle_action.triggered.connect(lambda: self.ide_main_window.logger_view.setHidden(
-            not self.logger_toggle_action.isChecked()
+        self.logger_toggle_action.triggered.connect(lambda: self.ide_main_window.logger_view.setVisible(
+            self.logger_toggle_action.isChecked()
         ))
         self.logger_toggle_action.setStatusTip("Toggle Logger View ON or OFF")
 
@@ -187,9 +187,12 @@ class MainWindowTopToolbar(QToolBar):
         self.open_file_action.setEnabled(has_pywright_game)
         # Let's not enable the save button yet, and handle it in update_save_button() instead.
         self.run_pywright_action.setEnabled(has_pywright)
-        self.directory_view_toggle_action.setChecked(not self.ide_main_window.directory_view.isHidden())
-        self.asset_browser_toggle_action.setChecked(not self.ide_main_window.asset_manager_widget.isHidden())
-        self.logger_toggle_action.setChecked(not self.ide_main_window.logger_view.isHidden())
+        self.update_toolbar_toggle_buttons()
+
+    def update_toolbar_toggle_buttons(self):
+        self.directory_view_toggle_action.setChecked(self.ide_main_window.directory_view.isVisible())
+        self.asset_browser_toggle_action.setChecked(self.ide_main_window.asset_manager_widget.isVisible())
+        self.logger_toggle_action.setChecked(self.ide_main_window.logger_view.isVisible())
 
     def update_toolbar_icons(self):
         find_pywright_icon_path = IconThemes.icon_path_from_theme(IconThemes.ICON_NAME_FIND_PYWRIGHT)

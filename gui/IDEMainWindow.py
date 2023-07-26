@@ -510,6 +510,9 @@ class IDEMainWindow(QMainWindow):
     def update_toolbar_buttons(self, has_pywright: bool, has_pywright_game: bool):
         self._top_toolbar.update_toolbar_buttons(has_pywright, has_pywright_game)
 
+    def update_toolbar_toggle_buttons(self):
+        self._top_toolbar.update_toolbar_toggle_buttons()
+
     def closeEvent(self, event: QCloseEvent):
         if not self.attempt_closing_unsaved_tabs():
             event.ignore()
