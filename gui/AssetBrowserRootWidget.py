@@ -16,6 +16,7 @@ class AssetBrowserRootWidget(QDockWidget):
         super().__init__(parent)
         self.setWindowTitle("Asset Browser")
         self.visibilityChanged.connect(self._handle_visibility_change)
+        self.setObjectName("AssetBrowserRootWidget")
 
         self.tab_widget = QTabWidget(self)
 

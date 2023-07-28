@@ -14,6 +14,7 @@ class MainWindowTopToolbar(QToolBar):
     def __init__(self, parent: QWidget):
         super().__init__(parent)
         self.setWindowTitle("Main Toolbar")
+        self.setObjectName("MainToolbar")
         self.setMovable(False)
         # We must not be able to disable the toolbar
         self.toggleViewAction().setEnabled(False)

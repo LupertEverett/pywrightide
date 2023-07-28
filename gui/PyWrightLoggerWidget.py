@@ -12,6 +12,7 @@ class PyWrightLoggerWidget(QDockWidget):
         super().__init__()
 
         self.setWindowTitle("Logger")
+        self.setObjectName("LoggerWidget")
 
         self.logger_text_edit = QPlainTextEdit()
         self.logger_text_edit.setEnabled(False)

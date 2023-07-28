@@ -12,6 +12,7 @@ AUTOLOAD_LAST_PROJECT_KEY = "general/autoload_last_project"
 AUTOLOAD_LAST_PROJECT_PATH_KEY = "general/last_project_path"
 AUTOLOAD_LAST_GAME_NAME_KEY = "general/last_game_name"
 WINDOW_GEOMETRY_KEY = "general/window_geometry"
+WINDOW_STATE_KEY = "general/window_state"
 ICON_THEME_KEY = "general/icon_theme"
 
 # Functions
@@ -72,6 +73,14 @@ def set_window_geometry(new_geometry: QByteArray):
     __program_settings.setValue(WINDOW_GEOMETRY_KEY, new_geometry)
 
 
+def get_window_state() -> bytes:
+    return bytes(__program_settings.value(WINDOW_STATE_KEY, None, QByteArray))
+
+
+def set_window_state(new_state: QByteArray):
+    __program_settings.setValue(WINDOW_STATE_KEY, new_state)
+
+
 def get_icon_theme() -> str:
     return __program_settings.value(ICON_THEME_KEY, "default")
 
@@ -86,6 +95,10 @@ def all_keys() -> list[str]:
 
 def window_geometry_data_exists() -> bool:
     return __program_settings.value(WINDOW_GEOMETRY_KEY) is not None
+
+
+def window_state_data_exists() -> bool:
+    return __program_settings.value(WINDOW_STATE_KEY) is not None
 
 
 def save_settings():

@@ -32,6 +32,7 @@ class DirectoryViewWidget(QDockWidget):
         super().__init__(parent)
 
         self.setWindowTitle("Directory View")
+        self.setObjectName("DirectoryViewWidget")
         self.visibilityChanged.connect(self._handle_visibility_change)
 
         self._game_title_label = QLabel()

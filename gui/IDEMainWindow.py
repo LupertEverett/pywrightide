@@ -108,6 +108,10 @@ class IDEMainWindow(QMainWindow):
                     else:
                         IDESettings.set_autoload_last_game_name("")
 
+        # Try loading the window state (docks positions, visibility, etc.)
+        if IDESettings.window_state_data_exists():
+            self.restoreState(IDESettings.get_window_state())
+
     def pick_pywright_installation_folder(self, folder_path: str):
         self.selected_pywright_installation = folder_path
         self.game_properties_widget = GamePropertiesWidget(self.selected_pywright_installation)
@@ -528,6 +532,7 @@ class IDEMainWindow(QMainWindow):
             IDESettings.set_autoload_last_game_name("")
 
         IDESettings.set_window_geometry(self.saveGeometry())
+        IDESettings.set_window_state(self.saveState())
 
         self.asset_manager_widget.deinit()
         event.accept()
