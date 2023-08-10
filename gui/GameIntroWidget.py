@@ -22,7 +22,6 @@ class GameIntroWidget(QWidget):
         self._game_cases_list_widget = QListWidget()
         self._game_cases_list_widget.clicked.connect(self._handle_list_widget_clicked)
 
-        # TODO: Add buttons to add/remove cases
         # Buttons
 
         self._widget_toolbar = QToolBar()
