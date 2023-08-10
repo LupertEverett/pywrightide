@@ -10,7 +10,7 @@ from data.PyWrightCase import PyWrightCase
 
 class AddNewCaseDialog(QDialog):
 
-    def __init__(self, selected_game: PyWrightGame, parent=None):
+    def __init__(self, selected_game: PyWrightGame, selected_case: PyWrightCase | None, parent=None):
         super().__init__(parent)
 
         self.setWindowTitle("Add New Case")
@@ -18,9 +18,17 @@ class AddNewCaseDialog(QDialog):
 
         self._selected_game = selected_game
 
-        self.new_case = PyWrightCase("", "scene1")
+        self._is_a_new_case: bool = selected_case is None
 
-        self._case_properties_widget = CasePropertiesWidget(self.new_case)
+        if self._is_a_new_case:
+            self._selected_case = PyWrightCase("", "scene1")
+        else:
+            self._selected_case = selected_case
+
+        # self.new_case = PyWrightCase("", "scene1")
+        # self._case_properties_widget = CasePropertiesWidget(self.new_case)
+
+        self._case_properties_widget = CasePropertiesWidget(self._selected_case)
 
         self._buttonBox = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
         self._buttonBox.accepted.connect(self._handle_accept)
@@ -43,11 +51,12 @@ class AddNewCaseDialog(QDialog):
             QMessageBox.critical(self, "Error", "One or more important fields are empty!")
             return
 
-        # Check if a case with the same name doesn't exist first
-        for case in self._selected_game.game_cases:
-            if self._case_properties_widget.get_case_name_field_text().lower() == case.lower():
-                QMessageBox.critical(self, "Error", "A case with name \"{}\" already exists!".format(case))
-                return
+        # If we're creating a new case, check if a case with the same name doesn't exist first
+        if self._is_a_new_case:
+            for case in self._selected_game.game_cases:
+                if self._case_properties_widget.get_case_name_field_text().lower() == case.lower():
+                    QMessageBox.critical(self, "Error", "A case with name \"{}\" already exists!".format(case))
+                    return
 
         self._case_properties_widget.save_fields_to_case()
         self.accept()
