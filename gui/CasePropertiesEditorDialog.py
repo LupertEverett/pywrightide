@@ -8,7 +8,7 @@ from data.PyWrightGame import PyWrightGame
 from data.PyWrightCase import PyWrightCase
 
 
-class AddNewCaseDialog(QDialog):
+class CasePropertiesEditorDialog(QDialog):
 
     def __init__(self, selected_game: PyWrightGame, selected_case: PyWrightCase | None, parent=None):
         super().__init__(parent)

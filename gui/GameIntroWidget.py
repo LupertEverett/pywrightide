@@ -3,7 +3,7 @@
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QListWidget, QToolBar, QAction, QMessageBox
 from PyQt5.QtGui import QIcon
 
-from .AddNewCaseDialog import AddNewCaseDialog
+from .CasePropertiesEditorDialog import CasePropertiesEditorDialog
 from .AddExistingCaseDialog import AddExistingCaseDialog
 
 from data.PyWrightGame import PyWrightGame
@@ -84,7 +84,7 @@ class GameIntroWidget(QWidget):
         self._update_widget_toolbar_buttons()
 
     def _handle_add_new_case(self):
-        add_new_case_dialog = AddNewCaseDialog(self._selected_game, None, self)
+        add_new_case_dialog = CasePropertiesEditorDialog(self._selected_game, None, self)
 
         if add_new_case_dialog.exec_():
             self._selected_game.create_new_case(add_new_case_dialog.get_case())
@@ -112,7 +112,7 @@ class GameIntroWidget(QWidget):
         selected_case_path = self._selected_game.game_path/selected_case_name
         selected_case = PyWrightCase.from_existing_case_folder(selected_case_path)
 
-        case_properties_dialog = AddNewCaseDialog(self._selected_game, selected_case, self)
+        case_properties_dialog = CasePropertiesEditorDialog(self._selected_game, selected_case, self)
 
         if case_properties_dialog.exec_():
             selected_case.update_case_intro_txt(selected_case_path)
