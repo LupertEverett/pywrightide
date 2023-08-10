@@ -82,10 +82,10 @@ class GameIntroWidget(QWidget):
         self.remove_case_action.setEnabled(selection is not None)
 
     def _handle_add_new_case(self):
-        add_new_case_dialog = AddNewCaseDialog(self._selected_game, self)
+        add_new_case_dialog = AddNewCaseDialog(self._selected_game, None, self)
 
         if add_new_case_dialog.exec_():
-            self._selected_game.create_new_case(add_new_case_dialog.new_case)
+            self._selected_game.create_new_case(add_new_case_dialog.get_case())
             self._populate_cases_list()
 
     def _handle_add_existing_case(self):
