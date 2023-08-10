@@ -24,6 +24,48 @@ class PyWrightCase:
 
         return result
 
+    def update_case_intro_txt(self, case_folder_path: Path):
+        """Non-destructively updates an intro.txt file
+        :param case_folder_path: Path to the Case that's going to be updated"""
+        if not case_folder_path.exists() or not case_folder_path.is_dir():
+            raise FileNotFoundError("Invalid case folder!")
+
+        intro_txt = case_folder_path/"intro.txt"
+
+        if not intro_txt.exists():
+            raise FileNotFoundError("Missing intro.txt file for the case!")
+
+        # Load the current intro.txt into memory...
+        with open(intro_txt, "r") as f:
+            whole_file = f.readlines()
+
+        # ...change the appropriate fields...
+        for idx in range(len(whole_file)):
+            line = whole_file[idx]
+            line_splitted = line.split(maxsplit=3)
+
+            if len(line_splitted) <= 1:
+                continue
+
+            ends_with_newline = line.endswith("\n")
+            if line_splitted[0] == "set":
+                if line_splitted[1] == "_textbox_wrap":
+                    whole_file[idx] = "set _textbox_wrap {}".format(str(self.textbox_wrap).lower())
+                elif line_splitted[1] == "_textbox_lines":
+                    whole_file[idx] = "set _textbox_lines {}".format(self.textbox_lines)
+
+                if ends_with_newline:
+                    whole_file[idx] += "\n"
+
+            elif line_splitted[0] == "script":
+                whole_file[idx] = "script {}".format(self.initial_script_name)
+                if ends_with_newline:
+                    whole_file[idx] += "\n"
+
+        # ...and finally write everything back to intro.txt
+        with open(intro_txt, "w") as f:
+            f.writelines(whole_file)
+
     def read_from_intro_txt(self, case_folder_path: str):
         if not Path(case_folder_path).exists() or not Path(case_folder_path).is_dir():
             print("Invalid case folder!")

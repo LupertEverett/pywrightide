@@ -115,6 +115,7 @@ class GameIntroWidget(QWidget):
         case_properties_dialog = AddNewCaseDialog(self._selected_game, selected_case, self)
 
         if case_properties_dialog.exec_():
+            selected_case.update_case_intro_txt(selected_case_path)
             self._populate_cases_list()
 
     def _update_widget_toolbar_buttons(self):
