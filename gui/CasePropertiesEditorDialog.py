@@ -11,6 +11,10 @@ from data.PyWrightCase import PyWrightCase
 class CasePropertiesEditorDialog(QDialog):
 
     def __init__(self, selected_game: PyWrightGame, selected_case: PyWrightCase | None, parent=None):
+        """Opens up a dialog to edit a case's properties.
+        :param selected_game: The PyWright game the case is in
+        :param selected_case: The case that's going to be edited, or None if it is a new case
+        :param parent: Parent Widget of this dialog"""
         super().__init__(parent)
 
         self.setFixedSize(300, 200)
