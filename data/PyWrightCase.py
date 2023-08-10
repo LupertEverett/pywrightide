@@ -70,3 +70,14 @@ class PyWrightCase:
 
                 elif line_splitted[0] == "script":
                     self.initial_script_name = line_splitted[1]
+
+    @staticmethod
+    def from_existing_case_folder(case_folder_path: Path):
+        if not case_folder_path.exists() or not case_folder_path.is_dir():
+            raise FileNotFoundError("Case folder does not exist!")
+
+        read_case = PyWrightCase(case_name=case_folder_path.stem)
+        read_case.read_from_intro_txt(str(case_folder_path))
+
+        return read_case
+
