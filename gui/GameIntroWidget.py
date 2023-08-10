@@ -7,6 +7,7 @@ from .AddNewCaseDialog import AddNewCaseDialog
 from .AddExistingCaseDialog import AddExistingCaseDialog
 
 from data.PyWrightGame import PyWrightGame
+from data.PyWrightCase import PyWrightCase
 
 import data.IconThemes as IconThemes
 
@@ -39,6 +40,7 @@ class GameIntroWidget(QWidget):
         self.remove_case_action.triggered.connect(self._handle_remove_case)
         self.case_properties_action = QAction(QIcon(case_properties_icon_path),
                                               "Case Properties", self._widget_toolbar)
+        self.case_properties_action.triggered.connect(self._handle_case_properties)
 
         # Main Layout
         main_layout = self._prepare_main_layout()
@@ -102,3 +104,13 @@ class GameIntroWidget(QWidget):
         selected_case: str = self._game_cases_list_widget.currentItem().text()
         self._selected_game.remove_case(selected_case, also_remove_folder == QMessageBox.Yes)
         self._populate_cases_list()
+
+    def _handle_case_properties(self):
+        selected_case_name = self._game_cases_list_widget.selectedItems()[0].text()
+        selected_case_path = self._selected_game.game_path/selected_case_name
+        selected_case = PyWrightCase.from_existing_case_folder(selected_case_path)
+
+        case_properties_dialog = AddNewCaseDialog(self._selected_game, selected_case, self)
+
+        if case_properties_dialog.exec_():
+            self._populate_cases_list()
