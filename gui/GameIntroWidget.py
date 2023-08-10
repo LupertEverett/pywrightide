@@ -46,6 +46,8 @@ class GameIntroWidget(QWidget):
         main_layout = self._prepare_main_layout()
         self.setLayout(main_layout)
 
+        self._update_widget_toolbar_buttons()
+
     def _prepare_main_layout(self) -> QVBoxLayout:
         result = QVBoxLayout()
 
@@ -78,8 +80,9 @@ class GameIntroWidget(QWidget):
             self._game_cases_list_widget.addItem(game_case)
 
     def _handle_list_widget_clicked(self):
-        selection = self._game_cases_list_widget.currentItem()
-        self.remove_case_action.setEnabled(selection is not None)
+        # selection = self._game_cases_list_widget.currentItem()
+        # self.remove_case_action.setEnabled(selection is not None)
+        self._update_widget_toolbar_buttons()
 
     def _handle_add_new_case(self):
         add_new_case_dialog = AddNewCaseDialog(self._selected_game, None, self)
@@ -114,3 +117,8 @@ class GameIntroWidget(QWidget):
 
         if case_properties_dialog.exec_():
             self._populate_cases_list()
+
+    def _update_widget_toolbar_buttons(self):
+        selected_items = self._game_cases_list_widget.selectedItems()
+        self.remove_case_action.setEnabled(len(selected_items) > 0)
+        self.case_properties_action.setEnabled(len(selected_items) > 0)
