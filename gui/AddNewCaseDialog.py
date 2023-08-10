@@ -25,9 +25,6 @@ class AddNewCaseDialog(QDialog):
         else:
             self._selected_case = selected_case
 
-        # self.new_case = PyWrightCase("", "scene1")
-        # self._case_properties_widget = CasePropertiesWidget(self.new_case)
-
         self._case_properties_widget = CasePropertiesWidget(self._selected_case)
 
         self._buttonBox = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
@@ -60,3 +57,6 @@ class AddNewCaseDialog(QDialog):
 
         self._case_properties_widget.save_fields_to_case()
         self.accept()
+
+    def get_case(self):
+        return self._selected_case
