@@ -13,7 +13,6 @@ class AddNewCaseDialog(QDialog):
     def __init__(self, selected_game: PyWrightGame, selected_case: PyWrightCase | None, parent=None):
         super().__init__(parent)
 
-        self.setWindowTitle("Add New Case")
         self.setFixedSize(300, 200)
 
         self._selected_game = selected_game
@@ -21,8 +20,10 @@ class AddNewCaseDialog(QDialog):
         self._is_a_new_case: bool = selected_case is None
 
         if self._is_a_new_case:
+            self.setWindowTitle("Add New Case")
             self._selected_case = PyWrightCase("", "scene1")
         else:
+            self.setWindowTitle("Case Properties: {}".format(selected_case.case_name))
             self._selected_case = selected_case
 
         self._case_properties_widget = CasePropertiesWidget(self._selected_case)
