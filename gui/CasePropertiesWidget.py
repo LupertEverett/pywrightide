@@ -16,6 +16,8 @@ class CasePropertiesWidget(QWidget):
         self.case_name_line_edit.setWhatsThis("This will be the name of your case. It will appear in "
                                               "the case selection menu, and it will be the name of the folder "
                                               "that's going to be created.")
+        # The case name shouldn't be changed once the case is created
+        self.case_name_line_edit.setDisabled(self._selected_case.case_name != "")
         self.case_initial_script_line_edit = QLineEdit()
         self.case_initial_script_line_edit.setWhatsThis("Indicates the name of the script that'll be run "
                                                         "when starting this case from the beginning.")
