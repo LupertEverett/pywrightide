@@ -84,7 +84,9 @@ class FileEditWidget(QWidget):
     def save_to_file(self):
         if not self._is_a_new_file:
             # newline="" so the IDE does not mess with the EOL chars, fixes the gaps in new lines bug
-            with open(self.file_path, "w", newline="") as f:
+            # The IDE will assume ALL the text files that are opened with it is utf-8 encoded, this should be a safe bet
+            # Text encoding detection using libs like chardet may be used if the need arises
+            with open(self.file_path, "w", newline="", encoding="utf-8") as f:
                 f.write(self.sci.text())
             self.sci.setModified(False)
             return
