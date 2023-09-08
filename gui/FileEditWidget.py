@@ -63,7 +63,9 @@ class FileEditWidget(QWidget):
 
     def fill_the_scintilla(self, selected_file):
         # newline="" so the IDE does not mess with the EOL chars, fixes the gaps in new lines bug
-        with open(selected_file, "r", newline="") as f:
+        # The IDE will assume ALL the text files that are opened with it is utf-8 encoded, this should be a safe bet
+        # Text encoding detection using libs like chardet may be used if the need arises
+        with open(selected_file, "r", newline="", encoding="utf-8") as f:
             lines = f.readlines()
             text = "".join(lines)
             self.sci.setText(text)
