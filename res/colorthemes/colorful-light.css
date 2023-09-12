@@ -3,7 +3,7 @@ IDEMainWindow {
 }
 
 QDockWidget {
-    background-color: #DEA245;
+    background-color: #3576AB;
     color: #FFF;
 }
 
@@ -29,17 +29,18 @@ QStatusBar QLabel {
 }
 
 QTabWidget::pane {
-    border-top: 2px solid #1F5E91;
+    border: 0;
     background: #69BBFF;
 }
 
 QTabBar::tab {
-    padding: 8px;
-    background-color: #69BBFF;
+    padding: 4px 12px 4px 12px;
+    background-color: #1F5E91;
     margin-right: 4px;
+    color: #FFF;
 }
 
 QTabBar::tab:selected {
-    background-color: #1F5E91;
-    color: #FFF;
+    background-color: #69BBFF;
+    color: #000;
 }
