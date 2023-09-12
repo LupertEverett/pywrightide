@@ -3,7 +3,7 @@ from PyQt5.QtWidgets import (QDialog, QGroupBox, QVBoxLayout, QHBoxLayout, QLine
 from PyQt5.QtCore import QSettings, pyqtSignal
 from PyQt5.QtGui import QFont
 
-from data import IDESettings
+from data import IDESettings, ColorThemes
 from data import IconThemes
 
 
@@ -37,8 +37,17 @@ class SettingsDialog(QDialog):
         icon_theme_section_layout.addWidget(QLabel("Icon Theme:"))
         icon_theme_section_layout.addWidget(self.icon_theme_combobox)
 
+        color_theme_selection_layout = QHBoxLayout()
+        self.color_theme_combobox = QComboBox()
+        self.color_theme_combobox.addItem("System Theme")
+        self.color_theme_combobox.addItems(ColorThemes.query_color_themes())
+        self._set_current_color_theme_in_color_combobox()
+        color_theme_selection_layout.addWidget(QLabel("Color Theme:"))
+        color_theme_selection_layout.addWidget(self.color_theme_combobox)
+
         general_group_layout.addWidget(self.autoreload_last_checkbox)
         general_group_layout.addLayout(icon_theme_section_layout)
+        general_group_layout.addLayout(color_theme_selection_layout)
 
         general_group_box.setLayout(general_group_layout)
 
@@ -89,6 +98,13 @@ class SettingsDialog(QDialog):
 
         self.setLayout(main_layout)
 
+    def _set_current_color_theme_in_color_combobox(self):
+        theme_name = IDESettings.get_color_theme()
+        found_idx = self.color_theme_combobox.findText(theme_name)
+
+        if found_idx != -1:
+            self.color_theme_combobox.setCurrentIndex(found_idx)
+
     def _handle_apply(self):
         current_font = self.font_name_combobox.currentFont()
         IDESettings.set_font_name(current_font.family())
@@ -96,6 +112,7 @@ class SettingsDialog(QDialog):
         IDESettings.set_font_boldness(self.bold_toggle_button.isChecked())
         IDESettings.set_autoload_last_project_check(self.autoreload_last_checkbox.isChecked())
         IDESettings.set_icon_theme(self.icon_theme_combobox.currentText())
+        IDESettings.set_color_theme(self.color_theme_combobox.currentText())
         self.settings_changed.emit()
 
     def _handle_accept(self):

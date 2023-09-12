@@ -20,6 +20,8 @@ class MainWindowTopToolbar(QToolBar):
         self.toggleViewAction().setEnabled(False)
         self.toggleViewAction().setVisible(False)
 
+        self.setContentsMargins(2, 2, 0, 0)
+
         # For easier access to the Main Window we're attached to
         self.ide_main_window: gui.IDEMainWindow.IDEMainWindow = parent
 

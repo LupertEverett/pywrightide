@@ -17,7 +17,7 @@ from .SettingsDialog import SettingsDialog
 from .FindReplaceDialog import FindReplaceDialog
 from .AssetBrowserRootWidget import AssetBrowserRootWidget
 
-from data import IDESettings
+from data import IDESettings, ColorThemes
 from data.PyWrightGame import PyWrightGame
 
 
@@ -86,6 +86,7 @@ class IDEMainWindow(QMainWindow):
         self.status_bar = QStatusBar()
         self.status_bar.setSizeGripEnabled(False)
         self.installation_path_label = QLabel("No PyWright folder selected")
+        self.installation_path_label.setContentsMargins(0, 4, 12, 4)
         self.status_bar.addPermanentWidget(self.installation_path_label)
 
         self.setStatusBar(self.status_bar)
@@ -110,6 +111,10 @@ class IDEMainWindow(QMainWindow):
         # Try loading the window state (docks positions, visibility, etc.)
         if IDESettings.window_state_data_exists():
             self.restoreState(IDESettings.get_window_state())
+
+        # Apply the color theme if it exists
+        if IDESettings.get_color_theme() != "System Theme":
+            self._apply_new_color_theme()
 
     def pick_pywright_installation_folder(self, folder_path: str):
         self.selected_pywright_installation = folder_path
@@ -217,7 +222,11 @@ class IDEMainWindow(QMainWindow):
 
     def _apply_settings(self):
         self.central_widget.apply_settings()
+        self._apply_new_color_theme()
         self._top_toolbar.update_toolbar_icons()
+
+    def _apply_new_color_theme(self):
+        self.setStyleSheet(ColorThemes.load_current_color_theme())
 
     def _parse_builtin_macros(self, pywright_install_dir: str):
         core_macros_dir = Path("{}/core/macros".format(pywright_install_dir))

@@ -1,0 +1,45 @@
+IDEMainWindow {
+    background-color: #459ADF;
+}
+
+QDockWidget {
+    background-color: #DEA245;
+    color: #FFF;
+}
+
+QDockWidget::title {
+    background-color: #915F10;
+}
+
+MainWindowTopToolbar {
+    border-top: 0;
+    border-bottom: 1px solid #2C8DE0;
+    background-color: #90B9DE;
+    padding: 2px;
+}
+
+QStatusBar {
+    background-color: #DB555E;
+    color: #FFF;
+    border-top: 0px solid #8F3F41;
+}
+
+QStatusBar QLabel {
+    color: #FFF;
+}
+
+QTabWidget::pane {
+    border-top: 2px solid #1F5E91;
+    background: #69BBFF;
+}
+
+QTabBar::tab {
+    padding: 8px;
+    background-color: #69BBFF;
+    margin-right: 4px;
+}
+
+QTabBar::tab:selected {
+    background-color: #1F5E91;
+    color: #FFF;
+}

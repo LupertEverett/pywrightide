@@ -14,8 +14,10 @@ AUTOLOAD_LAST_GAME_NAME_KEY = "general/last_game_name"
 WINDOW_GEOMETRY_KEY = "general/window_geometry"
 WINDOW_STATE_KEY = "general/window_state"
 ICON_THEME_KEY = "general/icon_theme"
+COLOR_THEME_KEY = "general/color_theme"
 
 # Functions
+
 
 def get_font_name() -> str:
     return __program_settings.value(FONT_NAME_KEY, "Consolas", str)
@@ -89,6 +91,15 @@ def set_icon_theme(new_theme_name: str):
     __program_settings.setValue(ICON_THEME_KEY, new_theme_name)
 
 
+def get_color_theme() -> str:
+    return __program_settings.value(COLOR_THEME_KEY, "System Theme")
+
+
+def set_color_theme(new_color_theme_name: str):
+    if new_color_theme_name == "":
+        raise ValueError("Empty Color Theme Name!")
+    __program_settings.setValue(COLOR_THEME_KEY, new_color_theme_name)
+
 def all_keys() -> list[str]:
     return __program_settings.allKeys()
 
@@ -114,3 +125,4 @@ def reset_settings():
     __program_settings.setValue(AUTOLOAD_LAST_GAME_NAME_KEY, "")
     __program_settings.setValue(WINDOW_GEOMETRY_KEY, None)
     __program_settings.setValue(ICON_THEME_KEY, "default")
+    __program_settings.setValue(COLOR_THEME_KEY, "System Theme")
