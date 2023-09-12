@@ -1,0 +1,133 @@
+IDEMainWindow {
+    background-color: #474747;
+}
+
+QDockWidget {
+    background-color: #777777;
+    color: #FFF;
+}
+
+QDockWidget::title {
+    background-color: #915F10;
+}
+
+MainWindowTopToolbar {
+    border-top: 0;
+    border-bottom: 1px solid #575757;
+    background-color: #373737;
+    padding: 2px;
+}
+
+QLabel {
+    color: #FFF;
+}
+
+QStatusBar {
+    background-color: #858585;
+    color: #FFF;
+    border-top: 0px solid #857777;
+}
+
+QStatusBar QLabel {
+    color: #000;
+}
+
+QTabWidget::pane {
+    border: 0;
+    background: #858585;
+}
+
+QTabBar::tab {
+    padding: 4px 12px 4px 12px;
+    background-color: #373737;
+    margin-right: 4px;
+    color: #FFF;
+}
+
+QTabBar::tab:selected {
+    background-color: #858585;
+    color: #000;
+}
+
+QToolButton {
+    border-radius: 3px;
+    padding: 2px;
+    border: 0;
+}
+
+QToolButton:hover {
+    border: 1px solid #777;
+    background: #666;
+}
+
+QToolButton:pressed {
+    border: 1px solid #777;
+    background: #888;
+}
+
+QToolButton:checked {
+    border: 1px solid #777;
+    background: #888;
+}
+
+QTreeView {
+    background: #434343;
+    border: 1px solid #333333;
+    color: #FFF;
+}
+
+QListWidget {
+    background: #434343;
+    border: 1px solid #333333;
+    color: #FFF;
+}
+
+QListView {
+    background: #434343;
+    border: 1px solid #333333;
+    color: #FFF;
+}
+
+QLineEdit {
+    background: #434343;
+    border: 1px solid #333333;
+    color: #FFF;
+}
+
+QPlainTextEdit {
+    background: #434343;
+    border: 1px solid #333333;
+    color: #FFF;
+}
+
+QComboBox {
+    background: #434343;
+    border-color: #333333;
+    border-radius: 3px;
+    padding: 3px;
+    color: #FFF;
+}
+
+QSpinBox {
+    background: #434343;
+    border-color: #333333;
+    border-radius: 3px;
+    padding: 3px;
+    color: #FFF;
+}
+
+QDialog {
+    background-color: #474747;
+}
+
+QCheckBox {
+    color: #FFF;
+}
+
+QGroupBox {
+    color: #FFF;
+}
+
+QRadioButton {
+    color: #FFF;
+}
