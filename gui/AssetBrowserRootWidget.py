@@ -1,6 +1,6 @@
 # Provides ways to view various assets (textures, sound, music...)
 
-from PyQt5.QtWidgets import QDockWidget, QTabWidget
+from PyQt5.QtWidgets import QDockWidget, QTabWidget, QWidget, QVBoxLayout, QHBoxLayout, QLabel
 from PyQt5.QtGui import QHideEvent
 
 import pygame.mixer
@@ -20,7 +20,23 @@ class AssetBrowserRootWidget(QDockWidget):
 
         self.tab_widget = QTabWidget(self)
 
-        self.setWidget(self.tab_widget)
+        main_widget = QWidget()
+        layout = QVBoxLayout()
+
+        layout.addWidget(self.tab_widget)
+        layout.setContentsMargins(12, 0, 12, 12)
+        main_widget.setLayout(layout)
+
+        self.title_bar_widget = QWidget()
+        title_bar_layout = QHBoxLayout()
+
+        self.title_bar_widget.setLayout(title_bar_layout)
+        title_bar_layout.setContentsMargins(4, 6, 4, 6)
+
+        self.topLevelChanged.connect(self._handle_top_level)
+
+        self.setWidget(main_widget)
+        self.setTitleBarWidget(self.title_bar_widget)
 
         pygame.mixer.init()
 
@@ -66,3 +82,10 @@ class AssetBrowserRootWidget(QDockWidget):
 
     def deinit(self):
         pygame.mixer.quit()
+
+    def _handle_top_level(self, top_level: bool):
+        self.setTitleBarWidget(None if top_level else self.title_bar_widget)
+        if top_level:
+            self.widget().layout().setContentsMargins(0, 0, 0, 0)
+        else:
+            self.widget().layout().setContentsMargins(12, 0, 12, 12)
