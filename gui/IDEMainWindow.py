@@ -71,7 +71,9 @@ class IDEMainWindow(QMainWindow):
         self.central_widget.update_save_button_requested.connect(self._top_toolbar.update_save_button)
 
         self.directory_view.open_new_tab.connect(self.central_widget.open_new_editing_tab)
-        self.directory_view.open_game_properties_tab.connect(self.central_widget.open_game_properties_tab)
+        self.directory_view.open_game_properties_tab.connect(
+            lambda: self.central_widget.open_game_properties_tab(self.game_properties_widget)
+        )
 
         # Toolbar and the central widget
         self.addToolBar(self._top_toolbar)
@@ -108,7 +110,6 @@ class IDEMainWindow(QMainWindow):
         # Try loading the window state (docks positions, visibility, etc.)
         if IDESettings.window_state_data_exists():
             self.restoreState(IDESettings.get_window_state())
-
 
     def pick_pywright_installation_folder(self, folder_path: str):
         self.selected_pywright_installation = folder_path

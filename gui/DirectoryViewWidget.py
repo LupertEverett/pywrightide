@@ -5,7 +5,7 @@ from pathlib import Path
 from PyQt5.QtWidgets import (QTreeView, QFileIconProvider, QFileSystemModel, QAction,
                              QWidget, QDockWidget, QHBoxLayout,
                              QLabel, QPushButton, QMenu,
-                             QMessageBox, QInputDialog, QLineEdit)
+                             QMessageBox, QInputDialog, QLineEdit, QVBoxLayout)
 from PyQt5.QtGui import QIcon, QMouseEvent, QDesktopServices
 from PyQt5.QtCore import Qt, QModelIndex, pyqtSignal, QUrl
 
@@ -50,12 +50,26 @@ class DirectoryViewWidget(QDockWidget):
         self._directory_view.setContextMenuPolicy(Qt.CustomContextMenu)
         self._directory_view.customContextMenuRequested.connect(self._handle_view_context_menu)
 
+        main_widget = QWidget()
+        layout = QVBoxLayout()
+
+        dummy_title_bar = QWidget()
+        dummy_title_bar.setLayout(QHBoxLayout())
+        dummy_title_bar.layout().setContentsMargins(4, 6, 4, 6)
+
         self._top_widget = self._create_custom_title_bar()
 
         self._pywright_game = PyWrightGame()
 
-        self.setWidget(self._directory_view)
-        self.setTitleBarWidget(self._create_custom_title_bar())
+        layout.addWidget(self._top_widget)
+        layout.addWidget(self._directory_view)
+
+        main_widget.setLayout(layout)
+        layout.setContentsMargins(12, 0, 12, 12)
+
+        self.setWidget(main_widget)
+        self.setTitleBarWidget(dummy_title_bar)
+        self.setLayout(QVBoxLayout())
         self.setFeatures(QDockWidget.DockWidgetClosable | QDockWidget.DockWidgetMovable)
         self.setMinimumWidth(300)
 
@@ -102,7 +116,7 @@ class DirectoryViewWidget(QDockWidget):
         layout.addWidget(self._game_title_label)
         layout.addStretch()
         layout.addWidget(self._game_properties_button)
-        layout.setContentsMargins(4, 2, 2, 2)
+        layout.setContentsMargins(4, 0, 2, 0)
 
         result.setLayout(layout)
         return result
