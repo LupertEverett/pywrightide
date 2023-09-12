@@ -244,7 +244,7 @@ class MainWindowTopToolbar(QToolBar):
         self.save_file_action.setEnabled(is_file_modified)
 
     def _handle_about(self):
-        QMessageBox.about(self, "About PyWright IDE", "<h1>PyWright IDE</h1><h2>Prerelease version (23.09.12)</h2><br>"
-                                                      "<h3>by LupertEverett</h3><br>"
+        QMessageBox.about(self, "About PyWright IDE", "<h1>PyWright IDE</h1><h2>Prerelease version (23.09.12)</h2>"
+                                                      "<h3>by LupertEverett</h3>"
                                                       "This program aims to make developing PyWright games easier.<br>"
                                                       "Made with PyQt5, QScintilla and pygame.")
