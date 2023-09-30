@@ -103,10 +103,20 @@ QPlainTextEdit {
 
 QComboBox {
     background: #434343;
-    border-color: #333333;
+    border: 1px solid #333333;
     border-radius: 3px;
     padding: 3px;
     color: #FFF;
+}
+
+QComboBox:!editable:hover {
+    background: #535353;
+    border-color: #222222;
+}
+
+QComboBox:!editable:on{
+    background: #636363;
+    border-color: #222222;
 }
 
 QComboBox::drop-down {
@@ -133,6 +143,10 @@ QSpinBox {
     border-radius: 3px;
     padding: 3px;
     color: #FFF;
+}
+
+QSpinBox:hover {
+    background: #535353;
 }
 
 QSpinBox::up-button {
@@ -186,5 +200,9 @@ QGroupBox {
 }
 
 QRadioButton {
+    color: #FFF;
+}
+
+QStatusBar QLabel {
     color: #FFF;
 }
