@@ -106,6 +106,7 @@ class GameIntroWidget(QWidget):
     def _handle_add_existing_case(self):
         add_existing_case_dialog = AddExistingCaseDialog(self._selected_game, self)
         if add_existing_case_dialog.exec_():
+            self._selected_game.update_intro_txt_cases()
             self._populate_cases_list()
 
     def _handle_remove_case(self):
