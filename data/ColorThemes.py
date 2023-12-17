@@ -1,6 +1,8 @@
 import glob
 from pathlib import Path
 
+from PyQt5.QtCore import QDir
+
 from . import IDESettings
 
 
@@ -31,6 +33,7 @@ def get_color_theme_path() -> str:
     if not _is_valid_theme_folder(folder_path):
         raise FileNotFoundError("Color theme {} not found!".format(color_theme_name))
 
+    QDir.setSearchPaths("themefolder", [str(folder_path)])
     return "res/colorthemes/{}/theme.css".format(color_theme_name)
 
 
