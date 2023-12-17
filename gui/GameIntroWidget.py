@@ -1,6 +1,6 @@
 # Handles the data in intro.txt of the selected PyWright game
 
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QListWidget, QToolBar, QAction, QMessageBox
+from PyQt5.QtWidgets import QWidget, QVBoxLayout, QListWidget, QToolBar, QAction, QMessageBox
 from PyQt5.QtGui import QIcon
 
 from .CasePropertiesEditorDialog import CasePropertiesEditorDialog
@@ -30,16 +30,28 @@ class GameIntroWidget(QWidget):
         add_existing_case_icon_path = IconThemes.icon_path_from_theme(IconThemes.ICON_NAME_DOUBLE_PLUS)
         remove_case_icon_path = IconThemes.icon_path_from_theme(IconThemes.ICON_NAME_MINUS)
         case_properties_icon_path = IconThemes.icon_path_from_theme(IconThemes.ICON_NAME_SETTINGS)
+        up_arrow_icon_path = IconThemes.icon_path_from_theme(IconThemes.ICON_NAME_UP_ARROW)
+        down_arrow_icon_path = IconThemes.icon_path_from_theme(IconThemes.ICON_NAME_DOWN_ARROW)
+
         self.add_new_case_action = QAction(QIcon(add_new_case_icon_path),"New Case", self._widget_toolbar)
         self.add_new_case_action.triggered.connect(self._handle_add_new_case)
+
         self.add_existing_case_action = QAction(QIcon(add_existing_case_icon_path),
                                                 "Add Existing Case", self._widget_toolbar)
         self.add_existing_case_action.triggered.connect(self._handle_add_existing_case)
+
         self.remove_case_action = QAction(QIcon(remove_case_icon_path), "Remove Case", self._widget_toolbar)
         self.remove_case_action.triggered.connect(self._handle_remove_case)
+
         self.case_properties_action = QAction(QIcon(case_properties_icon_path),
                                               "Case Properties", self._widget_toolbar)
         self.case_properties_action.triggered.connect(self._handle_case_properties)
+
+        self.move_case_up_action = QAction(QIcon(up_arrow_icon_path), "Move Case Up", self._widget_toolbar)
+        self.move_case_up_action.triggered.connect(self._handle_case_move_up)
+
+        self.move_case_down_action = QAction(QIcon(down_arrow_icon_path), "Move Case Down", self._widget_toolbar)
+        self.move_case_down_action.triggered.connect(self._handle_case_move_down)
 
         # Main Layout
         main_layout = self._prepare_main_layout()
@@ -54,6 +66,9 @@ class GameIntroWidget(QWidget):
         self._widget_toolbar.addAction(self.add_existing_case_action)
         self._widget_toolbar.addSeparator()
         self._widget_toolbar.addAction(self.remove_case_action)
+        self._widget_toolbar.addSeparator()
+        self._widget_toolbar.addAction(self.move_case_up_action)
+        self._widget_toolbar.addAction(self.move_case_down_action)
         self._widget_toolbar.addSeparator()
         self._widget_toolbar.addAction(self.case_properties_action)
 
@@ -79,8 +94,6 @@ class GameIntroWidget(QWidget):
             self._game_cases_list_widget.addItem(game_case)
 
     def _handle_list_widget_clicked(self):
-        # selection = self._game_cases_list_widget.currentItem()
-        # self.remove_case_action.setEnabled(selection is not None)
         self._update_widget_toolbar_buttons()
 
     def _handle_add_new_case(self):
@@ -118,7 +131,43 @@ class GameIntroWidget(QWidget):
             selected_case.update_case_intro_txt(selected_case_path)
             self._populate_cases_list()
 
+    def _handle_case_move_up(self):
+        # Stop if nothing selected
+        if self._game_cases_list_widget.currentItem() is None:
+            return
+
+        curr_index = self._game_cases_list_widget.currentRow()
+        # Stop if we're already at the top item
+        if curr_index == 0:
+            return
+
+        self._selected_game.game_cases[curr_index - 1], self._selected_game.game_cases[curr_index] = \
+            self._selected_game.game_cases[curr_index], self._selected_game.game_cases[curr_index - 1]
+
+        self._selected_game.update_intro_txt_cases()
+        self._populate_cases_list()
+        self._game_cases_list_widget.setCurrentRow(curr_index - 1)
+
+    def _handle_case_move_down(self):
+        # Stop if nothing selected
+        if self._game_cases_list_widget.currentItem() is None:
+            return
+
+        curr_index = self._game_cases_list_widget.currentRow()
+        # Stop if we're already at the bottom item
+        if curr_index == self._game_cases_list_widget.count() - 1:
+            return
+
+        self._selected_game.game_cases[curr_index], self._selected_game.game_cases[curr_index + 1] = \
+            self._selected_game.game_cases[curr_index + 1], self._selected_game.game_cases[curr_index]
+
+        self._selected_game.update_intro_txt_cases()
+        self._populate_cases_list()
+        self._game_cases_list_widget.setCurrentRow(curr_index + 1)
+
     def _update_widget_toolbar_buttons(self):
         selected_items = self._game_cases_list_widget.selectedItems()
         self.remove_case_action.setEnabled(len(selected_items) > 0)
         self.case_properties_action.setEnabled(len(selected_items) > 0)
+        self.move_case_up_action.setEnabled(len(selected_items) > 0 and len(self._selected_game.game_cases) > 1)
+        self.move_case_down_action.setEnabled(len(selected_items) > 0 and len(self._selected_game.game_cases) > 1)

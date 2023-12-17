@@ -130,6 +130,32 @@ class PyWrightGame:
                 f.write("set _case_{} {}\n".format(i + 1, self.game_cases[i]))
             f.write("casemenu")
 
+    def update_intro_txt_cases(self):
+        if not self.is_a_game_selected():
+            print("No game path is set!")
+            return
+
+        with open(Path("{}/intro.txt".format(self.game_path)), "r") as f:
+            entire_file = f.readlines()
+
+        # Find the set _case_x lines and update them
+        # Easiest way to do this is by finding, removing then inserting the new values
+        for line_idx in range(len(entire_file)):
+            if entire_file[line_idx] == "set _order_cases variable\n":
+                # Remove the previously written case entries
+                while entire_file[line_idx + 1].startswith("set _case_"):
+                    entire_file.pop(line_idx + 1)
+
+                for case_idx in range(len(self.game_cases)):
+                    entire_file.insert(line_idx + (case_idx + 1),
+                                       "set _case_{} {}\n".format(case_idx + 1, self.game_cases[case_idx]))
+
+                break
+
+        # Rewrite the intro.txt with the updated cases
+        with open(Path("{}/intro.txt".format(self.game_path)), "w") as f:
+            f.writelines(entire_file)
+
     def create_new_case(self, new_case: PyWrightCase):
         new_case_dir = Path("{}/{}".format(self.game_path, new_case.case_name))
 
@@ -153,7 +179,7 @@ class PyWrightGame:
 
         # Finally, append the new case at the end of the cases list
         self.game_cases.append(new_case.case_name)
-        self.write_intro_txt()
+        self.update_intro_txt_cases()
 
     def create_new_game(self, game_path: str,
                         version: str,
@@ -187,7 +213,7 @@ class PyWrightGame:
     def remove_case(self, case_name: str, also_remove_folder: bool):
         try:
             self.game_cases.remove(case_name)
-            self.write_intro_txt()
+            self.update_intro_txt_cases()
 
             if also_remove_folder:
                 import shutil
