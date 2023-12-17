@@ -20,13 +20,14 @@ class AddExistingCaseDialog(QDialog):
         self.setWindowTitle("Add Existing Case")
 
         self._available_cases_list_widget = QListWidget()
+        self._available_cases_list_widget.itemSelectionChanged.connect(self._update_ok_button)
 
         self.buttonBox = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
         self.buttonBox.accepted.connect(self._handle_accept)
         self.buttonBox.rejected.connect(self.reject)
 
         self._ok_button: QPushButton = self.buttonBox.button(QDialogButtonBox.Ok)
-        self._ok_button.setEnabled(self._available_cases_list_widget.count() > 0)
+        self._update_ok_button()
 
         main_layout = QVBoxLayout()
         main_layout.addWidget(self._available_cases_list_widget)
@@ -47,6 +48,9 @@ class AddExistingCaseDialog(QDialog):
 
         self._available_cases_list_widget.addItems(folders)
 
+    def _update_ok_button(self):
+        self._ok_button.setEnabled(self._available_cases_list_widget.count() > 0)
+
     def _is_valid_case(self, case_path: Path):
         # Every valid case folder must include an intro.txt,
         # rather easily foolable but should be fine in almost all cases
@@ -54,5 +58,5 @@ class AddExistingCaseDialog(QDialog):
         return file.exists() and file.is_file()
 
     def _handle_accept(self):
-        self._selected_game.game_cases.append(self._available_cases_list_widget.selectedItems())
+        self._selected_game.game_cases.append(self._available_cases_list_widget.selectedItems()[0].text())
         self.accept()
