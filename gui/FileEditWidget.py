@@ -62,15 +62,29 @@ class FileEditWidget(QWidget):
             self.fill_the_scintilla(self.file_path)
 
     def fill_the_scintilla(self, selected_file):
-        # newline="" so the IDE does not mess with the EOL chars, fixes the gaps in new lines bug
-        # The IDE will assume ALL the text files that are opened with it is utf-8 encoded, this should be a safe bet
+        # The IDE will try to open files assuming UTF-8 encoding, if it fails, it will fall back to ANSI
+        # But it will ALWAYS save the files in UTF-8
         # Text encoding detection using libs like chardet may be used if the need arises
-        with open(selected_file, "r", newline="", encoding="utf-8") as f:
-            lines = f.readlines()
-            text = "".join(lines)
-            self.sci.setText(text)
-            # Common sense: Newly opened files aren't modified.
-            self.sci.setModified(False)
+        lines = self._try_read_lines(selected_file)
+        text = "".join(lines)
+        self.sci.setText(text)
+        # Common sense: Newly opened files aren't modified.
+        self.sci.setModified(False)
+
+    def _try_read_lines(self, selected_file) -> list[str]:
+        # newline="" so the IDE does not mess with the EOL chars, fixes the gaps in new lines bug
+        f = open(selected_file, "r", newline="", encoding="utf-8")
+        try:
+            result = f.readlines()
+        except UnicodeDecodeError:
+            f.close()
+            f = open(selected_file, "r", newline="", encoding="ansi")
+            result = f.readlines()
+        finally:
+            f.close()
+
+        return result
+
 
     def supply_builtin_macros_to_lexer(self, builtin_macros: list[str]):
         self._lexer.set_builtin_macros(builtin_macros)
