@@ -118,18 +118,9 @@ class PyWrightScriptLexer(QsciLexerCustom):
     def __init__(self, parent: QsciScintilla):
         super().__init__(parent)
 
-        settings = QSettings("PyWrightIDE", "PyWrightIDE")
-
-        if IDESettings.FONT_NAME_KEY not in settings.allKeys():
-            font_name = "Consolas"
-        else:
-            font_name = settings.value(IDESettings.FONT_NAME_KEY)
-        if IDESettings.FONT_SIZE_KEY not in settings.allKeys():
-            font_size = 10
-        else:
-            font_size = int(settings.value(IDESettings.FONT_SIZE_KEY))
-
-        bold_font = settings.value(IDESettings.FONT_BOLD_KEY, True, bool)
+        font_name = IDESettings.get_font_name()
+        font_size = IDESettings.get_font_size()
+        bold_font = IDESettings.get_font_boldness()
 
         # Default Text Settings
         self.setDefaultColor(QColor("#ff000000"))
