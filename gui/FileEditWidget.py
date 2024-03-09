@@ -38,7 +38,7 @@ class FileEditWidget(QWidget):
         # First margin is the line number margin by default. We set a preset width value to it here.
         self.sci.setMargins(2)
         self.sci.setMarginType(1, QsciScintilla.MarginType.SymbolMarginColor)
-        self.sci.setMarginWidth(0, 40)
+        self.sci.setMarginWidth(0, 50)
         self.sci.setMarginWidth(1, 1)
         self.sci.modificationChanged.connect(self._emit_file_modified)
 
