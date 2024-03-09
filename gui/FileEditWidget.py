@@ -5,9 +5,11 @@ from pathlib import Path
 
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QFileDialog, QMessageBox
 from PyQt5.QtCore import pyqtSignal
+from PyQt5.QtGui import QColor
 
 from PyQt5.Qsci import *
 
+import data.EditorThemes as EditorThemes
 from data.PyWrightScriptLexer import PyWrightScriptLexer
 from .FindReplaceDialog import FindType, ReplaceType, SearchScope
 
@@ -33,12 +35,11 @@ class FileEditWidget(QWidget):
         # Enable word wrapping
         self.sci.setWrapMode(QsciScintilla.WrapWord)
 
-        # Sets the amount of custom margins, first one being the line counter
-        # and the second one *should* be the folding one.
+        # First margin is the line number margin by default. We set a preset width value to it here.
         self.sci.setMargins(2)
-        self.sci.setMarginType(1, QsciScintilla.TextMargin)
-        # First margin is the line number margin. We set a preset width value to it here.
+        self.sci.setMarginType(1, QsciScintilla.MarginType.SymbolMarginColor)
         self.sci.setMarginWidth(0, 40)
+        self.sci.setMarginWidth(1, 1)
         self.sci.modificationChanged.connect(self._emit_file_modified)
 
         self._lexer = PyWrightScriptLexer(self.sci)
@@ -94,6 +95,14 @@ class FileEditWidget(QWidget):
 
     def supply_font_properties_to_lexer(self, font_name: str, font_size: int, bold_font: bool):
         self._lexer.set_font_properties(font_name, font_size, bold_font)
+
+    def supply_editor_color_theme_to_lexer(self):
+        self._lexer.set_editor_color_theme()
+        self.sci.setMarginsBackgroundColor(QColor(EditorThemes.current_editor_theme.editor_margin_color.paper_color))
+        self.sci.setMarginsForegroundColor(QColor(EditorThemes.current_editor_theme.editor_margin_color.text_color))
+        self.sci.setMarginBackgroundColor(1, QColor(EditorThemes.current_editor_theme.
+                                                    editor_margin_border_color.paper_color))
+        self.sci.setCaretForegroundColor(QColor(EditorThemes.current_editor_theme.caret_color.paper_color))
 
     def save_to_file(self):
         if not self._is_a_new_file:

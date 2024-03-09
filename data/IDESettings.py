@@ -15,6 +15,7 @@ WINDOW_GEOMETRY_KEY = "general/window_geometry"
 WINDOW_STATE_KEY = "general/window_state"
 ICON_THEME_KEY = "general/icon_theme"
 COLOR_THEME_KEY = "general/color_theme"
+EDITOR_THEME_KEY = "editor/color_theme"
 
 # Functions
 
@@ -100,6 +101,17 @@ def set_color_theme(new_color_theme_name: str):
         raise ValueError("Empty Color Theme Name!")
     __program_settings.setValue(COLOR_THEME_KEY, new_color_theme_name)
 
+
+def get_editor_color_theme() -> str:
+    return __program_settings.value(EDITOR_THEME_KEY, "default")
+
+
+def set_editor_color_theme(new_editor_theme_name: str):
+    if new_editor_theme_name == "":
+        raise ValueError("Empty Editor Color Theme Name!")
+    __program_settings.setValue(EDITOR_THEME_KEY, new_editor_theme_name)
+
+
 def all_keys() -> list[str]:
     return __program_settings.allKeys()
 
@@ -126,3 +138,4 @@ def reset_settings():
     __program_settings.setValue(WINDOW_GEOMETRY_KEY, None)
     __program_settings.setValue(ICON_THEME_KEY, "default")
     __program_settings.setValue(COLOR_THEME_KEY, "System Theme")
+    __program_settings.setValue(EDITOR_THEME_KEY, "default")

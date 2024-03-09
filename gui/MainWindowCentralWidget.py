@@ -3,7 +3,7 @@ from pathlib import Path
 from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtWidgets import QWidget, QTabWidget, QVBoxLayout, QMessageBox
 
-from data import IDESettings
+from data import IDESettings, EditorThemes
 from data.PyWrightGame import PyWrightGame
 from .FileEditWidget import FileEditWidget
 from .FindReplaceDialog import SearchScope, FindType, ReplaceType
@@ -28,6 +28,8 @@ class MainWindowCentralWidget(QWidget):
         layout.addWidget(self.tab_widget)
 
         self.setLayout(layout)
+
+        EditorThemes.current_editor_theme.load_theme(IDESettings.get_editor_color_theme())
 
         # Macros tracking
         self._pywright_builtin_macros: list[str] = []
@@ -77,6 +79,7 @@ class MainWindowCentralWidget(QWidget):
         file_edit_widget.file_modified.connect(self._update_save_button_and_current_tab)
         file_edit_widget.supply_builtin_macros_to_lexer(self._pywright_builtin_macros)
         file_edit_widget.supply_game_macros_to_lexer(self.selected_game.game_macros)
+        file_edit_widget.supply_editor_color_theme_to_lexer()
         file_edit_widget.move_to_tab_requested.connect(self._handle_move_to_tab)
         file_edit_widget.replace_next_in_next_tabs_requested.connect(self.replace_next_in_next_tabs)
         file_name = Path(file_path).name
@@ -286,12 +289,14 @@ class MainWindowCentralWidget(QWidget):
         self.tab_widget.clear()
 
     def apply_settings(self):
+        EditorThemes.current_editor_theme.load_theme(IDESettings.get_editor_color_theme())
         for idx in range(self.tabs_count()):
             if self.tab_widget.tabText(idx) != "Game Properties":
                 tab: FileEditWidget = self.tab_widget.widget(idx)
                 tab.supply_font_properties_to_lexer(IDESettings.get_font_name(),
                                                     IDESettings.get_font_size(),
                                                     IDESettings.get_font_boldness())
+                tab.supply_editor_color_theme_to_lexer()
 
     def handle_insert_into_cursor(self, command: str):
         # Don't do anything if there are no tabs open

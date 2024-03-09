@@ -1,0 +1,12 @@
+default=#ff000000,#ffffffff
+commands=#ff00007f,#ffffffff
+specialvars=#ff007f00,#ffffffff
+parameters=#ff7f0000,#ffffffff
+comments=#ffa0a0a0,#ffffffff
+strings=#ff707000,#ffffffff
+numbers=#ff00a0a0,#ffffffff
+builtinmacros=#ff0000dd,#ffffffff
+gamemacros=#ff4f00ff,#ffffffff
+editormargin=#ff000000,#ffa0a0a0
+editormarginborder=#fff0f0f0
+caret=#ff000000

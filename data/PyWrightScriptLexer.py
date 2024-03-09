@@ -6,7 +6,7 @@ from PyQt5.QtCore import QSettings
 
 from PyQt5.Qsci import QsciLexerCustom, QsciScintilla
 
-from data import IDESettings
+from data import IDESettings, EditorThemes
 
 commands = [
     # In the written order in doc.txt (with some additions):
@@ -122,46 +122,7 @@ class PyWrightScriptLexer(QsciLexerCustom):
         font_size = IDESettings.get_font_size()
         bold_font = IDESettings.get_font_boldness()
 
-        # Default Text Settings
-        self.setDefaultColor(QColor("#ff000000"))
-        self.setDefaultPaper(QColor("#ffffffff"))
-
-        # Colors per style
-        # Style 0: Default
-        self.setColor(QColor("#ff000000"), 0)  # black
-        self.setPaper(QColor("#ffffffff"), 0)
-
-        # Style 1: Commands
-        self.setColor(QColor("#ff00007f"), 1)  # blue
-        self.setPaper(QColor("#ffffffff"), 1)
-
-        # Style 2: Special Variables (includes case names)
-        self.setColor(QColor("#ff007f00"), 2)  # green
-        self.setPaper(QColor("#ffffffff"), 2)
-
-        # Style 3: parameters
-        self.setColor(QColor("#ff7f0000"), 3)  # red
-        self.setPaper(QColor("#ffffffff"), 3)
-
-        # Style 4: line comments
-        self.setColor(QColor("#ffa0a0a0"), 4)  # gray
-        self.setPaper(QColor("#ffffffff"), 4)
-
-        # Style 5: Double-quoted strings
-        self.setColor(QColor("#ff707000"), 5)  # ??? (I'm bad with colors)
-        self.setPaper(QColor("#ffffffff"), 5)
-
-        # Style 6: Numbers
-        self.setColor(QColor("#ff00a0a0"), 6)  # ??? (I'm bad with colors)
-        self.setPaper(QColor("#ffffffff"), 6)
-
-        # Style 7: Builtin Macros
-        self.setColor(QColor("#ff0000dd"), 7)  # (Cyan?)
-        self.setPaper(QColor("#ffffffff"), 7)
-
-        # Style 8: Game Macros
-        self.setColor(QColor("#ff4f00ff"), 8)  # (Idk anymore...)
-        self.setPaper(QColor("#ffffffff"), 8)
+        self.set_editor_color_theme()
 
         self.set_font_properties(font_name, font_size, bold_font)
 
@@ -179,6 +140,15 @@ class PyWrightScriptLexer(QsciLexerCustom):
 
     def set_game_macros(self, new_list: list[str]):
         self.game_macros = new_list
+
+    def set_editor_color_theme(self):
+        # Default Text Settings
+        self.setDefaultColor(QColor(EditorThemes.current_editor_theme.colors[0].text_color))
+        self.setDefaultPaper(QColor(EditorThemes.current_editor_theme.colors[0].paper_color))
+
+        for color_index in range(len(EditorThemes.current_editor_theme.colors)):
+            self.setColor(QColor(EditorThemes.current_editor_theme.colors[color_index].text_color), color_index)
+            self.setPaper(QColor(EditorThemes.current_editor_theme.colors[color_index].paper_color), color_index)
 
     def language(self):
         return "PyWright Script"

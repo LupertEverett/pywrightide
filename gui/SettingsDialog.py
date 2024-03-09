@@ -3,7 +3,7 @@ from PyQt5.QtWidgets import (QDialog, QGroupBox, QVBoxLayout, QHBoxLayout, QLine
 from PyQt5.QtCore import QSettings, pyqtSignal
 from PyQt5.QtGui import QFont
 
-from data import IDESettings, ColorThemes
+from data import IDESettings, ColorThemes, EditorThemes
 from data import IconThemes
 
 
@@ -45,14 +45,21 @@ class SettingsDialog(QDialog):
         color_theme_selection_layout.addWidget(QLabel("Color Theme:"))
         color_theme_selection_layout.addWidget(self.color_theme_combobox)
 
+        editor_theme_selection_layout = QHBoxLayout()
+        self.editor_theme_combobox = QComboBox()
+        self.editor_theme_combobox.addItems(EditorThemes.query_available_editor_themes())
+        self._set_editor_theme_in_editor_combobox()
+        editor_theme_selection_layout.addWidget(QLabel("Editor Color Theme:"))
+        editor_theme_selection_layout.addWidget(self.editor_theme_combobox)
+
         general_group_layout.addWidget(self.autoreload_last_checkbox)
         general_group_layout.addLayout(icon_theme_section_layout)
         general_group_layout.addLayout(color_theme_selection_layout)
 
         general_group_box.setLayout(general_group_layout)
 
-        font_group_box = QGroupBox("Editor")
-        font_group_layout = QVBoxLayout()
+        editor_group_box = QGroupBox("Editor")
+        editor_group_layout = QVBoxLayout()
 
         font_name_layout = QHBoxLayout()
         self.font_name_combobox = QFontComboBox()
@@ -80,8 +87,9 @@ class SettingsDialog(QDialog):
         font_name_layout.addWidget(self.font_size_spinbox)
         font_name_layout.addWidget(self.bold_toggle_button)
 
-        font_group_layout.addLayout(font_name_layout)
-        font_group_box.setLayout(font_group_layout)
+        editor_group_layout.addLayout(font_name_layout)
+        editor_group_layout.addLayout(editor_theme_selection_layout)
+        editor_group_box.setLayout(editor_group_layout)
 
         self.button_box = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok |
                                            QDialogButtonBox.StandardButton.Cancel |
@@ -93,7 +101,7 @@ class SettingsDialog(QDialog):
         self.button_box.accepted.connect(self._handle_accept)
 
         main_layout.addWidget(general_group_box)
-        main_layout.addWidget(font_group_box)
+        main_layout.addWidget(editor_group_box)
         main_layout.addWidget(self.button_box)
 
         self.setLayout(main_layout)
@@ -105,6 +113,13 @@ class SettingsDialog(QDialog):
         if found_idx != -1:
             self.color_theme_combobox.setCurrentIndex(found_idx)
 
+    def _set_editor_theme_in_editor_combobox(self):
+        theme_name = IDESettings.get_editor_color_theme()
+        found_idx = self.editor_theme_combobox.findText(theme_name)
+
+        if found_idx != -1:
+            self.editor_theme_combobox.setCurrentIndex(found_idx)
+
     def _handle_apply(self):
         current_font = self.font_name_combobox.currentFont()
         IDESettings.set_font_name(current_font.family())
@@ -113,6 +128,7 @@ class SettingsDialog(QDialog):
         IDESettings.set_autoload_last_project_check(self.autoreload_last_checkbox.isChecked())
         IDESettings.set_icon_theme(self.icon_theme_combobox.currentText())
         IDESettings.set_color_theme(self.color_theme_combobox.currentText())
+        IDESettings.set_editor_color_theme(self.editor_theme_combobox.currentText())
         self.settings_changed.emit()
 
     def _handle_accept(self):
