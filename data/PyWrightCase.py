@@ -85,33 +85,19 @@ class PyWrightCase:
                 if len(line_splitted) <= 1:
                     continue
 
-                # match line_splitted[0]:
-                #     case "set":
-                #         match line_splitted[1]:
-                #             case "_textbox_wrap":
-                #                 self.textbox_wrap = line_splitted[2].lower() == "true"
-                #             case "_textbox_lines":
-                #                 self.textbox_lines = int(line_splitted[2])
-                #
-                #     case "addev":
-                #         self.initial_evidence_list.append(line_splitted[1])
-                #
-                #     case "script":
-                #         self.initial_script_name = line_splitted[1]
+                match line_splitted[0]:
+                    case "set":
+                        match line_splitted[1]:
+                            case "_textbox_wrap":
+                                self.textbox_wrap = line_splitted[2].lower() == "true"
+                            case "_textbox_lines":
+                                self.textbox_lines = int(line_splitted[2])
 
-                # Python < 3.10 compatibility moment
+                    case "addev":
+                        self.initial_evidence_list.append(line_splitted[1])
 
-                if line_splitted[0] == "set":
-                    if line_splitted[1] == "_textbox_wrap":
-                        self.textbox_wrap = line_splitted[2].lower() == "true"
-                    elif line_splitted[1] == "_textbox_lines":
-                        self.textbox_lines = int(line_splitted[2])
-
-                elif line_splitted[0] == "addev":
-                    self.initial_evidence_list.append(line_splitted[1])
-
-                elif line_splitted[0] == "script":
-                    self.initial_script_name = line_splitted[1]
+                    case "script":
+                        self.initial_script_name = line_splitted[1]
 
     @staticmethod
     def from_existing_case_folder(case_folder_path: Path):
