@@ -1,16 +1,19 @@
 # Text Editor Color Themes handling
 
-# Colors are put into the .editortheme file in order:
+# Colors are put into the .editortheme file as "key=value(s)" pairs. Available keys:
 #
-# Line 1: Default color
-# Line 2: Commands ("set", "include", "script", ...)
-# Line 3: Special Variables ("_ev", "_order_cases", ...)
-# Line 4: Parameters ("stack", "nowait", "hide", ...)
-# Line 5: Line comments
-# Line 6: String literals
-# Line 7: Numbers
-# Line 8: Built-in Macros (that come with PyWright)
-# Line 9: Game-specific Macros
+# default: Default color
+# commands: Commands ("set", "include", "script", ...)
+# specialvars: Special Variables ("_ev", "_order_cases", ...)
+# parameters: Parameters ("stack", "nowait", "hide", ...)
+# comments: Line comments
+# strings: String literals
+# numbers: Self-explanatory
+# builtinmacros: Built-in Macros (that come with PyWright)
+# gamemacros: Game-specific Macros
+# editormargin: Scintilla's Margin section, all margins
+# editormarginborder: Special margin reserved for acting like a border between line number area and text area
+# caret: The vertical line on the text editing area that indicates the position, and also blinks.
 #
 # Lines follow the format: "[Text Color],[Paper (Background) Color]", where each color is formatted as "#aarrggbb"
 
