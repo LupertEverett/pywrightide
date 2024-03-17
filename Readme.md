@@ -2,11 +2,11 @@
 
 This project is a curious experiment made with Python and PyQt, that aims at making developing PyWright games easier.
 
-Includes a tabbed text editor with syntax highlighting, dialogs to create new games/cases, and an icon picker.
+Includes a tabbed text editor with syntax highlighting, dialogs to create new or interact with games/cases, and asset browsers.
 
 ## Dependencies
 
-* A recent Python version
+* A recent Python version (3.10+)
 * PyQt5 and QScintilla for Python
 * pygame (only for playing sounds)
 
@@ -16,31 +16,39 @@ For the source code version: Have all the dependencies installed, and then run P
 
 A compiled build for Windows is also available. Just download, extract and run PyWrightIDE.exe
 
-## Screenshots
-
-![](https://i.imgur.com/oqsCuvX.png)
-
-![](https://i.imgur.com/WXe6BjV.png)
-
-![](https://i.imgur.com/BvEYvaq.png)
-
-![](https://i.imgur.com/sz1tJgm.png)
-
 ## Building for Windows
 
-Alongside the dependencies above, have pyinstaller installed via pip. Then run this command in the source code's root folder:
+Alongside the dependencies above, have `pyinstaller` installed via pip. Then run this command in the source code's root folder:
 
 * pyinstaller PyWrightIDE.spec
 
-Once the command finishes its job, the compiled program can be found in /dist/pywrightide/
+Once the command finishes its job, the compiled program can be found in `/dist/pywrightide/`
 
-## Notes
+## Screenshots
 
-Consider this a beta quality software. Some of the features are not yet planned or missing, 
-but you should be able to work with what's available just fine.
+![](https://i.imgur.com/XCYcBp3.png)
 
-## Licenses / Credits
+![](https://i.imgur.com/VyueNQz.png)
 
-The code is licensed under GPLv3, and the custom made icons in /res/icons, barring the ones that utilize official artworks in any way
-(the icons that has the Blue Badger), "pwicon.png", which comes from PyWright, and its edited versions "ideicon.ico" and "ideicon.png",
-are licensed with Creative Commons BY/NC/SA.
+![](https://i.imgur.com/VUD7SMR.png)
+
+![](https://i.imgur.com/4IRJ4aN.png)
+
+![](https://i.imgur.com/dqTJIcA.png)
+
+![](https://i.imgur.com/iPlTSUr.png)
+
+![](https://i.imgur.com/C5tQJCE.png)
+
+## License
+
+Code is licensed under **GPLv3**
+
+Custom-made icons in `/res/icons` and `/res/iconthemes` that are supplied with this program are licensed with **Creative Commons BY/NC/SA**, with the exception of the ones that utilize official artworks in any way
+(the icons that has the Blue Badger), "pwicon.png", which comes from PyWright, and its edited versions "ideicon.ico" and "ideicon.png".
+
+## Credits
+
+[PyWright](http://pywright.dawnsoft.org/) is made by Saluk.
+
+A heartfelt thanks goes to BirbIsTheWord for his extensive usage and testing (and inspiring me to make this program in the first place)!
