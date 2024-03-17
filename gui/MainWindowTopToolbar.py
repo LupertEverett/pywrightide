@@ -5,6 +5,7 @@ from PyQt5.QtWidgets import QToolBar, QAction, QWidget, QFileDialog, QMessageBox
 from PyQt5.QtGui import QIcon, QKeySequence
 
 import gui.IDEMainWindow
+from gui import AboutDialog
 import data.IconThemes as IconThemes
 
 
@@ -246,7 +247,4 @@ class MainWindowTopToolbar(QToolBar):
         self.save_file_action.setEnabled(is_file_modified)
 
     def _handle_about(self):
-        QMessageBox.about(self, "About PyWright IDE", "<h1>PyWright IDE</h1><h2>Prerelease version (23.12.29)</h2>"
-                                                      "<h3>by LupertEverett</h3>"
-                                                      "This program aims to make developing PyWright games easier.<br>"
-                                                      "Made with PyQt5, QScintilla and pygame.")
+        AboutDialog.about_pywright_ide(self)
