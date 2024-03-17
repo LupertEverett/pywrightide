@@ -84,6 +84,7 @@ class MainWindowTopToolbar(QToolBar):
         find_replace_icon_path = IconThemes.icon_path_from_theme(IconThemes.ICON_NAME_FIND_REPLACE)
         self.find_replace_dialog_action = QAction(QIcon(find_replace_icon_path), "Find/Replace")
         # self.find_replace_dialog_action.triggered.connect(self._handle_find_replace)
+        self.find_replace_dialog_action.setEnabled(False)
         self.find_replace_dialog_action.setShortcut(QKeySequence("Ctrl+f"))
         self.find_replace_dialog_action.setStatusTip("Find/Replace words [{}]".format(
             self.find_replace_dialog_action.shortcut().toString()
@@ -189,6 +190,7 @@ class MainWindowTopToolbar(QToolBar):
         self.new_file_action.setEnabled(has_pywright_game)
         self.open_file_action.setEnabled(has_pywright_game)
         # Let's not enable the save button yet, and handle it in update_save_button() instead.
+        self.find_replace_dialog_action.setEnabled(has_pywright_game)
         self.run_pywright_action.setEnabled(has_pywright)
         self.update_toolbar_toggle_buttons()
 
