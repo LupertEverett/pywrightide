@@ -9,7 +9,7 @@ a = Analysis(
     pathex=[],
     binaries=[],
     datas=[("res", "res"), ("LICENSE", "."), ("Readme.md", ".")],
-    hiddenimports=["PyQt5.QtPrintSupport"],
+    hiddenimports=["PyQt5", "PyQt5.QtPrintSupport"],
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
@@ -38,6 +38,7 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
+    contents_directory='.'
 )
 coll = COLLECT(
     exe,
