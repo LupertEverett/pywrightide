@@ -194,7 +194,7 @@ class DirectoryViewWidget(QDockWidget):
         menu.exec_(self._directory_view.mapToGlobal(position))
 
     def _handle_add_new_case_action(self):
-        add_dialog = CasePropertiesEditorDialog(self._pywright_game, self)
+        add_dialog = CasePropertiesEditorDialog(self._pywright_game, None, self)
 
         if add_dialog.exec_():
             self._pywright_game.create_new_case(add_dialog.new_case)
