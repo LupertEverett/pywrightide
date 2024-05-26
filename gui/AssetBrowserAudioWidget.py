@@ -111,7 +111,10 @@ class AssetBrowserAudioWidget(QWidget):
         folder_path = Path("{}/{}/".format(self._pywright_dir if is_global else self._selected_game.game_path,
                                            self.__AUDIO_FOLDER))
 
-        items = [str(x.stem) for x in folder_path.iterdir() if x.suffix == ".ogg"]
+        if not folder_path.exists() or not folder_path.is_dir():
+            return
+
+        items = [x.stem for x in folder_path.iterdir() if x.suffix == ".ogg"]
 
         self._audio_list_widget.clear()
         self._audio_list_widget.addItems(items)
