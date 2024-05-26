@@ -1,7 +1,7 @@
 # Holds the information regarding a PyWright game
 # Basically "visualizes" data.txt and intro.txt
 
-from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QGroupBox, QPushButton
+from PyQt6.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QGroupBox, QPushButton
 
 from .GameDataWidget import GameDataWidget
 from .GameIntroWidget import GameIntroWidget

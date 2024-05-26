@@ -2,12 +2,10 @@
 
 from pathlib import Path
 
-from PyQt5.QtWidgets import (QTreeView, QFileIconProvider, QFileSystemModel, QAction,
-                             QWidget, QDockWidget, QHBoxLayout,
-                             QLabel, QPushButton, QMenu,
-                             QMessageBox, QInputDialog, QLineEdit, QVBoxLayout)
-from PyQt5.QtGui import QIcon, QMouseEvent, QDesktopServices
-from PyQt5.QtCore import Qt, QModelIndex, pyqtSignal, QUrl
+from PyQt6.QtWidgets import (QTreeView, QFileIconProvider, QWidget, QDockWidget, QHBoxLayout, QLabel,
+                             QPushButton, QMenu, QMessageBox, QInputDialog, QLineEdit, QVBoxLayout)
+from PyQt6.QtGui import QIcon, QMouseEvent, QDesktopServices, QFileSystemModel, QAction
+from PyQt6.QtCore import Qt, QModelIndex, pyqtSignal, QUrl
 
 from .CasePropertiesEditorDialog import CasePropertiesEditorDialog
 from data.PyWrightGame import PyWrightGame
@@ -47,7 +45,7 @@ class DirectoryViewWidget(QDockWidget):
 
         self._directory_view = DeselectableTreeView()
         self._directory_view.doubleClicked.connect(self._handle_tree_view_double_clicked)
-        self._directory_view.setContextMenuPolicy(Qt.CustomContextMenu)
+        self._directory_view.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
         self._directory_view.customContextMenuRequested.connect(self._handle_view_context_menu)
 
         main_widget = QWidget()
@@ -70,7 +68,8 @@ class DirectoryViewWidget(QDockWidget):
         self.setWidget(main_widget)
         self.setTitleBarWidget(dummy_title_bar)
         self.setLayout(QVBoxLayout())
-        self.setFeatures(QDockWidget.DockWidgetClosable | QDockWidget.DockWidgetMovable)
+        self.setFeatures(QDockWidget.DockWidgetFeature.DockWidgetClosable |
+                         QDockWidget.DockWidgetFeature.DockWidgetMovable)
         self.setMinimumWidth(300)
 
     def update_directory_view(self, selected_game: PyWrightGame):
@@ -91,7 +90,7 @@ class DirectoryViewWidget(QDockWidget):
         self._directory_view.setRootIndex(fs_model.setRootPath(str(self._pywright_game.game_path)))
         self._directory_view.setIndentation(20)
         self._directory_view.setSortingEnabled(True)
-        self._directory_view.sortByColumn(0, Qt.AscendingOrder)
+        self._directory_view.sortByColumn(0, Qt.SortOrder.AscendingOrder)
         self._directory_view.header().hide()
         self._directory_view.hideColumn(1)
         self._directory_view.hideColumn(2)
@@ -191,13 +190,13 @@ class DirectoryViewWidget(QDockWidget):
             menu.addSeparator()
             menu.addAction(open_dir_action)
 
-        menu.exec_(self._directory_view.mapToGlobal(position))
+        menu.exec(self._directory_view.mapToGlobal(position))
 
     def _handle_add_new_case_action(self):
         add_dialog = CasePropertiesEditorDialog(self._pywright_game, None, self)
 
-        if add_dialog.exec_():
-            self._pywright_game.create_new_case(add_dialog.new_case)
+        if add_dialog.exec():
+            self._pywright_game.create_new_case(add_dialog.get_case())
 
     def _handle_new_script_action(self):
         index = self._directory_view.selectedIndexes()[0]
@@ -208,14 +207,14 @@ class DirectoryViewWidget(QDockWidget):
 
         dir_path = model.filePath(index)
 
-        name, ok = QInputDialog.getText(self, "New Script", "Enter file name", QLineEdit.Normal)
+        name, ok = QInputDialog.getText(self, "New Script", "Enter file name", QLineEdit.EchoMode.Normal)
 
         if ok and name != "":
             if not name.endswith((".mcro", ".txt")):
                 name = name + ".txt"
             final_path = Path("{}/{}".format(dir_path, name))
             if final_path.exists():
-                QMessageBox.critical(self, "Error", "File already exists!", QMessageBox.Ok)
+                QMessageBox.critical(self, "Error", "File already exists!", QMessageBox.ButtonRole.Ok)
                 return
 
             with open(final_path, "x"):
@@ -252,7 +251,7 @@ class DirectoryViewWidget(QDockWidget):
 
         if full_file_path.exists() and full_file_path.is_file():
             QMessageBox.critical(self, "Error", "Script named \"{}\" already exists!".format(resulting_script_name),
-                                 QMessageBox.Ok)
+                                 QMessageBox.ButtonRole.Ok)
             return
 
         with open(full_file_path, "w"):
@@ -261,7 +260,7 @@ class DirectoryViewWidget(QDockWidget):
     def _handle_open_dir_action(self):
         if len(self._directory_view.selectedIndexes()) == 0:
             # Open the Game's root dir instead.
-            QDesktopServices.openUrl(QUrl.fromLocalFile(self._pywright_game.game_path))
+            QDesktopServices.openUrl(QUrl.fromLocalFile(str(self._pywright_game.game_path)))
             return
 
         index = self._directory_view.selectedIndexes()[0]
@@ -282,11 +281,11 @@ class DirectoryViewWidget(QDockWidget):
 
         if old_name in important_files:
             QMessageBox.critical(self, "Error", "Important file \"{}\" cannot be renamed!".format(old_name),
-                                 QMessageBox.Ok)
+                                 QMessageBox.ButtonRole.Ok)
             return
 
         new_name, ok = QInputDialog.getText(self, "Rename File", "Enter file name",
-                                            QLineEdit.Normal, old_name)
+                                            QLineEdit.EchoMode.Normal, old_name)
 
         if not ok:
             return
@@ -304,7 +303,7 @@ class DirectoryViewWidget(QDockWidget):
 
         if final_path.exists() and final_path.is_file():
             QMessageBox.critical(self, "Error", "File \"{}\" already exists!".format(final_path.name),
-                                 QMessageBox.Ok)
+                                 QMessageBox.ButtonRole.Ok)
             return
 
         model.setReadOnly(False)
@@ -325,13 +324,13 @@ class DirectoryViewWidget(QDockWidget):
 
         if file_name in important_files:
             QMessageBox.critical(self, "Error", "Important file \"{}\" cannot be removed!".format(file_name),
-                                 QMessageBox.Ok)
+                                 QMessageBox.ButtonRole.Ok)
             return
 
         prompt = QMessageBox.question(self, "Question", "Are you sure you want to remove \"{}\"?".format(file_name),
-                                      QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+                                      QMessageBox.ButtonRole.Yes | QMessageBox.ButtonRole.No, QMessageBox.ButtonRole.No)
 
-        if prompt == QMessageBox.Yes:
+        if prompt == QMessageBox.ButtonRole.Yes:
             model.remove(index)
 
     def _handle_visibility_change(self):

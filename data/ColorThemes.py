@@ -1,7 +1,6 @@
-import glob
 from pathlib import Path
 
-from PyQt5.QtCore import QDir
+from PyQt6.QtCore import QDir
 
 from . import IDESettings
 

@@ -2,7 +2,7 @@
 
 from pathlib import Path
 
-from PyQt5.QtWidgets import QDialog, QDialogButtonBox, QVBoxLayout, QListWidget
+from PyQt6.QtWidgets import QDialog, QDialogButtonBox, QVBoxLayout, QListWidget
 
 
 class OpenGameDialog(QDialog):
@@ -15,7 +15,7 @@ class OpenGameDialog(QDialog):
 
         self.setWindowTitle("Pick a Game")
 
-        self.buttonBox = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
+        self.buttonBox = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel)
         self.buttonBox.accepted.connect(self._handle_accept)
         self.buttonBox.rejected.connect(self.reject)
 

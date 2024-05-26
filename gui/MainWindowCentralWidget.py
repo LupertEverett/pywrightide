@@ -1,7 +1,7 @@
 from pathlib import Path
 
-from PyQt5.QtCore import pyqtSignal
-from PyQt5.QtWidgets import QWidget, QTabWidget, QVBoxLayout, QMessageBox
+from PyQt6.QtCore import pyqtSignal
+from PyQt6.QtWidgets import QWidget, QTabWidget, QVBoxLayout, QMessageBox
 
 from data import IDESettings, EditorThemes
 from data.PyWrightGame import PyWrightGame
@@ -105,11 +105,6 @@ class MainWindowCentralWidget(QWidget):
 
     def _update_save_button_and_current_tab(self):
         self._update_file_editing_tab_info(self.tab_widget.currentIndex())
-        # is_file_modified = self.tab_widget.currentWidget().is_file_modified()
-        # self.update_save_button_requested.emit(is_file_modified)
-        # tab_text = self.tab_widget.currentWidget().file_name
-        # # Prepend a * to the tab name if the file is modified
-        # self.tab_widget.setTabText(self.tab_widget.currentIndex(), "*" + tab_text if is_file_modified else tab_text)
 
     def _update_tab_modified_infos(self):
         # Like _update_save_button() but for all tabs

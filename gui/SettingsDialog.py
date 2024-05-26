@@ -1,7 +1,7 @@
-from PyQt5.QtWidgets import (QDialog, QGroupBox, QVBoxLayout, QHBoxLayout, QLineEdit,
+from PyQt6.QtWidgets import (QDialog, QGroupBox, QVBoxLayout, QHBoxLayout,
                              QSpinBox, QDialogButtonBox, QLabel, QPushButton, QCheckBox, QFontComboBox, QComboBox)
-from PyQt5.QtCore import QSettings, pyqtSignal
-from PyQt5.QtGui import QFont
+from PyQt6.QtCore import pyqtSignal
+from PyQt6.QtGui import QFont
 
 from data import IDESettings, ColorThemes, EditorThemes
 from data import IconThemes

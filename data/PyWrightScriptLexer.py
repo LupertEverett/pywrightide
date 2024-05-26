@@ -1,10 +1,9 @@
 # A custom lexer for PyWright scripts, mainly for syntax highlighting
 import re
 
-from PyQt5.QtGui import QColor, QFont
-from PyQt5.QtCore import QSettings
+from PyQt6.QtGui import QColor, QFont
 
-from PyQt5.Qsci import QsciLexerCustom, QsciScintilla
+from PyQt6.Qsci import QsciLexerCustom, QsciScintilla
 
 from data import IDESettings, EditorThemes
 
@@ -131,7 +130,7 @@ class PyWrightScriptLexer(QsciLexerCustom):
 
     def set_font_properties(self, font_name: str, font_size: int, bold_font: bool):
         self.setDefaultFont(QFont(font_name, font_size))
-        font_weight = QFont.Bold if bold_font else QFont.Normal
+        font_weight = QFont.Weight.Bold if bold_font else QFont.Weight.Normal
         for i in range(0, 9):
             self.setFont(QFont(font_name, font_size, weight=font_weight), i)
 

@@ -1,7 +1,7 @@
 # Handles the data in intro.txt of the selected PyWright game
 
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QListWidget, QToolBar, QAction, QMessageBox
-from PyQt5.QtGui import QIcon
+from PyQt6.QtWidgets import QWidget, QVBoxLayout, QListWidget, QToolBar, QMessageBox
+from PyQt6.QtGui import QIcon, QAction
 
 from .CasePropertiesEditorDialog import CasePropertiesEditorDialog
 from .AddExistingCaseDialog import AddExistingCaseDialog
@@ -99,26 +99,28 @@ class GameIntroWidget(QWidget):
     def _handle_add_new_case(self):
         add_new_case_dialog = CasePropertiesEditorDialog(self._selected_game, None, self)
 
-        if add_new_case_dialog.exec_():
+        if add_new_case_dialog.exec():
             self._selected_game.create_new_case(add_new_case_dialog.get_case())
             self._populate_cases_list()
 
     def _handle_add_existing_case(self):
         add_existing_case_dialog = AddExistingCaseDialog(self._selected_game, self)
-        if add_existing_case_dialog.exec_():
+        if add_existing_case_dialog.exec():
             self._selected_game.update_intro_txt_cases()
             self._populate_cases_list()
 
     def _handle_remove_case(self):
         if QMessageBox.question(self, "Are you sure?", "Are you sure you want to remove this case?",
-                                QMessageBox.Yes | QMessageBox.No, QMessageBox.No) == QMessageBox.No:
+                                QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+                                QMessageBox.StandardButton.No) == QMessageBox.StandardButton.No:
             return
 
         also_remove_folder = QMessageBox.question(self, "Also remove the folder?",
                                                   "Would you like to remove the folder as well?",
-                                                  QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+                                                  QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+                                                  QMessageBox.StandardButton.No)
         selected_case: str = self._game_cases_list_widget.currentItem().text()
-        self._selected_game.remove_case(selected_case, also_remove_folder == QMessageBox.Yes)
+        self._selected_game.remove_case(selected_case, also_remove_folder == QMessageBox.StandardButton.Yes)
         self._populate_cases_list()
 
     def _handle_case_properties(self):
@@ -128,7 +130,7 @@ class GameIntroWidget(QWidget):
 
         case_properties_dialog = CasePropertiesEditorDialog(self._selected_game, selected_case, self)
 
-        if case_properties_dialog.exec_():
+        if case_properties_dialog.exec():
             selected_case.update_case_intro_txt(selected_case_path)
             self._populate_cases_list()
 

@@ -3,11 +3,9 @@
 
 from pathlib import Path
 
-from PyQt5.QtWidgets import (QWidget, QListView, QFileSystemModel, QAction,
-                             QFileIconProvider, QVBoxLayout, QComboBox,
-                             QMenu)
-from PyQt5.QtGui import QIcon, QPixmap, QDesktopServices, QClipboard, QGuiApplication
-from PyQt5.QtCore import QSize, QDir, Qt, QUrl, pyqtSignal, QFileSystemWatcher
+from PyQt6.QtWidgets import QWidget, QListView, QFileIconProvider, QVBoxLayout, QComboBox, QMenu
+from PyQt6.QtGui import QIcon, QPixmap, QDesktopServices, QClipboard, QGuiApplication, QFileSystemModel, QAction
+from PyQt6.QtCore import QSize, QDir, Qt, QUrl, pyqtSignal, QFileSystemWatcher
 
 from data.PyWrightGame import PyWrightGame
 

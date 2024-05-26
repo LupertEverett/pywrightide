@@ -2,8 +2,8 @@
 
 from pathlib import Path
 
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QPushButton
-from PyQt5.QtCore import pyqtSignal
+from PyQt6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QPushButton
+from PyQt6.QtCore import pyqtSignal
 
 from .IconPickerDialog import IconPickerDialog
 from data.PyWrightGame import PyWrightGame
@@ -136,5 +136,5 @@ class GameDataWidget(QWidget):
     def _handle_icon_picker_clicked(self):
         icon_picker = IconPickerDialog(self._pywright_root_dir, self._selected_game, self)
 
-        if icon_picker.exec_():
+        if icon_picker.exec():
             self._game_icon_lineedit.setText(icon_picker.selected_icon)

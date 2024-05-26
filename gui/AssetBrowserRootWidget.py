@@ -1,7 +1,6 @@
 # Provides ways to view various assets (textures, sound, music...)
 
-from PyQt5.QtWidgets import QDockWidget, QTabWidget, QWidget, QVBoxLayout, QHBoxLayout, QLabel
-from PyQt5.QtGui import QHideEvent
+from PyQt6.QtWidgets import QDockWidget, QTabWidget, QWidget, QVBoxLayout, QHBoxLayout
 
 import pygame.mixer
 

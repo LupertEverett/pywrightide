@@ -3,11 +3,11 @@
 
 from pathlib import Path
 
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QFileDialog, QMessageBox
-from PyQt5.QtCore import pyqtSignal
-from PyQt5.QtGui import QColor
+from PyQt6.QtWidgets import QWidget, QVBoxLayout, QFileDialog, QMessageBox
+from PyQt6.QtCore import pyqtSignal
+from PyQt6.QtGui import QColor
 
-from PyQt5.Qsci import *
+from PyQt6.Qsci import *
 
 import data.EditorThemes as EditorThemes
 from data.PyWrightScriptLexer import PyWrightScriptLexer
@@ -33,7 +33,7 @@ class FileEditWidget(QWidget):
         self.sci.setUtf8(True)
 
         # Enable word wrapping
-        self.sci.setWrapMode(QsciScintilla.WrapWord)
+        self.sci.setWrapMode(QsciScintilla.WrapMode.WrapWord)
 
         # First margin is the line number margin by default. We set a preset width value to it here.
         self.sci.setMargins(2)
@@ -85,7 +85,6 @@ class FileEditWidget(QWidget):
             f.close()
 
         return result
-
 
     def supply_builtin_macros_to_lexer(self, builtin_macros: list[str]):
         self._lexer.set_builtin_macros(builtin_macros)

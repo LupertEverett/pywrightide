@@ -3,11 +3,11 @@
 
 from pathlib import Path
 
-from PyQt5.QtWidgets import (QDialog, QDialogButtonBox, QComboBox, QCheckBox,
-                             QListView, QFileSystemModel, QFileIconProvider,
+from PyQt6.QtWidgets import (QDialog, QDialogButtonBox, QComboBox, QCheckBox,
+                             QListView, QFileIconProvider,
                              QHBoxLayout, QVBoxLayout, QMessageBox)
-from PyQt5.QtGui import QPixmap, QIcon
-from PyQt5.QtCore import QDir, QSize, Qt
+from PyQt6.QtGui import QPixmap, QIcon, QFileSystemModel
+from PyQt6.QtCore import QDir, QSize, Qt
 
 from data.PyWrightGame import PyWrightGame
 
@@ -40,13 +40,13 @@ class IconPickerDialog(QDialog):
                                                   "query the selected game's art folder instead, if it exists.")
 
         self._icons_list_view = QListView()
-        self._icons_list_view.setViewMode(QListView.IconMode)
-        self._icons_list_view.setResizeMode(QListView.Adjust)
+        self._icons_list_view.setViewMode(QListView.ViewMode.IconMode)
+        self._icons_list_view.setResizeMode(QListView.ResizeMode.Adjust)
         self._icons_list_view.setUniformItemSizes(True)
         self._icons_list_view.setSpacing(5)
         self._icons_list_view.doubleClicked.connect(self._handle_accept)
 
-        self._dialog_box = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
+        self._dialog_box = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel)
         self._dialog_box.accepted.connect(self._handle_accept)
         self._dialog_box.rejected.connect(self.reject)
 
@@ -103,7 +103,7 @@ class IconPickerDialog(QDialog):
         fs_model.setIconProvider(icon_provider)
 
         name_filters = ["*.png", "*.jpg"]
-        fs_model.setFilter(QDir.Files)
+        fs_model.setFilter(QDir.Filter.Files)
         fs_model.setNameFilters(name_filters)
         fs_model.setNameFilterDisables(False)
 
@@ -115,7 +115,8 @@ class IconPickerDialog(QDialog):
             QMessageBox.critical(self, "Error", "Nothing has selected!")
             return
 
-        name = self._icons_list_view.model().data(self._icons_list_view.selectedIndexes()[0], Qt.DisplayRole)
+        name = self._icons_list_view.model().data(self._icons_list_view.selectedIndexes()[0],
+                                                  Qt.ItemDataRole.DisplayRole)
         self.selected_icon = "art/" + self._subfolder_combobox.currentText() + "/" + name
         self.accept()
 

@@ -2,7 +2,7 @@
 # Checks through the folders that could be possible Case folders and prompts the user to pick one to add
 from pathlib import Path
 
-from PyQt5.QtWidgets import QDialog, QDialogButtonBox, QListWidget, QVBoxLayout, QPushButton
+from PyQt6.QtWidgets import QDialog, QDialogButtonBox, QListWidget, QVBoxLayout, QPushButton
 
 from data.PyWrightGame import PyWrightGame
 
@@ -22,11 +22,11 @@ class AddExistingCaseDialog(QDialog):
         self._available_cases_list_widget = QListWidget()
         self._available_cases_list_widget.itemSelectionChanged.connect(self._update_ok_button)
 
-        self.buttonBox = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
+        self.buttonBox = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel)
         self.buttonBox.accepted.connect(self._handle_accept)
         self.buttonBox.rejected.connect(self.reject)
 
-        self._ok_button: QPushButton = self.buttonBox.button(QDialogButtonBox.Ok)
+        self._ok_button: QPushButton = self.buttonBox.button(QDialogButtonBox.StandardButton.Ok)
         self._update_ok_button()
 
         main_layout = QVBoxLayout()

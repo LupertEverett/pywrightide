@@ -1,6 +1,6 @@
 # Dialog to add a new case to a selected game.
 
-from PyQt5.QtWidgets import QDialog, QDialogButtonBox, QVBoxLayout, QMessageBox
+from PyQt6.QtWidgets import QDialog, QDialogButtonBox, QVBoxLayout, QMessageBox
 
 from .CasePropertiesWidget import CasePropertiesWidget
 
@@ -32,7 +32,7 @@ class CasePropertiesEditorDialog(QDialog):
 
         self._case_properties_widget = CasePropertiesWidget(self._selected_case)
 
-        self._buttonBox = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
+        self._buttonBox = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel)
         self._buttonBox.accepted.connect(self._handle_accept)
         self._buttonBox.rejected.connect(self.reject)
 

@@ -1,8 +1,8 @@
 # Main Window Toolbar
 # Contains stuff like "New File", "Load File", etc.
 
-from PyQt5.QtWidgets import QToolBar, QAction, QWidget, QFileDialog, QMessageBox
-from PyQt5.QtGui import QIcon, QKeySequence
+from PyQt6.QtWidgets import QToolBar, QWidget, QFileDialog, QMessageBox
+from PyQt6.QtGui import QIcon, QKeySequence, QAction
 
 import gui.IDEMainWindow
 from gui import AboutDialog

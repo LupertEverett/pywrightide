@@ -2,7 +2,7 @@
 
 from pathlib import Path
 
-from PyQt5.QtWidgets import QDialog, QDialogButtonBox, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QMessageBox
+from PyQt6.QtWidgets import QDialog, QDialogButtonBox, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QMessageBox
 
 from .GameDataWidget import GameDataWidget
 from data.PyWrightGame import PyWrightGame
@@ -31,7 +31,7 @@ class NewGameDialog(QDialog):
 
         self._new_game = PyWrightGame()
 
-        self._dialog_box = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
+        self._dialog_box = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel)
         self._dialog_box.accepted.connect(self._handle_accepted)
         self._dialog_box.rejected.connect(self.reject)
 

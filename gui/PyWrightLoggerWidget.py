@@ -1,10 +1,11 @@
 from pathlib import Path
 
-from PyQt5.QtWidgets import QWidget, QDockWidget, QPlainTextEdit, QHBoxLayout, QLabel, QPushButton
-from PyQt5.QtGui import QIcon, QHideEvent
-from PyQt5.QtCore import QProcess
+from PyQt6.QtWidgets import QWidget, QDockWidget, QPlainTextEdit, QHBoxLayout, QLabel, QPushButton
+from PyQt6.QtGui import QIcon, QHideEvent
+from PyQt6.QtCore import QProcess
 
 import data.IconThemes as IconThemes
+
 
 class PyWrightLoggerWidget(QDockWidget):
 

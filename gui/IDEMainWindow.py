@@ -2,9 +2,9 @@
 
 from pathlib import Path
 
-from PyQt5.QtWidgets import (QMainWindow, QStatusBar, QFileDialog, QLabel, QMessageBox)
-from PyQt5.QtGui import QIcon, QCloseEvent
-from PyQt5.QtCore import Qt
+from PyQt6.QtWidgets import (QMainWindow, QStatusBar, QFileDialog, QLabel, QMessageBox)
+from PyQt6.QtGui import QIcon, QCloseEvent
+from PyQt6.QtCore import Qt
 
 from .MainWindowTopToolbar import MainWindowTopToolbar
 from .MainWindowCentralWidget import MainWindowCentralWidget
@@ -37,7 +37,7 @@ class IDEMainWindow(QMainWindow):
 
         self.setWindowTitle("PyWright IDE")
         self.setWindowIcon(QIcon("res/icons/ideicon.png"))
-        self.setMinimumSize(1024, 768)
+        self.setMinimumSize(1024, 600)
         if IDESettings.window_geometry_data_exists():
             self.restoreGeometry(IDESettings.get_window_geometry())
 

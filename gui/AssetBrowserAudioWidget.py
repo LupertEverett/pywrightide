@@ -3,10 +3,10 @@
 from pathlib import Path
 from enum import Enum
 
-from PyQt5.QtWidgets import (QWidget, QListWidget, QAction, QVBoxLayout, QHBoxLayout, QComboBox,
+from PyQt6.QtWidgets import (QWidget, QListWidget, QVBoxLayout, QHBoxLayout, QComboBox,
                              QMenu, QPushButton)
-from PyQt5.QtGui import QDesktopServices, QGuiApplication, QClipboard
-from PyQt5.QtCore import pyqtSignal, Qt, QUrl, QFileSystemWatcher
+from PyQt6.QtGui import QDesktopServices, QGuiApplication, QClipboard, QAction
+from PyQt6.QtCore import pyqtSignal, Qt, QUrl, QFileSystemWatcher
 
 from data.PyWrightGame import PyWrightGame
 
@@ -39,7 +39,7 @@ class AssetBrowserAudioWidget(QWidget):
 
         self._audio_list_widget = QListWidget(self)
         self._audio_list_widget.setDragEnabled(False)
-        self._audio_list_widget.setContextMenuPolicy(Qt.CustomContextMenu)
+        self._audio_list_widget.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
         self._audio_list_widget.customContextMenuRequested.connect(self._handle_audio_context_menu)
         self._audio_list_widget.itemSelectionChanged.connect(self._handle_current_change)
         self._audio_list_widget.doubleClicked.connect(self._handle_play_pressed)
@@ -159,7 +159,7 @@ class AssetBrowserAudioWidget(QWidget):
         clipboard = QGuiApplication.clipboard()
         item = self._audio_list_widget.selectedItems()[0].text()
 
-        clipboard.setText(item + ".ogg", QClipboard.Clipboard)
+        clipboard.setText(item + ".ogg", QClipboard.Mode.Clipboard)
 
     def _handle_insert_into_cursor(self):
         audio_name = self._audio_list_widget.selectedItems()[0].text()

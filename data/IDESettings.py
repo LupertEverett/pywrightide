@@ -1,8 +1,8 @@
 # Mainly for storing the key names
 from PyQt5.QtCore import QSettings, QByteArray
 
-IDE_VERSION_STRING = "1.0.1"
-IDE_BUILD_STRING = "24.03.24"
+IDE_VERSION_STRING = "1.1"
+IDE_BUILD_STRING = "24.05.26"
 
 __program_settings = QSettings("PyWrightIDE", "PyWrightIDE")
 
@@ -71,16 +71,16 @@ def set_autoload_last_game_name(new_game_name_str: str):
     __program_settings.setValue(AUTOLOAD_LAST_GAME_NAME_KEY, new_game_name_str)
 
 
-def get_window_geometry() -> bytes:
-    return bytes(__program_settings.value(WINDOW_GEOMETRY_KEY, None, QByteArray))
+def get_window_geometry() -> QByteArray:
+    return __program_settings.value(WINDOW_GEOMETRY_KEY)
 
 
 def set_window_geometry(new_geometry: QByteArray):
     __program_settings.setValue(WINDOW_GEOMETRY_KEY, new_geometry)
 
 
-def get_window_state() -> bytes:
-    return bytes(__program_settings.value(WINDOW_STATE_KEY, None, QByteArray))
+def get_window_state() -> QByteArray:
+    return __program_settings.value(WINDOW_STATE_KEY)
 
 
 def set_window_state(new_state: QByteArray):
