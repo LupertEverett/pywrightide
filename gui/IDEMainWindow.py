@@ -112,9 +112,8 @@ class IDEMainWindow(QMainWindow):
         if IDESettings.window_state_data_exists():
             self.restoreState(IDESettings.get_window_state())
 
-        # Apply the color theme if it exists
-        if IDESettings.get_color_theme() != "System Theme":
-            self._apply_new_color_theme()
+        # Apply the color theme
+        self._apply_new_color_theme()
 
     def pick_pywright_installation_folder(self, folder_path: str):
         self.selected_pywright_installation = folder_path
