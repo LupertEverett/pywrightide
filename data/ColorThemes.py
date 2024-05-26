@@ -1,8 +1,22 @@
 from pathlib import Path
 
+import sys
+
 from PyQt6.QtCore import QDir
 
 from . import IDESettings
+
+win32_style_overrides = """
+QTreeView {
+    background: #FFF;
+    border: 1px solid #ECECEC;
+}
+
+QListView {
+    background: #FFF;
+    border: 1px solid #ECECEC;
+}
+"""
 
 
 def query_color_themes() -> list[str]:
@@ -40,7 +54,7 @@ def load_current_color_theme() -> str:
     current_color_theme = IDESettings.get_color_theme()
 
     if current_color_theme == "System Theme":
-        return ""
+        return "" if sys.platform != "win32" else win32_style_overrides
 
     result = ""
     with open(get_color_theme_path(), "r") as f:
