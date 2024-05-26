@@ -9,12 +9,12 @@ from . import IDESettings
 win32_style_overrides = """
 QTreeView {
     background: #FFF;
-    border: 1px solid #ECECEC;
+    border: 1px solid #CCC;
 }
 
 QListView {
     background: #FFF;
-    border: 1px solid #ECECEC;
+    border: 1px solid #CCC;
 }
 """
 
