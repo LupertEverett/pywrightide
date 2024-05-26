@@ -1,5 +1,3 @@
-from PyQt5.QtCore import QSettings
-
 from pathlib import Path
 
 from . import IDESettings
