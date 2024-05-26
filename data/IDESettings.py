@@ -1,5 +1,5 @@
 # Mainly for storing the key names
-from PyQt5.QtCore import QSettings, QByteArray
+from PyQt6.QtCore import QSettings, QByteArray
 
 IDE_VERSION_STRING = "1.1"
 IDE_BUILD_STRING = "24.05.26"
