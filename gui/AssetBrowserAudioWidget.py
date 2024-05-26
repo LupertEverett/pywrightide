@@ -6,7 +6,7 @@ from enum import Enum
 from PyQt5.QtWidgets import (QWidget, QListWidget, QAction, QVBoxLayout, QHBoxLayout, QComboBox,
                              QMenu, QPushButton)
 from PyQt5.QtGui import QDesktopServices, QGuiApplication, QClipboard
-from PyQt5.QtCore import pyqtSignal, Qt, QUrl
+from PyQt5.QtCore import pyqtSignal, Qt, QUrl, QFileSystemWatcher
 
 from data.PyWrightGame import PyWrightGame
 
@@ -53,6 +53,8 @@ class AssetBrowserAudioWidget(QWidget):
         self._stop_button = QPushButton("Stop")
         self._stop_button.pressed.connect(self._handle_stop_pressed)
 
+        self.__file_system_watcher = QFileSystemWatcher(self)
+
         media_controls_layout = QHBoxLayout()
 
         media_controls_layout.addWidget(self._play_button)
@@ -75,6 +77,7 @@ class AssetBrowserAudioWidget(QWidget):
         self._selected_game = selected_game
 
     def _query_available_folders(self):
+        self.__file_system_watcher.removePaths(self.__file_system_watcher.directories())
         if self._pywright_dir == "":
             return
 
@@ -88,9 +91,11 @@ class AssetBrowserAudioWidget(QWidget):
         self._available_music_folders.clear()
 
         if global_music_folder_path.exists() and global_music_folder_path.is_dir():
+            self.__file_system_watcher.addPath(str(global_music_folder_path))
             self._available_music_folders.append("Global")
 
         if game_music_folder_path.exists() and game_music_folder_path.is_dir():
+            self.__file_system_watcher.addPath(str(game_music_folder_path))
             self._available_music_folders.append("Game specific")
 
     def refresh_music_folders(self):

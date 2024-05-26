@@ -7,7 +7,7 @@ from PyQt5.QtWidgets import (QWidget, QListView, QFileSystemModel, QAction,
                              QFileIconProvider, QVBoxLayout, QComboBox,
                              QMenu)
 from PyQt5.QtGui import QIcon, QPixmap, QDesktopServices, QClipboard, QGuiApplication
-from PyQt5.QtCore import QSize, QDir, Qt, QUrl, pyqtSignal
+from PyQt5.QtCore import QSize, QDir, Qt, QUrl, pyqtSignal, QFileSystemWatcher
 
 from data.PyWrightGame import PyWrightGame
 
@@ -43,6 +43,10 @@ class AssetManagerTextureWidget(QWidget):
         self._folders_combo_box = QComboBox()
         self._folders_combo_box.currentIndexChanged.connect(self._refresh_texture_view)
 
+        self.__file_system_watcher = QFileSystemWatcher(self)
+
+        self.__file_system_watcher.directoryChanged.connect(self._handle_directory_contents_changed)
+
         main_layout = QVBoxLayout()
 
         main_layout.addWidget(self._folders_combo_box)
@@ -53,6 +57,7 @@ class AssetManagerTextureWidget(QWidget):
     def clear(self):
         self._pywright_dir = ""
         self._selected_game = PyWrightGame()
+        self.__file_system_watcher.removePaths(self.__file_system_watcher.directories())
 
     def select_pywright(self, pywright_dir: str):
         self._pywright_dir = pywright_dir
@@ -61,6 +66,8 @@ class AssetManagerTextureWidget(QWidget):
         self._selected_game = selected_game
 
     def _query_available_folders(self):
+        self.__file_system_watcher.removePaths(self.__file_system_watcher.directories())
+
         if self._pywright_dir == "":
             return
 
@@ -87,6 +94,8 @@ class AssetManagerTextureWidget(QWidget):
                 game_art_subfolders.extend([folder + "/" + x.name for x in folder_path.iterdir() if x.is_dir()])
 
         self._available_folders = global_art_folders + game_art_folders + game_art_subfolders
+
+        self.__file_system_watcher.addPaths(self._available_folders)
 
     def refresh_art_folders(self):
         self._query_available_folders()
@@ -118,6 +127,10 @@ class AssetManagerTextureWidget(QWidget):
 
         self._textures_list_view.setModel(fs_model)
         self._textures_list_view.setRootIndex(fs_model.setRootPath(str(folder_path)))
+
+    def _handle_directory_contents_changed(self, path: str):
+        if path == self._folders_combo_box.currentText():
+            self._refresh_texture_view()
 
     def _handle_texture_context_menu(self, position):
         if not self._selected_game.is_a_game_selected():
