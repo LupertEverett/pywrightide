@@ -7,6 +7,16 @@ QDockWidget {
     color: #FFF;
 }
 
+QTreeView {
+    background: #FFF;
+    border: 1px solid #ECECEC;
+}
+
+QListView {
+    background: #FFF;
+    border: 1px solid #ECECEC;
+}
+
 QDockWidget::title {
     background-color: #915F10;
 }
