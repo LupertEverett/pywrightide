@@ -45,7 +45,7 @@ class AssetBrowserAudioWidget(QWidget):
         self._audio_list_widget.doubleClicked.connect(self._handle_play_pressed)
 
         self._audio_folders_combo_box = QComboBox()
-        self._audio_folders_combo_box.currentIndexChanged.connect(self._refresh_music_list_view)
+        self._audio_folders_combo_box.currentIndexChanged.connect(self._refresh_audio_list_view)
 
         self._play_button = QPushButton("Play")
         self._play_button.pressed.connect(self._handle_play_pressed)
@@ -98,13 +98,13 @@ class AssetBrowserAudioWidget(QWidget):
             self.__file_system_watcher.addPath(str(game_music_folder_path))
             self._available_music_folders.append("Game specific")
 
-    def refresh_music_folders(self):
+    def refresh_audio_folders(self):
         self._audio_folders_combo_box.clear()
         self._query_available_folders()
         self._audio_folders_combo_box.addItems(self._available_music_folders)
-        self._refresh_music_list_view()
+        self._refresh_audio_list_view()
 
-    def _refresh_music_list_view(self):
+    def _refresh_audio_list_view(self):
         folder_text = self._audio_folders_combo_box.currentText()
         is_global = folder_text == "Global"
 

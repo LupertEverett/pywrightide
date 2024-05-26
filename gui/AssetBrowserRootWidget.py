@@ -60,11 +60,11 @@ class AssetBrowserRootWidget(QDockWidget):
 
         self.music_browser.select_pywright(pywright_path)
         self.music_browser.set_selected_game(selected_game)
-        self.music_browser.refresh_music_folders()
+        self.music_browser.refresh_audio_folders()
 
         self.sfx_browser.select_pywright(pywright_path)
         self.sfx_browser.set_selected_game(selected_game)
-        self.sfx_browser.refresh_music_folders()
+        self.sfx_browser.refresh_audio_folders()
 
     def _handle_visibility_change(self):
         from .IDEMainWindow import IDEMainWindow
