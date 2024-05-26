@@ -23,7 +23,7 @@ class AssetBrowserRootWidget(QDockWidget):
         layout = QVBoxLayout()
 
         layout.addWidget(self.tab_widget)
-        layout.setContentsMargins(12, 0, 12, 12)
+        layout.setContentsMargins(4, 4, 4, 4)
         main_widget.setLayout(layout)
 
         self.title_bar_widget = QWidget()

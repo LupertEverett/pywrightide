@@ -23,7 +23,7 @@ class MainWindowCentralWidget(QWidget):
         self.tab_widget.currentChanged.connect(self._handle_tab_change)
 
         layout = QVBoxLayout()
-        layout.setContentsMargins(12, 12, 12, 12)
+        layout.setContentsMargins(4, 4, 4, 4)
 
         layout.addWidget(self.tab_widget)
 

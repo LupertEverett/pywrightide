@@ -53,7 +53,7 @@ class DirectoryViewWidget(QDockWidget):
 
         dummy_title_bar = QWidget()
         dummy_title_bar.setLayout(QHBoxLayout())
-        dummy_title_bar.layout().setContentsMargins(4, 6, 4, 6)
+        dummy_title_bar.layout().setContentsMargins(2, 2, 2, 2)
 
         self._top_widget = self._create_custom_title_bar()
 
@@ -63,7 +63,7 @@ class DirectoryViewWidget(QDockWidget):
         layout.addWidget(self._directory_view)
 
         main_widget.setLayout(layout)
-        layout.setContentsMargins(12, 0, 12, 12)
+        layout.setContentsMargins(4, 4, 4, 4)
 
         self.setWidget(main_widget)
         self.setTitleBarWidget(dummy_title_bar)
