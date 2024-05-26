@@ -130,6 +130,7 @@ class IDEMainWindow(QMainWindow):
         self._top_toolbar.update_run_pywright_status_tip(self.pywright_executable_name)
         self._top_toolbar.update_toolbar_buttons(self.selected_pywright_installation != "",
                                                  self.selected_game.get_game_name() != "")
+        self.asset_manager_widget.update_assets(folder_path, PyWrightGame())
 
     def check_legit_pywright(self, selected_directory) -> bool:
         """Returns true if the selected folder is a valid PyWright directory."""
