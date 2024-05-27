@@ -37,7 +37,7 @@ class IDEMainWindow(QMainWindow):
 
         self.setWindowTitle("PyWright IDE")
         self.setWindowIcon(QIcon("res/icons/ideicon.png"))
-        self.setMinimumSize(1024, 600)
+        self.setMinimumSize(800, 600)
         if IDESettings.window_geometry_data_exists():
             self.restoreGeometry(IDESettings.get_window_geometry())
 
