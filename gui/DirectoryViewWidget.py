@@ -70,7 +70,7 @@ class DirectoryViewWidget(QDockWidget):
         self.setLayout(QVBoxLayout())
         self.setFeatures(QDockWidget.DockWidgetFeature.DockWidgetClosable |
                          QDockWidget.DockWidgetFeature.DockWidgetMovable)
-        self.setMinimumWidth(300)
+        self.setMinimumWidth(150)
 
     def update_directory_view(self, selected_game: PyWrightGame):
         fs_model = QFileSystemModel()
