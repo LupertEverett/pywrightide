@@ -196,6 +196,7 @@ QCheckBox {
 }
 
 QGroupBox {
+    background-color: #474747;
     color: #FFF;
 }
 
