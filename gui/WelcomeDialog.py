@@ -3,9 +3,7 @@ from PyQt6.QtWidgets import QLabel, QDialog, QListView, QPushButton, QHBoxLayout
     QMessageBox
 from PyQt6.QtGui import QStandardItem, QStandardItemModel, QIcon, QCloseEvent
 
-from data import IDESettings, IconThemes
-
-from pathlib import Path
+from data import IDESettings, IconThemes, PyWrightFolder
 
 _welcome_label_text = """
 <h1>Welcome to PyWright IDE {}!</h1>
@@ -76,7 +74,7 @@ class WelcomeDialog(QDialog):
         picker = QFileDialog.getExistingDirectory()
 
         if picker != "":
-            if not self.__check_legit_pywright(picker):
+            if not PyWrightFolder.is_valid_pywright_folder(picker):
                 QMessageBox.critical(self, "Error", "Could not find a PyWright installation")
                 return
 
@@ -104,19 +102,6 @@ class WelcomeDialog(QDialog):
             IDESettings.set_autoload_last_game_name("")  # Should be set after closing the main window instead
             IDESettings.set_autoload_last_project_check(True)
         self.accept()
-
-    def __check_legit_pywright(self, selected_directory) -> bool:
-        """Returns true if the selected folder is a valid PyWright directory."""
-
-        return Path("{}/games".format(selected_directory)).exists() \
-            and Path("{}/art".format(selected_directory)).exists() \
-            and Path("{}/core".format(selected_directory)).exists() \
-            and self.__check_legit_pywright_executables(selected_directory)
-
-    def __check_legit_pywright_executables(self, selected_directory) -> bool:
-        # Let's not handle macOS PyWright yet...
-        return Path("{}/PyWright.exe".format(selected_directory)).exists() \
-            or Path("{}/PyWright.py".format(selected_directory)).exists()
 
     def get_selected_folder_path(self) -> str:
         return self.__selected_folder_path

@@ -17,7 +17,7 @@ from .SettingsDialog import SettingsDialog
 from .FindReplaceDialog import FindReplaceDialog
 from .AssetBrowserRootWidget import AssetBrowserRootWidget
 
-from data import IDESettings, ColorThemes
+from data import IDESettings, ColorThemes, PyWrightFolder
 from data.PyWrightGame import PyWrightGame
 
 
@@ -34,6 +34,8 @@ class IDEMainWindow(QMainWindow):
 
         if len(IDESettings.all_keys()) == 0:
             IDESettings.reset_settings()
+
+        self.recent_folders = IDESettings.get_recent_docs()
 
         self.setWindowTitle("PyWright IDE")
         self.setWindowIcon(QIcon("res/icons/ideicon.png"))
@@ -124,7 +126,7 @@ class IDEMainWindow(QMainWindow):
         if self.central_widget.tabs_count() > 0:
             self.central_widget.clear_tabs()
         self.installation_path_label.setText(folder_path)
-        self._pick_pywright_executable(folder_path)
+        self.pywright_executable_name = PyWrightFolder.pick_pywright_executable(folder_path)
         self._parse_builtin_macros(folder_path)
         self.central_widget.set_pywright_installation_path(self.selected_pywright_installation)
         self.central_widget.load_builtin_macros(self._pywright_builtin_macros)
@@ -132,32 +134,6 @@ class IDEMainWindow(QMainWindow):
         self._top_toolbar.update_toolbar_buttons(self.selected_pywright_installation != "",
                                                  self.selected_game.get_game_name() != "")
         self.asset_manager_widget.update_assets(folder_path, PyWrightGame())
-
-    def check_legit_pywright(self, selected_directory) -> bool:
-        """Returns true if the selected folder is a valid PyWright directory."""
-
-        return Path("{}/games".format(selected_directory)).exists() \
-               and Path("{}/art".format(selected_directory)).exists() \
-               and Path("{}/core".format(selected_directory)).exists() \
-               and self._check_legit_pywright_executables(selected_directory)
-
-    def _check_legit_pywright_executables(self, selected_directory) -> bool:
-        # Let's not handle macOS PyWright yet...
-        return Path("{}/PyWright.exe".format(selected_directory)).exists() \
-               or Path("{}/PyWright.py".format(selected_directory)).exists()
-
-    def _pick_pywright_executable(self, selected_directory):
-        """Picks a PyWright executable from the selected_directory.
-
-        :param selected_directory: Selected Directory, must be the root folder of the PyWright installation."""
-        # Default to Windows, fallback to the generic py version.
-        win_pywright = Path("{}/PyWright.exe".format(selected_directory))
-        py_pywright = Path("{}/PyWright.py".format(selected_directory))
-
-        if win_pywright.exists():
-            self.pywright_executable_name = win_pywright.name
-        elif py_pywright.exists():
-            self.pywright_executable_name = py_pywright.name
 
     def _handle_new_game(self):
         new_game_dialog = NewGameDialog(self.selected_pywright_installation, self)
@@ -266,6 +242,8 @@ class IDEMainWindow(QMainWindow):
         # Always save the last open project's path and the selected game
         IDESettings.set_autoload_last_project_path(self.selected_pywright_installation)
         IDESettings.set_autoload_last_game_name(self.selected_game.get_game_name())
+
+        IDESettings.set_recent_docs(self.recent_folders)
 
         IDESettings.set_window_geometry(self.saveGeometry())
         IDESettings.set_window_state(self.saveState())
