@@ -135,6 +135,11 @@ class IDEMainWindow(QMainWindow):
                                                  self.selected_game.get_game_name() != "")
         self.asset_manager_widget.update_assets(folder_path, PyWrightGame())
 
+        for recent_folder_path in self.recent_folders:
+            if folder_path == recent_folder_path:
+                return
+        self.recent_folders.append(folder_path)
+
     def _handle_new_game(self):
         new_game_dialog = NewGameDialog(self.selected_pywright_installation, self)
 

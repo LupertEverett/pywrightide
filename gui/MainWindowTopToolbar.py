@@ -1,11 +1,12 @@
 # Main Window Toolbar
 # Contains stuff like "New File", "Load File", etc.
 
-from PyQt6.QtWidgets import QToolBar, QWidget, QFileDialog, QMessageBox
+from PyQt6.QtWidgets import QToolBar, QWidget, QFileDialog, QMessageBox, QMenu
 from PyQt6.QtGui import QIcon, QKeySequence, QAction
 
 import gui.IDEMainWindow
 from gui import AboutDialog
+from data import IDESettings, PyWrightFolder
 import data.IconThemes as IconThemes
 
 
@@ -35,6 +36,15 @@ class MainWindowTopToolbar(QToolBar):
         self.find_pywright_installation_action.setStatusTip("Locate PyWright Installation Folder [{}]".format(
             self.find_pywright_installation_action.shortcut().toString()
         ))
+
+        # Add recent folders to the menu
+        self.recent_folders_menu = QMenu()
+        self.update_recent_folders_list()
+        self.recent_folders_menu.triggered.connect(lambda action:
+                                                   self.ide_main_window.pick_pywright_installation_folder(action.text())
+                                                   )
+        self.find_pywright_installation_action.setMenu(self.recent_folders_menu)
+
 
         # Actions
         new_game_icon_path = IconThemes.icon_path_from_theme(IconThemes.ICON_NAME_NEW_GAME)
@@ -164,7 +174,7 @@ class MainWindowTopToolbar(QToolBar):
         picker = QFileDialog.getExistingDirectory()
 
         if picker != "":
-            if not self.ide_main_window.check_legit_pywright(picker):
+            if not PyWrightFolder.is_valid_pywright_folder(picker):
                 QMessageBox.critical(self, "Error", "Could not find a PyWright installation")
                 return
 
@@ -194,11 +204,21 @@ class MainWindowTopToolbar(QToolBar):
         self.find_replace_dialog_action.setEnabled(has_pywright_game)
         self.run_pywright_action.setEnabled(has_pywright)
         self.update_toolbar_toggle_buttons()
+        self.update_recent_folders_list()
 
     def update_toolbar_toggle_buttons(self):
         self.directory_view_toggle_action.setChecked(self.ide_main_window.directory_view.isVisible())
         self.asset_browser_toggle_action.setChecked(self.ide_main_window.asset_manager_widget.isVisible())
         self.logger_toggle_action.setChecked(self.ide_main_window.logger_view.isVisible())
+
+    def update_recent_folders_list(self):
+        self.recent_folders_menu.clear()
+        for folder_path in self.ide_main_window.recent_folders:
+            if PyWrightFolder.is_valid_pywright_folder(folder_path):
+                if self.ide_main_window.selected_pywright_installation == folder_path:
+                    continue
+                folder_action = QAction(folder_path, self.recent_folders_menu)
+                self.recent_folders_menu.addAction(folder_action)
 
     def update_toolbar_icons(self):
         find_pywright_icon_path = IconThemes.icon_path_from_theme(IconThemes.ICON_NAME_FIND_PYWRIGHT)
