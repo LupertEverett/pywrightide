@@ -130,15 +130,11 @@ class IDEMainWindow(QMainWindow):
         self._parse_builtin_macros(folder_path)
         self.central_widget.set_pywright_installation_path(self.selected_pywright_installation)
         self.central_widget.load_builtin_macros(self._pywright_builtin_macros)
+        self._add_pywright_folder_to_recent(folder_path)
         self._top_toolbar.update_run_pywright_status_tip(self.pywright_executable_name)
         self._top_toolbar.update_toolbar_buttons(self.selected_pywright_installation != "",
                                                  self.selected_game.get_game_name() != "")
         self.asset_manager_widget.update_assets(folder_path, PyWrightGame())
-
-        for recent_folder_path in self.recent_folders:
-            if folder_path == recent_folder_path:
-                return
-        self.recent_folders.append(folder_path)
 
     def _handle_new_game(self):
         new_game_dialog = NewGameDialog(self.selected_pywright_installation, self)
@@ -154,6 +150,12 @@ class IDEMainWindow(QMainWindow):
         open_game_dialog = OpenGameDialog(self.selected_pywright_installation, self)
         if open_game_dialog.exec():
             self._switch_to_selected_game(open_game_dialog.selected_game)
+
+    def _add_pywright_folder_to_recent(self, folder_path: str):
+        for recent_folder_path in self.recent_folders:
+            if folder_path == recent_folder_path:
+                return
+        self.recent_folders.append(folder_path)
 
     def _switch_to_selected_game(self, selected_game: str):
         """Switches the IDE to the selected PyWright game, closing all open tabs in the process
