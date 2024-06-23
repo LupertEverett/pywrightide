@@ -1,6 +1,8 @@
 if __name__ == '__main__':
     from PyQt6.QtWidgets import QApplication
     from gui.IDEMainWindow import IDEMainWindow
+    from gui.WelcomeDialog import WelcomeDialog
+    from data import IDESettings
 
     import sys
 
@@ -11,8 +13,13 @@ if __name__ == '__main__':
     if sys.platform == "win32":
         app.setStyle("WindowsVista")
 
-    main_window = IDEMainWindow()
-
-    main_window.show()
-
-    app.exec()
+    if not IDESettings.get_autoload_last_project_check():
+        welcome_dialog = WelcomeDialog()
+        if welcome_dialog.exec():
+            main_window = IDEMainWindow(welcome_dialog.get_selected_folder_path())
+            main_window.show()
+            app.exec()
+    else:
+        main_window = IDEMainWindow()
+        main_window.show()
+        app.exec()

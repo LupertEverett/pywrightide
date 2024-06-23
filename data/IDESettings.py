@@ -1,8 +1,8 @@
 # Mainly for storing the key names
 from PyQt6.QtCore import QSettings, QByteArray
 
-IDE_VERSION_STRING = "1.1.1"
-IDE_BUILD_STRING = "24.05.28"
+IDE_VERSION_STRING = "1.2 Preview"
+IDE_BUILD_STRING = "24.06.23"
 
 __program_settings = QSettings("PyWrightIDE", "PyWrightIDE")
 
@@ -19,6 +19,7 @@ WINDOW_STATE_KEY = "general/window_state"
 ICON_THEME_KEY = "general/icon_theme"
 COLOR_THEME_KEY = "general/color_theme"
 EDITOR_THEME_KEY = "editor/color_theme"
+RECENT_DOCS_KEY = "general/recent_docs"
 
 # Functions
 
@@ -113,6 +114,28 @@ def set_editor_color_theme(new_editor_theme_name: str):
     if new_editor_theme_name == "":
         raise ValueError("Empty Editor Color Theme Name!")
     __program_settings.setValue(EDITOR_THEME_KEY, new_editor_theme_name)
+
+
+def get_recent_docs() -> list[str]:
+    result: list[str] = []
+
+    size = __program_settings.beginReadArray(RECENT_DOCS_KEY)
+    for idx in range(size):
+        __program_settings.setArrayIndex(idx)
+        result.append(__program_settings.value("folder_path"))
+    __program_settings.endArray()
+
+    return result
+
+
+def set_recent_docs(docs: list[str]):
+    __program_settings.beginWriteArray(RECENT_DOCS_KEY)
+
+    for idx in range(len(docs)):
+        __program_settings.setArrayIndex(idx)
+        __program_settings.setValue("folder_path", docs[idx])
+
+    __program_settings.endArray()
 
 
 def all_keys() -> list[str]:

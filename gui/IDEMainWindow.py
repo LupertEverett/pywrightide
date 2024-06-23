@@ -24,11 +24,11 @@ from data.PyWrightGame import PyWrightGame
 class IDEMainWindow(QMainWindow):
     """Main Window of the PyWright IDE"""
 
-    def __init__(self):
+    def __init__(self, selected_pywright_path: str = ""):
         super().__init__()
 
         # Instance-wide variables
-        self.selected_pywright_installation = ""
+        self.selected_pywright_installation = selected_pywright_path
         self.selected_game = PyWrightGame()
         self.pywright_executable_name = ""
 
@@ -107,6 +107,8 @@ class IDEMainWindow(QMainWindow):
                         self._switch_to_selected_game(autoload_game_name)
                     else:
                         IDESettings.set_autoload_last_game_name("")
+        elif self.selected_pywright_installation != "":
+            self.pick_pywright_installation_folder(self.selected_pywright_installation)
 
         # Try loading the window state (docks positions, visibility, etc.)
         if IDESettings.window_state_data_exists():
@@ -261,14 +263,9 @@ class IDEMainWindow(QMainWindow):
             event.ignore()
             return
 
-        # Save the last open project's path in here, if the autoload last project option is enabled
-        if IDESettings.get_autoload_last_project_check():
-            IDESettings.set_autoload_last_project_path(self.selected_pywright_installation)
-            IDESettings.set_autoload_last_game_name(self.selected_game.get_game_name())
-        else:
-            # Otherwise clear the paths, just in case
-            IDESettings.set_autoload_last_project_path("")
-            IDESettings.set_autoload_last_game_name("")
+        # Always save the last open project's path and the selected game
+        IDESettings.set_autoload_last_project_path(self.selected_pywright_installation)
+        IDESettings.set_autoload_last_game_name(self.selected_game.get_game_name())
 
         IDESettings.set_window_geometry(self.saveGeometry())
         IDESettings.set_window_state(self.saveState())
