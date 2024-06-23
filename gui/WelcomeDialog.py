@@ -1,12 +1,14 @@
-from PyQt6.QtCore import QModelIndex
+from PyQt6.QtCore import QModelIndex, QSize
 from PyQt6.QtWidgets import QLabel, QDialog, QListView, QPushButton, QHBoxLayout, QVBoxLayout, QCheckBox, QFileDialog, \
     QMessageBox
-from PyQt6.QtGui import QStandardItem, QStandardItemModel, QIcon, QCloseEvent
+from PyQt6.QtGui import QStandardItem, QStandardItemModel, QIcon, QCloseEvent, QPixmap
 
 from data import IDESettings, IconThemes, PyWrightFolder
 
-_welcome_label_text = """
-<h1>Welcome to PyWright IDE {}!</h1>
+from pathlib import Path
+
+
+_welcome_label_text = """<h1>Welcome to PyWright IDE {}!</h1>
 <p>Please select a PyWright folder below to start editing cases!</p>
 """.format(IDESettings.IDE_VERSION_STRING)
 
@@ -20,11 +22,13 @@ class WelcomeDialog(QDialog):
         self.setWindowIcon(QIcon("res/icons/ideicon.png"))
         self.setMinimumSize(600, 600)
 
-        self._recent_docs = IDESettings.get_recent_docs()
+        self._recent_docs = [path for path in IDESettings.get_recent_docs()
+                             if Path(path).exists() and Path(path).is_dir()]
 
         self._recent_docs_view = QListView()
         self._recent_docs_model = QStandardItemModel(self._recent_docs_view)
         self._recent_docs_view.clicked.connect(self._handle_list_view_clicked)
+        self._recent_docs_view.setIconSize(QSize(32, 32))
 
         self.__selected_folder_path = ""
 
@@ -37,6 +41,11 @@ class WelcomeDialog(QDialog):
 
         self._recent_docs_view.setModel(self._recent_docs_model)
 
+        ide_icon_label = QLabel("")
+        icon_pixmap = QPixmap("res/icons/ideicon.png")
+        ide_icon_label.setPixmap(icon_pixmap)
+        label_size = QSize(icon_pixmap.width() + 2, icon_pixmap.height() + 2)
+        ide_icon_label.setFixedSize(label_size)
         welcome_label = QLabel(_welcome_label_text)
 
         # Buttons
@@ -56,9 +65,14 @@ class WelcomeDialog(QDialog):
         button_layout.addStretch()
         button_layout.addWidget(self.load_selected_button)
 
+        welcome_label_layout = QHBoxLayout()
+
+        welcome_label_layout.addWidget(ide_icon_label)
+        welcome_label_layout.addWidget(welcome_label)
+
         main_layout = QVBoxLayout()
 
-        main_layout.addWidget(welcome_label)
+        main_layout.addLayout(welcome_label_layout)
         main_layout.addWidget(self._recent_docs_view)
         main_layout.addWidget(self._always_autoload_checkbox)
         main_layout.addLayout(button_layout)
