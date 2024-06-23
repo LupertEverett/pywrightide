@@ -28,13 +28,12 @@ class MainWindowTopToolbar(QToolBar):
         self.ide_main_window: gui.IDEMainWindow.IDEMainWindow = parent
 
         find_pywright_icon_path = IconThemes.icon_path_from_theme(IconThemes.ICON_NAME_FIND_PYWRIGHT)
-        self.find_pywright_installation_action = QAction(QIcon(find_pywright_icon_path),
-                                                         "Locate PyWright Installation",
-                                                         self)
-        self.find_pywright_installation_action.triggered.connect(self.handle_find_pywright_installation)
-        self.find_pywright_installation_action.setShortcut(QKeySequence("Ctrl+l"))
-        self.find_pywright_installation_action.setStatusTip("Locate PyWright Installation Folder [{}]".format(
-            self.find_pywright_installation_action.shortcut().toString()
+        self.open_pywright_folder_action = QAction(QIcon(find_pywright_icon_path), "Open PyWright Folder",
+                                                   self)
+        self.open_pywright_folder_action.triggered.connect(self.handle_find_pywright_installation)
+        self.open_pywright_folder_action.setShortcut(QKeySequence("Ctrl+l"))
+        self.open_pywright_folder_action.setStatusTip("Open PyWright Folder [{}]".format(
+            self.open_pywright_folder_action.shortcut().toString()
         ))
 
         # Add recent folders to the menu
@@ -43,7 +42,7 @@ class MainWindowTopToolbar(QToolBar):
         self.recent_folders_menu.triggered.connect(lambda action:
                                                    self.ide_main_window.pick_pywright_installation_folder(action.text())
                                                    )
-        self.find_pywright_installation_action.setMenu(self.recent_folders_menu)
+        self.open_pywright_folder_action.setMenu(self.recent_folders_menu)
 
 
         # Actions
@@ -149,7 +148,7 @@ class MainWindowTopToolbar(QToolBar):
 
         # TODO: Perhaps a "Command dictionary" button, that is for checking thru all the available commands for scripts.
 
-        self.addAction(self.find_pywright_installation_action)
+        self.addAction(self.open_pywright_folder_action)
         self.addSeparator()
         self.addAction(self.new_pywright_game_action)
         self.addAction(self.open_pywright_game_action)
@@ -222,7 +221,7 @@ class MainWindowTopToolbar(QToolBar):
 
     def update_toolbar_icons(self):
         find_pywright_icon_path = IconThemes.icon_path_from_theme(IconThemes.ICON_NAME_FIND_PYWRIGHT)
-        self.find_pywright_installation_action.setIcon(QIcon(find_pywright_icon_path))
+        self.open_pywright_folder_action.setIcon(QIcon(find_pywright_icon_path))
 
         new_game_icon_path = IconThemes.icon_path_from_theme(IconThemes.ICON_NAME_NEW_GAME)
         self.new_pywright_game_action.setIcon(QIcon(new_game_icon_path))
