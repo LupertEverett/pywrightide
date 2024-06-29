@@ -2,7 +2,11 @@
 
 from pathlib import Path
 
-from PyQt6.QtWidgets import QDialog, QDialogButtonBox, QVBoxLayout, QListWidget
+from PyQt6.QtCore import QSize
+from PyQt6.QtGui import QStandardItemModel, QStandardItem, QIcon
+from PyQt6.QtWidgets import QDialog, QDialogButtonBox, QVBoxLayout, QListView
+
+from data import IconThemes
 
 
 class OpenGameDialog(QDialog):
@@ -19,12 +23,15 @@ class OpenGameDialog(QDialog):
         self.buttonBox.accepted.connect(self._handle_accept)
         self.buttonBox.rejected.connect(self.reject)
 
-        self.list_widget = QListWidget()
-        self.list_widget.doubleClicked.connect(self._handle_list_widget_double_click)
+        self._list_view = QListView()
+        self._item_model = QStandardItemModel()
+        self._list_view.setModel(self._item_model)
+        self._list_view.setIconSize(QSize(32, 32))
+        self._list_view.doubleClicked.connect(self._handle_list_view_double_click)
 
         self.layout = QVBoxLayout()
 
-        self.layout.addWidget(self.list_widget)
+        self.layout.addWidget(self._list_view)
         self.layout.addWidget(self.buttonBox)
 
         self.setLayout(self.layout)
@@ -36,13 +43,21 @@ class OpenGameDialog(QDialog):
 
         games = [x for x in p.iterdir() if x.is_dir()]
 
-        for game in games:
-            self.list_widget.addItem(str(game.stem))
+        game_icon_path = IconThemes.icon_path_from_theme(IconThemes.ICON_NAME_OPEN_GAME)
 
-    def _handle_list_widget_double_click(self):
-        if len(self.list_widget.selectedIndexes()) > 0:
+        for game in games:
+            self._add_item_to_model(game_icon_path, game.stem)
+
+    def _add_item_to_model(self, icon_path: str, item_text: str):
+        item = QStandardItem(QIcon(icon_path), item_text)
+        item.setEditable(False)
+        self._item_model.appendRow(item)
+
+    def _handle_list_view_double_click(self):
+        if len(self._list_view.selectedIndexes()) > 0:
             self._handle_accept()
 
     def _handle_accept(self):
-        self.selected_game = self.list_widget.currentItem().text()
+        idx = self._list_view.currentIndex().row()
+        self.selected_game = self._item_model.item(idx).text()
         self.accept()
