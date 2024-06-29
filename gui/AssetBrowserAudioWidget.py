@@ -266,3 +266,10 @@ class AssetBrowserAudioWidget(QWidget):
         if self._currently_playing_index is not None:
             self._audio_list_model.item(self._currently_playing_index.row()).setIcon(QIcon(self._get_audio_icon_name()))
             self._currently_playing_index = None
+
+    def clear_everything(self):
+        self._selected_game = PyWrightGame()
+        self._audio_list_model.removeRows(0, self._audio_list_model.rowCount())
+        self._audio_folders_combo_box.clear()
+        self._play_button.setEnabled(False)
+        self._refresh_button.setEnabled(False)

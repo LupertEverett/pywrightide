@@ -134,7 +134,7 @@ class IDEMainWindow(QMainWindow):
         self._top_toolbar.update_run_pywright_status_tip(self.pywright_executable_name)
         self._top_toolbar.update_toolbar_buttons(self.selected_pywright_installation != "",
                                                  self.selected_game.get_game_name() != "")
-        self.asset_manager_widget.update_assets(folder_path, PyWrightGame())
+        self.asset_manager_widget.clear_everything()
 
     def _handle_new_game(self):
         new_game_dialog = NewGameDialog(self.selected_pywright_installation, self)

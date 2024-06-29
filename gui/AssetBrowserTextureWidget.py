@@ -244,6 +244,12 @@ class AssetManagerTextureWidget(QWidget):
 
         return subfolder_name
 
+    def clear_everything(self):
+        self.clear()
+        self._textures_list_view.setModel(None)
+        self._folders_combo_box.clear()
+        self._refresh_button.setEnabled(False)
+
 
 class ThumbnailIconProvider(QFileIconProvider):
     """Custom Icon Provider class that also provides thumbnails for image files"""

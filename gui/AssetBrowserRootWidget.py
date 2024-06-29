@@ -64,6 +64,7 @@ class AssetBrowserRootWidget(QDockWidget):
         self.tab_widget.addTab(self.sfx_browser, "SFX")
 
     def update_assets(self, pywright_path: str, selected_game: PyWrightGame):
+        self.clear_everything()
         self.texture_browser.select_pywright(pywright_path)
         self.texture_browser.set_selected_game(selected_game)
         self.texture_browser.refresh_art_folders()
@@ -97,6 +98,11 @@ class AssetBrowserRootWidget(QDockWidget):
             if event.type == AUDIO_END_EVENT:
                 self.sfx_browser.unset_currently_playing_icon()
                 self.music_browser.unset_currently_playing_icon()
+
+    def clear_everything(self):
+        self.texture_browser.clear_everything()
+        self.music_browser.clear_everything()
+        self.sfx_browser.clear_everything()
 
     def deinit(self):
         self._pymixer_check_timer.stop()
