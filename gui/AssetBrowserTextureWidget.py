@@ -132,7 +132,7 @@ class AssetManagerTextureWidget(QWidget):
 
         fs_model.setIconProvider(icon_provider)
 
-        name_filters = ["*.png", "*.jpg"]
+        name_filters = ["*.png", "*.PNG", "*.jpg", "*.JPG"]
         fs_model.setFilter(QDir.Filter.Files)
         fs_model.setNameFilters(name_filters)
         fs_model.setNameFilterDisables(False)
