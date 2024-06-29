@@ -3,11 +3,13 @@
 
 from pathlib import Path
 
-from PyQt6.QtWidgets import QWidget, QListView, QFileIconProvider, QVBoxLayout, QComboBox, QMenu
+from PyQt6.QtWidgets import QWidget, QListView, QFileIconProvider, QVBoxLayout, QComboBox, QMenu, QPushButton, \
+    QHBoxLayout
 from PyQt6.QtGui import QIcon, QPixmap, QDesktopServices, QClipboard, QGuiApplication, QFileSystemModel, QAction
 from PyQt6.QtCore import QSize, QDir, Qt, QUrl, pyqtSignal, QFileSystemWatcher
 
 from data.PyWrightGame import PyWrightGame
+from data import IconThemes
 
 insertable_folders = ("bg", "ev", "fg")
 accepted_types = (".png", ".jpg")
@@ -39,7 +41,15 @@ class AssetManagerTextureWidget(QWidget):
         self._available_folders: list[str] = []
 
         self._folders_combo_box = QComboBox()
-        self._folders_combo_box.currentIndexChanged.connect(self._refresh_texture_view)
+        self._folders_combo_box.currentIndexChanged.connect(self._handle_combobox_index_changed)
+
+        self._refresh_button = QPushButton()
+        self._refresh_button.setIcon(QIcon(IconThemes.icon_path_from_theme(IconThemes.ICON_NAME_REFRESH)))
+        self._refresh_button.setToolTip("Refresh current folder")
+        self._refresh_button.setMaximumWidth(30)
+        self._refresh_button.clicked.connect(self._refresh_texture_view)
+
+        self._refresh_button.setEnabled(self._folders_combo_box.currentIndex() != -1)
 
         self.__file_system_watcher = QFileSystemWatcher(self)
 
@@ -47,7 +57,11 @@ class AssetManagerTextureWidget(QWidget):
 
         main_layout = QVBoxLayout()
 
-        main_layout.addWidget(self._folders_combo_box)
+        combobox_layout = QHBoxLayout()
+        combobox_layout.addWidget(self._folders_combo_box)
+        combobox_layout.addWidget(self._refresh_button)
+
+        main_layout.addLayout(combobox_layout)
         main_layout.addWidget(self._textures_list_view)
 
         self.setLayout(main_layout)
@@ -125,6 +139,10 @@ class AssetManagerTextureWidget(QWidget):
 
         self._textures_list_view.setModel(fs_model)
         self._textures_list_view.setRootIndex(fs_model.setRootPath(str(folder_path)))
+
+    def _handle_combobox_index_changed(self):
+        self._refresh_button.setEnabled(self._folders_combo_box.currentIndex() != -1)
+        self._refresh_texture_view()
 
     def _handle_directory_contents_changed(self, path: str):
         if path == self._folders_combo_box.currentText():
