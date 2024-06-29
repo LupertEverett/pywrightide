@@ -27,7 +27,11 @@ class OpenGameDialog(QDialog):
         self._item_model = QStandardItemModel()
         self._list_view.setModel(self._item_model)
         self._list_view.setIconSize(QSize(32, 32))
+        self._list_view.clicked.connect(self._handle_list_view_click)
         self._list_view.doubleClicked.connect(self._handle_list_view_double_click)
+
+        self._ok_button = self.buttonBox.button(QDialogButtonBox.StandardButton.Ok)
+        self._ok_button.setEnabled(len(self._list_view.selectedIndexes()) > 0)
 
         self.layout = QVBoxLayout()
 
@@ -52,6 +56,9 @@ class OpenGameDialog(QDialog):
         item = QStandardItem(QIcon(icon_path), item_text)
         item.setEditable(False)
         self._item_model.appendRow(item)
+
+    def _handle_list_view_click(self):
+        self._ok_button.setEnabled(len(self._list_view.selectedIndexes()) > 0)
 
     def _handle_list_view_double_click(self):
         if len(self._list_view.selectedIndexes()) > 0:
