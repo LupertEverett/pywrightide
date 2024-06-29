@@ -3,10 +3,10 @@
 from pathlib import Path
 from enum import Enum
 
-from PyQt6.QtWidgets import (QWidget, QListWidget, QVBoxLayout, QHBoxLayout, QComboBox,
-                             QMenu, QPushButton)
-from PyQt6.QtGui import QDesktopServices, QGuiApplication, QClipboard, QAction, QIcon
-from PyQt6.QtCore import pyqtSignal, Qt, QUrl, QFileSystemWatcher
+from PyQt6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QComboBox,
+                             QMenu, QPushButton, QListView)
+from PyQt6.QtGui import QDesktopServices, QGuiApplication, QClipboard, QAction, QIcon, QStandardItemModel, QStandardItem
+from PyQt6.QtCore import pyqtSignal, Qt, QUrl, QFileSystemWatcher, QModelIndex
 
 from data.PyWrightGame import PyWrightGame
 from data import IconThemes
@@ -38,12 +38,15 @@ class AssetBrowserAudioWidget(QWidget):
         self.__audio_type = audio_type
         self.__AUDIO_FOLDER = MUSIC_FOLDER_NAME if audio_type == AudioType.Music else SFX_FOLDER_NAME
 
-        self._audio_list_widget = QListWidget(self)
-        self._audio_list_widget.setDragEnabled(False)
-        self._audio_list_widget.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
-        self._audio_list_widget.customContextMenuRequested.connect(self._handle_audio_context_menu)
-        self._audio_list_widget.itemSelectionChanged.connect(self._handle_current_change)
-        self._audio_list_widget.doubleClicked.connect(self._handle_play_pressed)
+        self._audio_list_view = QListView(self)
+        self._audio_list_model = QStandardItemModel()
+
+        self._audio_list_view.setDragEnabled(False)
+        self._audio_list_view.setModel(self._audio_list_model)
+        self._audio_list_view.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
+        self._audio_list_view.customContextMenuRequested.connect(self._handle_audio_context_menu)
+        self._audio_list_view.clicked.connect(self._handle_current_change)
+        self._audio_list_view.doubleClicked.connect(self._handle_play_pressed)
 
         self._audio_folders_combo_box = QComboBox()
         self._audio_folders_combo_box.currentIndexChanged.connect(self._handle_combobox_index_changed)
@@ -59,7 +62,7 @@ class AssetBrowserAudioWidget(QWidget):
         self._play_button.setIcon(QIcon(IconThemes.icon_path_from_theme(IconThemes.ICON_NAME_AUDIO_PLAY)))
         self._play_button.setToolTip("Play")
         self._play_button.pressed.connect(self._handle_play_pressed)
-        self._play_button.setEnabled(len(self._audio_list_widget.selectedItems()) > 0)
+        self._play_button.setEnabled(len(self._audio_list_view.selectedIndexes()) > 0)
         self._stop_button = QPushButton()
         self._stop_button.setIcon(QIcon(IconThemes.icon_path_from_theme(IconThemes.ICON_NAME_AUDIO_STOP)))
         self._stop_button.setToolTip("Stop")
@@ -80,9 +83,11 @@ class AssetBrowserAudioWidget(QWidget):
 
         main_layout.addLayout(combobox_layout)
         main_layout.addLayout(media_controls_layout)
-        main_layout.addWidget(self._audio_list_widget)
+        main_layout.addWidget(self._audio_list_view)
 
         self._available_music_folders = []
+
+        self._currently_playing_index: QModelIndex | None = None
 
         self.setLayout(main_layout)
 
@@ -136,8 +141,15 @@ class AssetBrowserAudioWidget(QWidget):
 
         items = [x.stem for x in folder_path.iterdir() if x.suffix == ".ogg"]
 
-        self._audio_list_widget.clear()
-        self._audio_list_widget.addItems(items)
+        self._audio_list_model.clear()
+
+        for item in items:
+            self._add_item_to_model(item)
+
+    def _add_item_to_model(self, item_name: str):
+        item = QStandardItem(QIcon(self._get_audio_icon_name()), item_name)
+        item.setEditable(False)
+        self._audio_list_model.appendRow(item)
 
     def _handle_audio_context_menu(self, position):
         if not self._selected_game.is_a_game_selected():
@@ -160,7 +172,7 @@ class AssetBrowserAudioWidget(QWidget):
         open_folder_action.setStatusTip("Open the current {} folder in the default File Manager".format(
             self.__AUDIO_FOLDER))
 
-        if len(self._audio_list_widget.selectedIndexes()) > 0:
+        if len(self._audio_list_view.selectedIndexes()) > 0:
             menu.addAction(copy_music_name_action)
             menu.addAction(insert_into_current_script_action)
             menu.addSeparator()
@@ -180,12 +192,14 @@ class AssetBrowserAudioWidget(QWidget):
 
     def _handle_audio_name_copy(self):
         clipboard = QGuiApplication.clipboard()
-        item = self._audio_list_widget.selectedItems()[0].text()
+        selected_index = self._audio_list_view.selectedIndexes()[0].row()
+        item = self._audio_list_model.item(selected_index).text()
 
         clipboard.setText(item + ".ogg", QClipboard.Mode.Clipboard)
 
     def _handle_insert_into_cursor(self):
-        audio_name = self._audio_list_widget.selectedItems()[0].text()
+        selected_index = self._audio_list_view.selectedIndexes()[0].row()
+        audio_name = self._audio_list_model.item(selected_index).text()
 
         # Construct the final command and emit it
         final_command = "mus {}".format(audio_name) if self.__AUDIO_FOLDER == MUSIC_FOLDER_NAME \
@@ -194,7 +208,7 @@ class AssetBrowserAudioWidget(QWidget):
         self.command_insert_at_cursor_requested.emit(final_command)
 
     def _handle_current_change(self):
-        self._play_button.setEnabled(len(self._audio_list_widget.selectedItems()) > 0)
+        self._play_button.setEnabled(len(self._audio_list_view.selectedIndexes()) > 0)
 
     def _handle_play_pressed(self):
         if self._pywright_dir == "":
@@ -205,14 +219,38 @@ class AssetBrowserAudioWidget(QWidget):
         folder_text = self._audio_folders_combo_box.currentText()
         is_global = folder_text == "Global"
 
-        selected_music = self._audio_list_widget.selectedItems()[0].text()
+        # Revert the previous item back to its original icon
+        if self._currently_playing_index is not None:
+            self._audio_list_model.item(self._currently_playing_index.row()).setIcon(QIcon(self._get_audio_icon_name()))
+
+        selected_index = self._audio_list_view.selectedIndexes()[0].row()
+        selected_music = self._audio_list_model.item(selected_index).text()
 
         file_path = Path("{}/{}/{}.ogg".format(self._pywright_dir if is_global else self._selected_game.game_path,
                                                self.__AUDIO_FOLDER,
                                                selected_music))
 
+        self._currently_playing_index = self._audio_list_view.selectedIndexes()[0]
+        self._audio_list_model.item(selected_index).setIcon(QIcon(self._get_playing_icon_name()))
+
         # Construct a path for the Music
         self.audio_play_requested.emit(str(file_path))
 
+    def _get_audio_icon_name(self) -> str:
+        return IconThemes.icon_path_from_theme(IconThemes.ICON_NAME_AUDIO_FILE
+                                               if self.__audio_type == AudioType.Sfx
+                                               else IconThemes.ICON_NAME_MUSIC_FILE)
+
+    def _get_playing_icon_name(self) -> str:
+        return IconThemes.icon_path_from_theme(IconThemes.ICON_NAME_AUDIO_FILE_PLAYING
+                                               if self.__audio_type == AudioType.Sfx
+                                               else IconThemes.ICON_NAME_AUDIO_PLAY)
+
     def _handle_stop_pressed(self):
         self.audio_stop_requested.emit()
+        self.unset_currently_playing_icon()
+
+    def unset_currently_playing_icon(self):
+        # Revert back to the original icon
+        if self._currently_playing_index is not None:
+            self._audio_list_model.item(self._currently_playing_index.row()).setIcon(QIcon(self._get_audio_icon_name()))
