@@ -5,10 +5,11 @@ from enum import Enum
 
 from PyQt6.QtWidgets import (QWidget, QListWidget, QVBoxLayout, QHBoxLayout, QComboBox,
                              QMenu, QPushButton)
-from PyQt6.QtGui import QDesktopServices, QGuiApplication, QClipboard, QAction
+from PyQt6.QtGui import QDesktopServices, QGuiApplication, QClipboard, QAction, QIcon
 from PyQt6.QtCore import pyqtSignal, Qt, QUrl, QFileSystemWatcher
 
 from data.PyWrightGame import PyWrightGame
+from data import IconThemes
 
 MUSIC_FOLDER_NAME = "music"
 SFX_FOLDER_NAME = "sfx"
@@ -45,12 +46,23 @@ class AssetBrowserAudioWidget(QWidget):
         self._audio_list_widget.doubleClicked.connect(self._handle_play_pressed)
 
         self._audio_folders_combo_box = QComboBox()
-        self._audio_folders_combo_box.currentIndexChanged.connect(self._refresh_audio_list_view)
+        self._audio_folders_combo_box.currentIndexChanged.connect(self._handle_combobox_index_changed)
 
-        self._play_button = QPushButton("Play")
+        self._refresh_button = QPushButton()
+        self._refresh_button.setIcon(QIcon(IconThemes.icon_path_from_theme(IconThemes.ICON_NAME_REFRESH)))
+        self._refresh_button.setMaximumWidth(30)
+        self._refresh_button.setToolTip("Refresh current folder")
+        self._refresh_button.clicked.connect(self._refresh_audio_list_view)
+        self._refresh_button.setEnabled(self._audio_folders_combo_box.currentIndex() != -1)
+
+        self._play_button = QPushButton()
+        self._play_button.setIcon(QIcon(IconThemes.icon_path_from_theme(IconThemes.ICON_NAME_AUDIO_PLAY)))
+        self._play_button.setToolTip("Play")
         self._play_button.pressed.connect(self._handle_play_pressed)
         self._play_button.setEnabled(len(self._audio_list_widget.selectedItems()) > 0)
-        self._stop_button = QPushButton("Stop")
+        self._stop_button = QPushButton()
+        self._stop_button.setIcon(QIcon(IconThemes.icon_path_from_theme(IconThemes.ICON_NAME_AUDIO_STOP)))
+        self._stop_button.setToolTip("Stop")
         self._stop_button.pressed.connect(self._handle_stop_pressed)
 
         self.__file_system_watcher = QFileSystemWatcher(self)
@@ -62,8 +74,12 @@ class AssetBrowserAudioWidget(QWidget):
 
         main_layout = QVBoxLayout()
 
+        combobox_layout = QHBoxLayout()
+        combobox_layout.addWidget(self._audio_folders_combo_box)
+        combobox_layout.addWidget(self._refresh_button)
+
+        main_layout.addLayout(combobox_layout)
         main_layout.addLayout(media_controls_layout)
-        main_layout.addWidget(self._audio_folders_combo_box)
         main_layout.addWidget(self._audio_list_widget)
 
         self._available_music_folders = []
@@ -102,6 +118,10 @@ class AssetBrowserAudioWidget(QWidget):
         self._audio_folders_combo_box.clear()
         self._query_available_folders()
         self._audio_folders_combo_box.addItems(self._available_music_folders)
+        self._refresh_audio_list_view()
+
+    def _handle_combobox_index_changed(self):
+        self._refresh_button.setEnabled(self._audio_folders_combo_box.currentIndex() != -1)
         self._refresh_audio_list_view()
 
     def _refresh_audio_list_view(self):
