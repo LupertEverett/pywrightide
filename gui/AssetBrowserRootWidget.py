@@ -47,6 +47,7 @@ class AssetBrowserRootWidget(QDockWidget):
 
         self._pymixer_check_timer = QTimer(self)
         self._pymixer_check_timer.timeout.connect(self._check_pygame_events)
+        self._pymixer_check_timer.start(100)
 
         self.texture_browser = AssetManagerTextureWidget(self)
         self.music_browser = AssetBrowserAudioWidget(AudioType.Music, self)
@@ -87,18 +88,15 @@ class AssetBrowserRootWidget(QDockWidget):
             self.music_browser.unset_currently_playing_icon()
         pygame.mixer.music.load(path)
         pygame.mixer.music.play()
-        self._pymixer_check_timer.start(100)
 
     def _handle_audio_player_stop(self):
         pygame.mixer.music.stop()
-        self._pymixer_check_timer.stop()
 
     def _check_pygame_events(self):
         for event in pygame.event.get():
             if event.type == AUDIO_END_EVENT:
                 self.sfx_browser.unset_currently_playing_icon()
                 self.music_browser.unset_currently_playing_icon()
-                self._pymixer_check_timer.stop()
 
     def deinit(self):
         self._pymixer_check_timer.stop()
