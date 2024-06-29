@@ -88,6 +88,7 @@ class AssetBrowserAudioWidget(QWidget):
         self._available_music_folders = []
 
         self._currently_playing_index: QModelIndex | None = None
+        self._currently_playing_folder: str = ""
 
         self.setLayout(main_layout)
 
@@ -145,6 +146,9 @@ class AssetBrowserAudioWidget(QWidget):
 
         for item in items:
             self._add_item_to_model(item)
+
+        if self._currently_playing_index is not None and self._currently_playing_folder == folder_text:
+            self.set_currently_playing_icon()
 
     def _add_item_to_model(self, item_name: str):
         item = QStandardItem(QIcon(self._get_audio_icon_name()), item_name)
@@ -231,6 +235,7 @@ class AssetBrowserAudioWidget(QWidget):
                                                selected_music))
 
         self._currently_playing_index = self._audio_list_view.selectedIndexes()[0]
+        self._currently_playing_folder = folder_text
         self._audio_list_model.item(selected_index).setIcon(QIcon(self._get_playing_icon_name()))
 
         # Construct a path for the Music
@@ -250,7 +255,14 @@ class AssetBrowserAudioWidget(QWidget):
         self.audio_stop_requested.emit()
         self.unset_currently_playing_icon()
 
+    def set_currently_playing_icon(self):
+        if self._currently_playing_index is not None:
+            self._audio_list_model.item(self._currently_playing_index.row()).setIcon(
+                QIcon(self._get_playing_icon_name())
+            )
+
     def unset_currently_playing_icon(self):
         # Revert back to the original icon
         if self._currently_playing_index is not None:
             self._audio_list_model.item(self._currently_playing_index.row()).setIcon(QIcon(self._get_audio_icon_name()))
+            self._currently_playing_index = None
