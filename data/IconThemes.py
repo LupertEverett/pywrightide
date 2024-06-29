@@ -24,17 +24,21 @@ ICON_NAME_DOWN_ARROW = "downarrow.png"
 ICON_NAME_REFRESH = "refresh.png"
 ICON_NAME_AUDIO_PLAY = "audio_play.png"
 ICON_NAME_AUDIO_STOP = "audio_stop.png"
+ICON_NAME_AUDIO_FILE = "audio_file.png"
+ICON_NAME_AUDIO_FILE_PLAYING = "audio_file_playing.png"
+ICON_NAME_MUSIC_FILE = "music_file.png"
 
 ICONS = [ICON_NAME_FIND_PYWRIGHT, ICON_NAME_NEW_GAME, ICON_NAME_OPEN_GAME, ICON_NAME_NEW_FILE, ICON_NAME_OPEN_FILE,
          ICON_NAME_SAVE_FILE, ICON_NAME_FIND_REPLACE, ICON_NAME_RUN_PYWRIGHT, ICON_NAME_SETTINGS, ICON_NAME_ABOUT,
          ICON_NAME_DIRECTORY_VIEW_TOGGLE, ICON_NAME_ASSET_BROWSER_TOGGLE, ICON_NAME_LOGGER_TOGGLE, ICON_NAME_PLUS,
          ICON_NAME_DOUBLE_PLUS, ICON_NAME_MINUS, ICON_NAME_UP_ARROW, ICON_NAME_DOWN_ARROW, ICON_NAME_REFRESH,
-         ICON_NAME_AUDIO_PLAY, ICON_NAME_AUDIO_STOP]
+         ICON_NAME_AUDIO_PLAY, ICON_NAME_AUDIO_STOP, ICON_NAME_AUDIO_FILE, ICON_NAME_AUDIO_FILE_PLAYING,
+         ICON_NAME_MUSIC_FILE]
 
 
 def icon_path_from_theme(icon_name: str) -> str:
     if icon_name not in ICONS:
-        raise ValueError("Invalid icon name")
+        raise ValueError("Invalid icon name: " + icon_name)
 
     icon_theme_name = IDESettings.get_icon_theme()
 
