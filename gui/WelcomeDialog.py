@@ -28,6 +28,7 @@ class WelcomeDialog(QDialog):
         self._recent_docs_view = QListView()
         self._recent_docs_model = QStandardItemModel(self._recent_docs_view)
         self._recent_docs_view.clicked.connect(self._handle_list_view_clicked)
+        self._recent_docs_view.doubleClicked.connect(self._handle_load_selected_clicked)
         self._recent_docs_view.setIconSize(QSize(32, 32))
 
         self.__selected_folder_path = ""
@@ -35,9 +36,7 @@ class WelcomeDialog(QDialog):
         pywright_icon_path = IconThemes.icon_path_from_theme(IconThemes.ICON_NAME_FIND_PYWRIGHT)
 
         for doc_path in self._recent_docs:
-            item = QStandardItem(doc_path)
-            item.setIcon(QIcon(pywright_icon_path))
-            self._recent_docs_model.appendRow(item)
+            self.__add_item_to_model(doc_path, pywright_icon_path)
 
         self._recent_docs_view.setModel(self._recent_docs_model)
 
@@ -98,10 +97,14 @@ class WelcomeDialog(QDialog):
                 QMessageBox.information(self, "Notice", "Selected folder is already in the list!")
                 return
 
-            item = QStandardItem(picker)
-            item.setIcon(QIcon(IconThemes.icon_path_from_theme(IconThemes.ICON_NAME_FIND_PYWRIGHT)))
-            self._recent_docs_model.appendRow(item)
-            self._recent_docs.append(item.text())
+            self.__add_item_to_model(picker, IconThemes.icon_path_from_theme(IconThemes.ICON_NAME_FIND_PYWRIGHT))
+            self._recent_docs.append(picker)
+
+    def __add_item_to_model(self, text: str, icon_path: str):
+        item = QStandardItem(text)
+        item.setIcon(QIcon(icon_path))
+        item.setEditable(False)
+        self._recent_docs_model.appendRow(item)
 
     def _handle_load_selected_clicked(self):
         indexes = self._recent_docs_view.selectedIndexes()
