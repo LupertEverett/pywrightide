@@ -11,7 +11,6 @@ from .GamePropertiesWidget import GamePropertiesWidget
 
 
 class MainWindowCentralWidget(QWidget):
-
     update_save_button_requested = pyqtSignal(bool)
 
     def __init__(self, parent=None):
@@ -55,7 +54,7 @@ class MainWindowCentralWidget(QWidget):
 
     def open_game_properties_tab(self, game_properties_widget: GamePropertiesWidget):
         for i in range(self.tab_widget.count()):
-            if self.tab_widget.tabText(i) == "Game Properties":
+            if self._is_game_properties_tab(i):
                 # We already have a Game Properties tab open, so switch to that instead.
                 self.tab_widget.setCurrentIndex(i)
                 return
@@ -66,11 +65,12 @@ class MainWindowCentralWidget(QWidget):
         # Don't open a file editing tab if there is already one open for a given file
         for i in range(self.tab_widget.count()):
             # Skip Game Properties tab
-            if self.tab_widget.tabText(i) == "Game Properties":
+            if self._is_game_properties_tab(i):
                 continue
-            opened_edit_widget: FileEditWidget = self.tab_widget.widget(i)
 
-            if opened_edit_widget.file_path == file_path:
+            opened_tab: FileEditWidget = self.tab_widget.widget(i)
+
+            if opened_tab.file_path == file_path:
                 self.tab_widget.setCurrentIndex(i)
                 return
         # Create a new FileEditWidget, and add it to the tab widget
@@ -88,10 +88,13 @@ class MainWindowCentralWidget(QWidget):
     # ==== Changing to a new tab ====
     def _handle_tab_change(self, index: int):
         condition = self.tab_widget.count() > 0 and \
-                    self.tab_widget.tabText(index) != "Game Properties" and \
+                    not self._is_game_properties_tab(index) and \
                     self.tab_widget.currentWidget().is_file_modified()
 
         self.update_save_button_requested.emit(condition)
+
+    def _is_game_properties_tab(self, index: int):
+        return isinstance(self.tab_widget.widget(index), GamePropertiesWidget)
 
     # ==== Renaming a tab ====
     def handle_rename_tab(self, new_name: str):
@@ -99,7 +102,7 @@ class MainWindowCentralWidget(QWidget):
 
     # ==== Saving a tab ====
     def handle_save_tab(self):
-        if self.tab_widget.tabText(self.tab_widget.currentIndex()) != "Game Properties":
+        if not self._is_game_properties_tab(self.tab_widget.currentIndex()):
             self.tab_widget.currentWidget().save_to_file()
             self._update_save_button_and_current_tab()
 
@@ -109,7 +112,7 @@ class MainWindowCentralWidget(QWidget):
     def _update_tab_modified_infos(self):
         # Like _update_save_button() but for all tabs
         for idx in range(self.tab_widget.count()):
-            if self.tab_widget.tabText(idx) == "Game Properties":
+            if self._is_game_properties_tab(idx):
                 continue
 
             self._update_file_editing_tab_info(idx)
@@ -125,7 +128,7 @@ class MainWindowCentralWidget(QWidget):
 
     # ==== Removing a tab ====
     def _handle_remove_tab(self, index):
-        if self.tab_widget.tabText(index) != "Game Properties":
+        if not self._is_game_properties_tab(index):
             tab: FileEditWidget = self.tab_widget.widget(index)
 
             if tab.is_file_modified():
@@ -163,11 +166,12 @@ class MainWindowCentralWidget(QWidget):
             # If nothing is open, inform the user and do nothing.
             QMessageBox.information(self, "Find/Replace", "There are no tabs open.")
             return
-        if self.tab_widget.tabText(self.tab_widget.currentIndex()) != "Game Properties":
+        if not self._is_game_properties_tab(self.tab_widget.currentIndex()):
             file_widget: FileEditWidget = self.tab_widget.currentWidget()
             file_widget.search_in_file(text, find_type, search_scope)
 
-    def handle_replace_signals(self, text_to_find: str, text_to_replace: str, replace_type: ReplaceType, search_scope: SearchScope):
+    def handle_replace_signals(self, text_to_find: str, text_to_replace: str, replace_type: ReplaceType,
+                               search_scope: SearchScope):
         if self.tab_widget.count() == 0:
             # If nothing is open, inform the user and do nothing.
             QMessageBox.information(self, "Find/Replace", "There are no tabs open.")
@@ -175,7 +179,7 @@ class MainWindowCentralWidget(QWidget):
         if replace_type == ReplaceType.REPLACE_ALL and search_scope == SearchScope.OPEN_TABS:
             self.replace_all_in_all_open_tabs(text_to_find, text_to_replace)
             return
-        if self.tab_widget.tabText(self.tab_widget.currentIndex()) != "Game Properties":
+        if not self._is_game_properties_tab(self.tab_widget.currentIndex()):
             file_widget: FileEditWidget = self.tab_widget.currentWidget()
             file_widget.replace_in_file(text_to_find, text_to_replace, replace_type, search_scope)
 
@@ -194,7 +198,7 @@ class MainWindowCentralWidget(QWidget):
             return
 
         for idx in range(current_position + 1, tabs_count):
-            if self.tab_widget.tabText(idx) == "Game Properties":
+            if self._is_game_properties_tab(idx):
                 continue
 
             curr_widget: FileEditWidget = self.tab_widget.widget(idx)
@@ -222,7 +226,7 @@ class MainWindowCentralWidget(QWidget):
             return
 
         for idx in range(current_position).__reversed__():
-            if self.tab_widget.tabText(idx) == "Game Properties":
+            if self._is_game_properties_tab(idx):
                 continue
 
             curr_widget: FileEditWidget = self.tab_widget.widget(idx)
@@ -247,11 +251,12 @@ class MainWindowCentralWidget(QWidget):
         current_position = self.tab_widget.currentIndex()
 
         if current_position == tabs_count - 1:
-            QMessageBox.information(self, "Find/Replace", "Last tab has been reached. Text to replace couldn't be found.")
+            QMessageBox.information(self, "Find/Replace",
+                                    "Last tab has been reached. Text to replace couldn't be found.")
             return
 
         for idx in range(current_position + 1, tabs_count):
-            if self.tab_widget.tabText(idx) == "Game Properties":
+            if self._is_game_properties_tab(idx):
                 continue
 
             curr_widget: FileEditWidget = self.tab_widget.widget(idx)
@@ -270,7 +275,7 @@ class MainWindowCentralWidget(QWidget):
         tab_count = self.tab_widget.count()
 
         for idx in range(tab_count):
-            if self.tab_widget.tabText(idx) == "Game Properties":
+            if self._is_game_properties_tab(idx):
                 continue
 
             curr_tab: FileEditWidget = self.tab_widget.widget(idx)
@@ -286,7 +291,7 @@ class MainWindowCentralWidget(QWidget):
     def apply_settings(self):
         EditorThemes.current_editor_theme.load_theme(IDESettings.get_editor_color_theme())
         for idx in range(self.tabs_count()):
-            if self.tab_widget.tabText(idx) != "Game Properties":
+            if not self._is_game_properties_tab(idx):
                 tab: FileEditWidget = self.tab_widget.widget(idx)
                 tab.supply_font_properties_to_lexer(IDESettings.get_font_name(),
                                                     IDESettings.get_font_size(),
@@ -299,10 +304,8 @@ class MainWindowCentralWidget(QWidget):
             QMessageBox.critical(self, "Error", "There are no tabs open!")
             return
 
-        tab_index = self.tab_widget.currentIndex()
-
         # Don't do anything if Game Properties is open
-        if self.tab_widget.tabText(tab_index) == "Game Properties":
+        if self._is_game_properties_tab(self.tab_widget.currentIndex()):
             QMessageBox.critical(self, "Error", "Current tab is not a script editing tab!")
             return
 
@@ -314,7 +317,7 @@ class MainWindowCentralWidget(QWidget):
         result = []
 
         for i in range(self.tabs_count()):
-            if self.tab_widget.tabText(i) == "Game Properties":
+            if self._is_game_properties_tab(i):
                 continue
 
             tab: FileEditWidget = self.tab_widget.widget(i)
