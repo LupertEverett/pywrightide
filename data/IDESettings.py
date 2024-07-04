@@ -11,15 +11,15 @@ __program_settings = QSettings("PyWrightIDE", "PyWrightIDE")
 FONT_NAME_KEY = "editor/font/name"
 FONT_SIZE_KEY = "editor/font/size"
 FONT_BOLD_KEY = "editor/font/bold"
-AUTOLOAD_LAST_PROJECT_KEY = "general/autoload_last_project"
-AUTOLOAD_LAST_PROJECT_PATH_KEY = "general/last_project_path"
-AUTOLOAD_LAST_GAME_NAME_KEY = "general/last_game_name"
-WINDOW_GEOMETRY_KEY = "general/window_geometry"
-WINDOW_STATE_KEY = "general/window_state"
-ICON_THEME_KEY = "general/icon_theme"
-COLOR_THEME_KEY = "general/color_theme"
+AUTOLOAD_LAST_PROJECT_KEY = "autoload_last_project"
+AUTOLOAD_LAST_PROJECT_PATH_KEY = "last_project_path"
+AUTOLOAD_LAST_GAME_NAME_KEY = "last_game_name"
+WINDOW_GEOMETRY_KEY = "window_geometry"
+WINDOW_STATE_KEY = "window_state"
+ICON_THEME_KEY = "icon_theme"
+COLOR_THEME_KEY = "color_theme"
 EDITOR_THEME_KEY = "editor/color_theme"
-RECENT_DOCS_KEY = "general/recent_docs"
+RECENT_DOCS_KEY = "recent_docs"
 
 # Functions
 
