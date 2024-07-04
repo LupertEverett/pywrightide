@@ -118,6 +118,8 @@ class WelcomeDialog(QDialog):
             IDESettings.set_autoload_last_project_path(self.__selected_folder_path)
             IDESettings.set_autoload_last_game_name("")  # Should be set after closing the main window instead
             IDESettings.set_autoload_last_project_check(True)
+
+        IDESettings.set_recent_docs(self._recent_docs)
         self.accept()
 
     def get_selected_folder_path(self) -> str:
