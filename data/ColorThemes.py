@@ -63,4 +63,16 @@ def load_current_color_theme() -> str:
         for line in result_as_array:
             result += line
 
+    # Check for Linux-specific overrides and load them
+    # Dark theme kinda requires it
+    if sys.platform == "linux":
+        linux_override_path = Path("res/colorthemes/{}/theme_linux.css".format(current_color_theme))
+
+        if linux_override_path.exists() and not linux_override_path.is_dir():
+            with open(linux_override_path, 'r') as f:
+                result_as_array = f.readlines()
+
+                for line in result_as_array:
+                    result += line
+
     return result
