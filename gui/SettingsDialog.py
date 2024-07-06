@@ -22,7 +22,7 @@ class SettingsDialog(QDialog):
         # Color themes (or at least a dark theme toggle)
         self.setWindowTitle("PyWright IDE Settings")
 
-        self.setFixedSize(375, 250)
+        self.setFixedSize(375, 275)
 
         main_layout = QVBoxLayout()
 
