@@ -12,10 +12,40 @@ QDockWidget::title {
 }
 
 MainWindowTopToolbar {
+    spacing: 2px;
     border-top: 0;
     border-bottom: 1px solid #575757;
+    padding: 4px;
     background-color: #373737;
-    padding: 2px;
+}
+
+QToolButton {
+    border-radius: 3px;
+    padding: 2px 4px;
+    border: 0;
+}
+
+QToolButton[popupMode="1"] {
+    padding-right: 24px;
+}
+
+QToolButton::menu-arrow {
+    image: url("themefolder:down_arrow.png");
+}
+
+QToolButton:hover {
+    border: 1px solid #777;
+    background: #676767;
+}
+
+QToolButton:pressed {
+    border: 1px solid #777;
+    background: #767676;
+}
+
+QToolButton:checked {
+    border: 1px solid #777;
+    background: #767676;
 }
 
 QLabel {
@@ -47,27 +77,6 @@ QTabBar::tab {
 QTabBar::tab:selected {
     background-color: #858585;
     color: #000;
-}
-
-QToolButton {
-    border-radius: 3px;
-    padding: 2px;
-    border: 0;
-}
-
-QToolButton:hover {
-    border: 1px solid #777;
-    background: #666;
-}
-
-QToolButton:pressed {
-    border: 1px solid #777;
-    background: #888;
-}
-
-QToolButton:checked {
-    border: 1px solid #777;
-    background: #888;
 }
 
 QTreeView {
@@ -196,7 +205,7 @@ QCheckBox {
 }
 
 QGroupBox {
-    background-color: #0000;
+    background-color: #00000000;
     color: #FFF;
 }
 
