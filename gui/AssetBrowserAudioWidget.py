@@ -171,6 +171,11 @@ class AssetBrowserAudioWidget(QWidget):
                                                        "command into the currently open "
                                                        "script from the cursor position".format(self.__AUDIO_FOLDER))
 
+        insert_into_current_script_loop_action = QAction("Insert into cursor position as looping music", self)
+        insert_into_current_script_loop_action.triggered.connect(self._handle_insert_music_loop_into_cursor)
+        insert_into_current_script_loop_action.setStatusTip("Insert the selected music as a looping music command "
+                                                            "into the currently open script from the cursor position")
+
         open_folder_action = QAction("Open current folder in File Manager", self)
         open_folder_action.triggered.connect(self._handle_open_current_folder)
         open_folder_action.setStatusTip("Open the current {} folder in the default File Manager".format(
@@ -179,6 +184,8 @@ class AssetBrowserAudioWidget(QWidget):
         if len(self._audio_list_view.selectedIndexes()) > 0:
             menu.addAction(copy_music_name_action)
             menu.addAction(insert_into_current_script_action)
+            if self.__audio_type == AudioType.Music:
+                menu.addAction(insert_into_current_script_loop_action)
             menu.addSeparator()
 
         menu.addAction(open_folder_action)
@@ -208,6 +215,14 @@ class AssetBrowserAudioWidget(QWidget):
         # Construct the final command and emit it
         final_command = "mus {}".format(audio_name) if self.__AUDIO_FOLDER == MUSIC_FOLDER_NAME \
             else "sfx {}".format(audio_name)
+
+        self.command_insert_at_cursor_requested.emit(final_command)
+
+    def _handle_insert_music_loop_into_cursor(self):
+        selected_index = self._audio_list_view.selectedIndexes()[0].row()
+        audio_name = self._audio_list_model.item(selected_index).text()
+
+        final_command = "set _music_loop {}".format(audio_name)
 
         self.command_insert_at_cursor_requested.emit(final_command)
 
