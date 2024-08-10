@@ -21,7 +21,6 @@ class AudioType(Enum):
 
 
 class AssetBrowserAudioWidget(QWidget):
-
     # Sends the URL of the music to play
     audio_play_requested = pyqtSignal(str)
 
@@ -85,7 +84,7 @@ class AssetBrowserAudioWidget(QWidget):
         main_layout.addLayout(media_controls_layout)
         main_layout.addWidget(self._audio_list_view)
 
-        self._available_music_folders = []
+        self._available_audio_folders = []
 
         self._currently_playing_index: QModelIndex | None = None
         self._currently_playing_folder: str = ""
@@ -106,24 +105,35 @@ class AssetBrowserAudioWidget(QWidget):
         if not self._selected_game.is_a_game_selected():
             return
 
-        global_music_folder_path = Path("{}/{}/".format(self._pywright_dir, self.__AUDIO_FOLDER))
+        global_audio_folder_path = Path("{}/{}/".format(self._pywright_dir, self.__AUDIO_FOLDER))
 
-        game_music_folder_path = Path("{}/{}/".format(self._selected_game.game_path, self.__AUDIO_FOLDER))
+        game_audio_folder_path = Path("{}/{}/".format(self._selected_game.game_path, self.__AUDIO_FOLDER))
 
-        self._available_music_folders.clear()
+        self._available_audio_folders.clear()
 
-        if global_music_folder_path.exists() and global_music_folder_path.is_dir():
-            self.__file_system_watcher.addPath(str(global_music_folder_path))
-            self._available_music_folders.append("Global")
+        if global_audio_folder_path.exists() and global_audio_folder_path.is_dir():
+            self.__file_system_watcher.addPath(str(global_audio_folder_path))
+            self._available_audio_folders.append("Global")
 
-        if game_music_folder_path.exists() and game_music_folder_path.is_dir():
-            self.__file_system_watcher.addPath(str(game_music_folder_path))
-            self._available_music_folders.append("Game specific")
+        if game_audio_folder_path.exists() and game_audio_folder_path.is_dir():
+            self.__file_system_watcher.addPath(str(game_audio_folder_path))
+            self._available_audio_folders.append("Game specific")
+
+        # Also add the relevant folders in Cases if they exist
+        for current_case in self._selected_game.game_cases:
+            case_audio_folder_path = Path("{}/{}/{}/".format(
+                self._selected_game.game_path,
+                current_case,
+                self.__AUDIO_FOLDER
+            ))
+
+            if case_audio_folder_path.exists() and case_audio_folder_path.is_dir():
+                self._available_audio_folders.append("{}/{}".format(current_case, self.__AUDIO_FOLDER))
 
     def refresh_audio_folders(self):
         self._audio_folders_combo_box.clear()
         self._query_available_folders()
-        self._audio_folders_combo_box.addItems(self._available_music_folders)
+        self._audio_folders_combo_box.addItems(self._available_audio_folders)
         self._refresh_audio_list_view()
 
     def _handle_combobox_index_changed(self):
@@ -131,11 +141,7 @@ class AssetBrowserAudioWidget(QWidget):
         self._refresh_audio_list_view()
 
     def _refresh_audio_list_view(self):
-        folder_text = self._audio_folders_combo_box.currentText()
-        is_global = folder_text == "Global"
-
-        folder_path = Path("{}/{}/".format(self._pywright_dir if is_global else self._selected_game.game_path,
-                                           self.__AUDIO_FOLDER))
+        folder_path = self._get_selected_audio_folder_path()
 
         if not folder_path.exists() or not folder_path.is_dir():
             return
@@ -146,6 +152,8 @@ class AssetBrowserAudioWidget(QWidget):
 
         for item in items:
             self._add_item_to_model(item)
+
+        folder_text = self._audio_folders_combo_box.currentText()
 
         if self._currently_playing_index is not None and self._currently_playing_folder == folder_text:
             self.set_currently_playing_icon()
@@ -192,6 +200,23 @@ class AssetBrowserAudioWidget(QWidget):
 
         menu.exec(self.mapToGlobal(position))
 
+    def _get_selected_audio_folder_path(self):
+        folder_text = self._audio_folders_combo_box.currentText()
+
+        is_case_specific_folder = folder_text != "Global" and folder_text != "Game specific"
+
+        if is_case_specific_folder:
+            case_text = folder_text.split('/', maxsplit=1)[0]
+            if case_text == "":
+                return Path()
+
+            return Path("{}/{}/{}/".format(self._selected_game.game_path, case_text, self.__AUDIO_FOLDER))
+        else:
+            is_global = folder_text == "Global"
+
+            return Path("{}/{}/".format(self._pywright_dir if is_global else self._selected_game.game_path,
+                                        self.__AUDIO_FOLDER))
+
     def _handle_open_current_folder(self):
         folder_text = self._audio_folders_combo_box.currentText()
         is_global = folder_text == "Global"
@@ -236,7 +261,8 @@ class AssetBrowserAudioWidget(QWidget):
             return
 
         folder_text = self._audio_folders_combo_box.currentText()
-        is_global = folder_text == "Global"
+
+        folder_path = self._get_selected_audio_folder_path()
 
         # Revert the previous item back to its original icon
         if self._currently_playing_index is not None:
@@ -245,9 +271,7 @@ class AssetBrowserAudioWidget(QWidget):
         selected_index = self._audio_list_view.selectedIndexes()[0].row()
         selected_music = self._audio_list_model.item(selected_index).text()
 
-        file_path = Path("{}/{}/{}.ogg".format(self._pywright_dir if is_global else self._selected_game.game_path,
-                                               self.__AUDIO_FOLDER,
-                                               selected_music))
+        file_path = folder_path / "{}.ogg".format(selected_music)
 
         self._currently_playing_index = self._audio_list_view.selectedIndexes()[0]
         self._currently_playing_folder = folder_text
