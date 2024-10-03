@@ -177,7 +177,7 @@ class PyWrightScriptLexer(QsciLexerCustom):
     def styleText(self, start, end):
         self.startStyling(start)
 
-        text = self.parent().text()[start:end]
+        text = bytearray(self.parent().text(), "utf-8")[start:end].decode("utf-8")
 
         p = re.compile(r"//+[^\r\n]*|#+[^\r\n]*|\"[^\r\n]*\"|\S+|\s+")
 
