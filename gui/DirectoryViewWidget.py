@@ -214,7 +214,7 @@ class DirectoryViewWidget(QDockWidget):
                 name = name + ".txt"
             final_path = Path("{}/{}".format(dir_path, name))
             if final_path.exists():
-                QMessageBox.critical(self, "Error", "File already exists!", QMessageBox.ButtonRole.Ok)
+                QMessageBox.critical(self, "Error", "File already exists!", QMessageBox.StandardButton.Ok)
                 return
 
             with open(final_path, "x"):
@@ -251,7 +251,7 @@ class DirectoryViewWidget(QDockWidget):
 
         if full_file_path.exists() and full_file_path.is_file():
             QMessageBox.critical(self, "Error", "Script named \"{}\" already exists!".format(resulting_script_name),
-                                 QMessageBox.ButtonRole.Ok)
+                                 QMessageBox.StandardButton.Ok)
             return
 
         with open(full_file_path, "w"):
@@ -281,7 +281,7 @@ class DirectoryViewWidget(QDockWidget):
 
         if old_name in important_files:
             QMessageBox.critical(self, "Error", "Important file \"{}\" cannot be renamed!".format(old_name),
-                                 QMessageBox.ButtonRole.Ok)
+                                 QMessageBox.StandardButton.Ok)
             return
 
         new_name, ok = QInputDialog.getText(self, "Rename File", "Enter file name",
@@ -291,11 +291,11 @@ class DirectoryViewWidget(QDockWidget):
             return
 
         if new_name == "":
-            QMessageBox.critical(self, "Error", "Name cannot be empty!", QMessageBox.Ok)
+            QMessageBox.critical(self, "Error", "Name cannot be empty!", QMessageBox.StandardButton.Ok)
             return
 
         if new_name == old_name:
-            QMessageBox.critical(self, "Error", "New name cannot be the same as old name!", QMessageBox.Ok)
+            QMessageBox.critical(self, "Error", "New name cannot be the same as old name!", QMessageBox.StandardButton.Ok)
             return
 
         # dir_path contains the full path, including the name, so we gotta "move up" to get its directory.
@@ -303,7 +303,7 @@ class DirectoryViewWidget(QDockWidget):
 
         if final_path.exists() and final_path.is_file():
             QMessageBox.critical(self, "Error", "File \"{}\" already exists!".format(final_path.name),
-                                 QMessageBox.ButtonRole.Ok)
+                                 QMessageBox.StandardButton.Ok)
             return
 
         model.setReadOnly(False)
@@ -324,13 +324,14 @@ class DirectoryViewWidget(QDockWidget):
 
         if file_name in important_files:
             QMessageBox.critical(self, "Error", "Important file \"{}\" cannot be removed!".format(file_name),
-                                 QMessageBox.ButtonRole.Ok)
+                                 QMessageBox.StandardButton.Ok)
             return
 
         prompt = QMessageBox.question(self, "Question", "Are you sure you want to remove \"{}\"?".format(file_name),
-                                      QMessageBox.ButtonRole.Yes | QMessageBox.ButtonRole.No, QMessageBox.ButtonRole.No)
+                                      QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+                                      QMessageBox.StandardButton.No)
 
-        if prompt == QMessageBox.ButtonRole.Yes:
+        if prompt == QMessageBox.StandardButton.Yes:
             model.remove(index)
 
     def _handle_visibility_change(self):
