@@ -5,6 +5,110 @@ from pathlib import Path
 
 from .PyWrightCase import PyWrightCase
 
+import PyWrightFolder
+
+
+class PyWrightGameInfo:
+
+    def __init__(self, game_title: str = "",
+                 game_version: str = "",
+                 game_author: str = "",
+                 game_icon_path: Path = "",
+                 game_cases: list[str] = [],
+                 game_path: Path = ""):
+        self.game_title: str = game_title
+        self.game_version: str = game_version
+        self.game_author: str = game_author
+        self.game_icon_path: Path = game_icon_path
+        self.game_cases: list[str] = game_cases
+        self.game_path: Path = game_path
+        self.game_macros: list[str] = []
+        self.pywright_folder_path: Path = Path("")
+
+        if str(self.game_path) != "":
+            self.pywright_folder_path = self.game_path.parent.parent
+
+    @staticmethod
+    def from_folder(folder_path: Path):
+        if folder_path.parent.stem.lower() != "games":
+            raise FileNotFoundError("Not a valid PyWright game folder")
+
+        if not PyWrightFolder.is_valid_pywright_folder(str(folder_path.parent.parent)):
+            raise FileNotFoundError("Not a valid PyWright game folder")
+
+        game_title, game_author, game_version, game_icon_path = PyWrightGameInfo._load_data_txt(folder_path)
+
+        game_cases = PyWrightGameInfo._load_intro_txt(folder_path)
+
+        return PyWrightGameInfo(game_title, game_version, game_author, game_icon_path, game_cases, folder_path)
+
+
+    @staticmethod
+    def create_new_game(pywright_folder_path: Path,
+                        game_version: str,
+                        game_title: str,
+                        game_author: str,
+                        game_icon_path: str):
+        pass
+
+    @staticmethod
+    def _load_data_txt(game_folder_path: Path):
+        file_path = game_folder_path / "data.txt"
+        if not file_path.exists() or not file_path.is_file():
+            raise FileNotFoundError("{} does not exist".format(file_path))
+
+        game_title = ""
+        game_version = ""
+        game_author = ""
+        game_icon_path = Path("")
+
+        with open(file_path, "r") as f:
+            for line in f.readlines():
+                # Only splitting from the first whitespace should be more than enough
+                line_splitted = line.strip().split(" ", maxsplit=1)
+
+                # This allows us to make this assumption easily.
+                if not len(line_splitted) == 2:
+                    continue
+
+                match line_splitted[0]:
+                    case "version":
+                        game_version = line_splitted[1]
+                    case "icon":
+                        game_icon_path = Path(line_splitted[1])
+                    case "title":
+                        game_title = line_splitted[1]
+                    case "author":
+                        game_author = line_splitted[1]
+
+        return game_title, game_author, game_version, game_icon_path
+
+    @staticmethod
+    def _load_intro_txt(game_folder_path: Path):
+        file_path = game_folder_path / "intro.txt"
+        if not file_path.exists() or not file_path.is_file():
+            raise FileNotFoundError("{} does not exist".format(file_path))
+
+        game_cases: list[str] = []
+
+        with open(file_path, "r") as f:
+            for line in f.readlines():
+                if not line.strip().startswith("set _case_"):
+                    continue
+
+                # now we should be only dealing with the lines that start with "set _case_"
+                line = line.strip()
+                # Only splitting from the first two whitespaces (because of "set" and "_case_")
+                # should be more than enough
+                line_splitted = line.split(" ", maxsplit=2)
+
+                if not len(line_splitted) == 3:
+                    continue
+
+                game_cases.append(line_splitted[2])
+
+        return game_cases
+
 
 class PyWrightGame:
     def __init__(self):
