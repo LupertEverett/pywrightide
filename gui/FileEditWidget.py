@@ -65,11 +65,8 @@ class FileEditWidget(QWidget):
 
     def setup_autocompletion(self):
         # The autocompletion should be used from an API source to have a custom list of proposals
-        try:
-            self.sci.setAutoCompletionThreshold(1)
-            self.sci.setAutoCompletionSource(QsciScintilla.AutoCompletionSource.AcsAPIs)
-        except Exception as e:
-            print(e)
+        self.sci.setAutoCompletionThreshold(1)
+        self.sci.setAutoCompletionSource(QsciScintilla.AutoCompletionSource.AcsAPIs)
 
     def fill_the_scintilla(self, selected_file):
         # The IDE will try to open files assuming UTF-8 encoding, if it fails, it will fall back to ANSI
