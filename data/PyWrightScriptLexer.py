@@ -3,7 +3,7 @@ import re
 
 from PyQt6.QtGui import QColor, QFont
 
-from PyQt6.Qsci import QsciLexerCustom, QsciScintilla
+from PyQt6.Qsci import QsciLexerCustom, QsciScintilla, QsciAPIs
 
 from data import IDESettings, EditorThemes
 
@@ -16,33 +16,43 @@ commands = [
     "list", "li", "showlist", "forgetlist", "forgetlistitem",
     "present",
     "examine", "region",
+
     # "Various control commands"
     "print", "include", "nt", "goto", "label", "penalty", "pause", "waitenter",
     "mus", "sfx", "movie",
     "exit", "endscript", "casemenu", "script", "top",
     "cross", "endcross", "statement", "resume", "cross_restart", "clearcross",
     "next_statement", "prev_statement",
+
     # "Variables and flags to keep track of what happens"
     "setflag", "delflag", "flag", "noflag", "set",
     "setvar", "joinvar", "addvar", "subvar", "divvar", "mulvar", "absvar",
     "random",
     "is", "AND", "isnot", "isempty", "isnotempty", "isnumber",
     "exportvars", "importvars", "savegame", "loadgame", "deletegame",
+
     # "Working with evidence"
     "addev", "delev",
+
     # "Special effects"
     "draw_off", "draw_on", "scroll", "rotate",
+
     # macros
     "macro", "endmacro",
+
     # data.txt fields
     "icon", "title", "author", "version",
+
     # "Animation file commands" (these can be added here too)
     "horizontal", "vertical", "length", "loops", "framedelay",
     "blinkmode", "blipsound", "framecompress",
+
     # "Art Types"
     "fg", "bg", "ev",
+
     # Not mentioned in doc.txt, but somewhere else
     "zoom", "char", "delete", "shake", "is_ex", "setvar_ex",
+
     # Misc. stuff (some might be custom macros, or stuff that wasn't in 0.9880)
     "in", "out", "obj"
 ]
@@ -51,13 +61,16 @@ special_variables = [
     # In the written order in doc.txt
     # "Used in actual game logic"
     "_speaking",
+
     # "Dev controls"
     "_debug", "_return", "_preload",
+
     # "Things engine sets which might be useful to use in logic"
     "_layer_invisible", "_layer_bg", "_layer_char", "_layer_fg", "_layer_textbox", "_layer_gui"
     "_speaking_name", "_lastline", "_currentline", "_lastlabel", "_currentlabel",
     "_statement", "_selected", "_examine_offset_x", "_examine_offset_y",
     "_examine_click_x", "_examine_click_y",
+
     # "Interface toggles so you can customize look or behavior of things"
     "_default_port_fg_delay", "_default_fg_frame_delay", "_list_checked_img", "_bigbutton_img",
     "_textbox_show_button", "_textbox_show_recordbutton", "_textbox_lines", "_textbox_wrap",
@@ -65,12 +78,15 @@ special_variables = [
     "_examine_showcursor", "_examine_use", "_examine_mousedown", "_testimony_blinker", "_cr_button",
     "_allow_present_evidence", "_allow_present_profiles", "_allow_click_save", "_allow_saveload",
     "_allow_click_load",
+
     # "Present customization"
     "_profiles_enable", "_profiles_present", "_evidence_enable", "_evidence_present",
     "_cr_back_button", "_list_back_button", "_menu_fade_level", "_double_screen_list_fade",
     "_flash_sound", "_shake_sound", "_music_loop",
+
     # "Used in intro.txt in the game folder to control menu"
     "_order_cases",
+
     # _case_0, _case_1, case_2... etc. are handled in a separate list
     # Misc. stuff that wasn't in the doc.txt (some might be custom macros, or stuff that wasn't in 0.9880)
     "_list_bg_image", "_music_fade", "ev_mode_bg_logic", "_bigbutton_bg",
@@ -127,6 +143,20 @@ class PyWrightScriptLexer(QsciLexerCustom):
 
         self.builtin_macros: list[str] = []
         self.game_macros: list[str] = []
+        
+        self.setup_autocompletion()
+
+    def setup_autocompletion(self):
+        # Create an API for us to populate with our autocomplete terms
+        api = QsciAPIs(self)
+
+        # Add autocompletion strings
+        for l in (commands, special_variables, named_parameters, parameters, string_tokens, self.builtin_macros, self.game_macros):
+            for c in l:
+                api.add(c)
+
+        # Compile the api for use in the lexer
+        api.prepare()
 
     def set_font_properties(self, font_name: str, font_size: int, bold_font: bool):
         self.setDefaultFont(QFont(font_name, font_size))
@@ -136,9 +166,11 @@ class PyWrightScriptLexer(QsciLexerCustom):
 
     def set_builtin_macros(self, new_list: list[str]):
         self.builtin_macros = new_list
+        self.setup_autocompletion()
 
     def set_game_macros(self, new_list: list[str]):
         self.game_macros = new_list
+        self.setup_autocompletion()
 
     def set_editor_color_theme(self):
         # Default Text Settings

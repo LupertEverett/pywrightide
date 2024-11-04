@@ -43,6 +43,7 @@ class FileEditWidget(QWidget):
         self.sci.modificationChanged.connect(self._emit_file_modified)
 
         self._lexer = PyWrightScriptLexer(self.sci)
+        self.setup_autocompletion()
         self.sci.setLexer(self._lexer)
 
         self.pywright_working_dir = pywright_dir
@@ -61,6 +62,11 @@ class FileEditWidget(QWidget):
         if not self._is_a_new_file:
             self.file_name = Path(self.file_path).name
             self.fill_the_scintilla(self.file_path)
+
+    def setup_autocompletion(self):
+        # The autocompletion should be used from an API source to have a custom list of proposals
+        self.sci.setAutoCompletionThreshold(1)
+        self.sci.setAutoCompletionSource(QsciScintilla.AutoCompletionSource.AcsAPIs)
 
     def fill_the_scintilla(self, selected_file):
         # The IDE will try to open files assuming UTF-8 encoding, if it fails, it will fall back to ANSI
