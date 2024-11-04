@@ -1,8 +1,6 @@
 # PyWright IDE Changelog
 
----
-
-## [Unreleased]
+## Upcoming
 
 * Added basic autocompletion support (by Zetrypio)
 
