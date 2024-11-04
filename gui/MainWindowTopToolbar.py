@@ -27,14 +27,14 @@ class MainWindowTopToolbar(QToolBar):
         # For easier access to the Main Window we're attached to
         self.ide_main_window: gui.IDEMainWindow.IDEMainWindow = parent
 
-        find_pywright_icon_path = IconThemes.icon_path_from_theme(IconThemes.ICON_NAME_FIND_PYWRIGHT)
-        self.open_pywright_folder_action = QAction(QIcon(find_pywright_icon_path), "Open PyWright Folder",
-                                                   self)
-        self.open_pywright_folder_action.triggered.connect(self.handle_find_pywright_installation)
-        self.open_pywright_folder_action.setShortcut(QKeySequence("Ctrl+l"))
-        self.open_pywright_folder_action.setStatusTip("Open PyWright Folder [{}]".format(
-            self.open_pywright_folder_action.shortcut().toString()
-        ))
+        # find_pywright_icon_path = IconThemes.icon_path_from_theme(IconThemes.ICON_NAME_FIND_PYWRIGHT)
+        # self.open_pywright_folder_action = QAction(QIcon(find_pywright_icon_path), "Open PyWright Folder",
+        #                                            self)
+        # self.open_pywright_folder_action.triggered.connect(self.handle_find_pywright_installation)
+        # self.open_pywright_folder_action.setShortcut(QKeySequence("Ctrl+l"))
+        # self.open_pywright_folder_action.setStatusTip("Open PyWright Folder [{}]".format(
+        #     self.open_pywright_folder_action.shortcut().toString()
+        # ))
 
         # Add recent folders to the menu
         self.recent_folders_menu = QMenu()
@@ -42,7 +42,7 @@ class MainWindowTopToolbar(QToolBar):
         self.recent_folders_menu.triggered.connect(lambda action:
                                                    self.ide_main_window.pick_pywright_installation_folder(action.text())
                                                    )
-        self.open_pywright_folder_action.setMenu(self.recent_folders_menu)
+        # self.open_pywright_folder_action.setMenu(self.recent_folders_menu)
 
 
         # Actions
@@ -148,8 +148,8 @@ class MainWindowTopToolbar(QToolBar):
 
         # TODO: Perhaps a "Command dictionary" button, that is for checking thru all the available commands for scripts.
 
-        self.addAction(self.open_pywright_folder_action)
-        self.addSeparator()
+        # self.addAction(self.open_pywright_folder_action)
+        # self.addSeparator()
         self.addAction(self.new_pywright_game_action)
         self.addAction(self.open_pywright_game_action)
         self.addSeparator()
@@ -169,16 +169,30 @@ class MainWindowTopToolbar(QToolBar):
         self.addAction(self.about_action)
 
     def handle_find_pywright_installation(self):
-        """Prompts the user for a folder and determines if the selected folder is a valid PyWright folder"""
+        """Prompts the user for a folder and determines if the selected folder is a valid PyWright game folder"""
         picker = QFileDialog.getExistingDirectory()
 
         if picker != "":
-            if not PyWrightFolder.is_valid_pywright_folder(picker):
-                QMessageBox.critical(self, "Error", "Could not find a PyWright installation")
-                return
+            # if not PyWrightFolder.is_valid_pywright_folder(picker):
+            #     QMessageBox.critical(self, "Error", "Could not find a PyWright installation")
+            #     return
 
             if self.ide_main_window.attempt_closing_unsaved_tabs():
-                self.ide_main_window.pick_pywright_installation_folder(picker)
+                # self.ide_main_window.pick_pywright_installation_folder(picker)
+                self.ide_main_window.pick_game_folder(picker)
+
+    def handle_find_pywright_game(self):
+        """Prompts the user for a folder and determines if the selected folder is a valid PyWright game folder"""
+        picker = QFileDialog.getExistingDirectory()
+
+        if picker != "":
+            # if not PyWrightFolder.is_valid_pywright_folder(picker):
+            #     QMessageBox.critical(self, "Error", "Could not find a PyWright installation")
+            #     return
+
+            if self.ide_main_window.attempt_closing_unsaved_tabs():
+                # self.ide_main_window.pick_pywright_installation_folder(picker)
+                self.ide_main_window.pick_game_folder(picker)
 
     def _handle_run_pywright(self):
         self.ide_main_window.logger_view.show()
@@ -220,8 +234,8 @@ class MainWindowTopToolbar(QToolBar):
                 self.recent_folders_menu.addAction(folder_action)
 
     def update_toolbar_icons(self):
-        find_pywright_icon_path = IconThemes.icon_path_from_theme(IconThemes.ICON_NAME_FIND_PYWRIGHT)
-        self.open_pywright_folder_action.setIcon(QIcon(find_pywright_icon_path))
+        # find_pywright_icon_path = IconThemes.icon_path_from_theme(IconThemes.ICON_NAME_FIND_PYWRIGHT)
+        # self.open_pywright_folder_action.setIcon(QIcon(find_pywright_icon_path))
 
         new_game_icon_path = IconThemes.icon_path_from_theme(IconThemes.ICON_NAME_NEW_GAME)
         self.new_pywright_game_action.setIcon(QIcon(new_game_icon_path))

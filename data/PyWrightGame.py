@@ -5,7 +5,7 @@ from pathlib import Path
 
 from .PyWrightCase import PyWrightCase
 
-import PyWrightFolder
+from . import PyWrightFolder
 
 
 class PyWrightGameInfo:
@@ -27,6 +27,16 @@ class PyWrightGameInfo:
 
         if str(self.game_path) != "":
             self.pywright_folder_path = self.game_path.parent.parent
+
+    @staticmethod
+    def is_valid_game_folder(folder_path: Path):
+        if folder_path.parent.stem.lower() != "games":
+            return False
+
+        if not PyWrightFolder.is_valid_pywright_folder(str(folder_path.parent.parent)):
+            return False
+
+        return True
 
     @staticmethod
     def load_from_folder(folder_path: Path):
@@ -232,6 +242,9 @@ class PyWrightGameInfo:
                     if line.startswith("macro "):
                         splitted_lines = line.split(maxsplit=1)
                         self.game_macros.append(splitted_lines[1])
+
+    def get_game_name(self):
+        return self.game_path.name
 
     def clear_case_list(self):
         self.game_cases.clear()

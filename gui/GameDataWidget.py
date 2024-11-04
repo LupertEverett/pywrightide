@@ -6,7 +6,7 @@ from PyQt6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit
 from PyQt6.QtCore import pyqtSignal
 
 from .IconPickerDialog import IconPickerDialog
-from data.PyWrightGame import PyWrightGame
+from data.PyWrightGame import PyWrightGame, PyWrightGameInfo
 
 
 class GameDataWidget(QWidget):
@@ -17,6 +17,7 @@ class GameDataWidget(QWidget):
         super().__init__()
 
         self._selected_game = PyWrightGame()
+        self._game_info: PyWrightGameInfo | None = None
 
         self._pywright_root_dir = pywright_root_dir
 
@@ -81,25 +82,37 @@ class GameDataWidget(QWidget):
 
         return result
 
-    def load_data_txt(self, selected_game: PyWrightGame):
-        self._selected_game = selected_game
-        if self._selected_game.is_a_game_selected():
-            self.populate_game_info()
+    def load_data_txt(self, selected_game_info: PyWrightGameInfo):
+        # self._selected_game = selected_game
+        # if self._selected_game.is_a_game_selected():
+        #     self.populate_game_info()
+
+        self._game_info = selected_game_info
+        self.populate_game_info()
 
     def save_data_txt(self):
-        if self._selected_game.is_a_game_selected():
-            self._selected_game.set_data_txt_fields(self._game_version_lineedit.text(),
-                                                    self._game_title_lineedit.text(),
-                                                    self._game_icon_lineedit.text(),
-                                                    self._game_author_lineedit.text())
-            self._selected_game.write_data_txt()
+        # if self._selected_game.is_a_game_selected():
+        #     self._selected_game.set_data_txt_fields(self._game_version_lineedit.text(),
+        #                                             self._game_title_lineedit.text(),
+        #                                             self._game_icon_lineedit.text(),
+        #                                             self._game_author_lineedit.text())
+        #     self._selected_game.write_data_txt()
+        #     self._handle_data_txt_fields_change()
+
+        if self._game_info is not None:
+            self._game_info.game_version = self._game_version_lineedit.text()
+            self._game_info.game_title = self._game_title_lineedit.text()
+            self._game_info.game_icon_path = self._game_icon_lineedit.text()
+            self._game_info.game_author = self._game_author_lineedit.text()
+            self._game_info.write_data_txt()
             self._handle_data_txt_fields_change()
 
     def populate_game_info(self):
-        self._game_title_lineedit.setText(self._selected_game.game_title)
-        self._game_version_lineedit.setText(self._selected_game.game_version)
-        self._game_icon_lineedit.setText(self._selected_game.game_icon_path)
-        self._game_author_lineedit.setText(self._selected_game.game_author)
+        if self._game_info is not None:
+            self._game_title_lineedit.setText(self._game_info.game_title)
+            self._game_version_lineedit.setText(self._game_info.game_version)
+            self._game_icon_lineedit.setText(str(self._game_info.game_icon_path))
+            self._game_author_lineedit.setText(self._game_info.game_author)
 
     def set_game_icon_path_textfield(self, new_path: str):
         self._game_icon_lineedit.setText(new_path)
@@ -111,7 +124,7 @@ class GameDataWidget(QWidget):
     def are_data_txt_areas_different(self) -> bool:
         return not self.are_data_txt_areas_empty() and (
                 self._game_title_lineedit.text() != self._selected_game.game_title
-                or self._game_icon_lineedit.text() != self._selected_game.game_icon_path
+                or self._game_icon_lineedit.text() != str(self._selected_game.game_icon_path)
                 or self._game_version_lineedit.text() != self._selected_game.game_version
                 or self._game_author_lineedit.text() != self._selected_game.game_author)
 
@@ -134,7 +147,8 @@ class GameDataWidget(QWidget):
         return self._game_version_lineedit.text()
 
     def _handle_icon_picker_clicked(self):
-        icon_picker = IconPickerDialog(self._pywright_root_dir, self._selected_game, self)
+        if self._game_info is not None:
+            icon_picker = IconPickerDialog(self._pywright_root_dir, self._game_info, self)
 
-        if icon_picker.exec():
-            self._game_icon_lineedit.setText(icon_picker.selected_icon)
+            if icon_picker.exec():
+                self._game_icon_lineedit.setText(icon_picker.selected_icon)

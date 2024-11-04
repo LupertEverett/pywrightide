@@ -9,7 +9,7 @@ from PyQt6.QtWidgets import (QDialog, QDialogButtonBox, QComboBox, QCheckBox,
 from PyQt6.QtGui import QPixmap, QIcon, QFileSystemModel
 from PyQt6.QtCore import QDir, QSize, Qt
 
-from data.PyWrightGame import PyWrightGame
+from data.PyWrightGame import PyWrightGame, PyWrightGameInfo
 
 accepted_types = (".png", ".jpg")
 ICON_SIZE = QSize(128, 128)
@@ -17,22 +17,23 @@ ICON_SIZE = QSize(128, 128)
 
 class IconPickerDialog(QDialog):
 
-    def __init__(self, pywright_root_dir: str, selected_game=PyWrightGame(), parent=None):
+    def __init__(self, pywright_root_dir: str, selected_game_info: PyWrightGameInfo | None = None, parent=None):
         super().__init__(parent)
 
         self.setWindowTitle("Pick an Icon")
 
         self._pywright_root_dir = pywright_root_dir
 
-        self._selected_game = selected_game
+        self._selected_game_info = selected_game_info
 
         self._subfolder_combobox = QComboBox()
         self._subfolder_combobox.currentIndexChanged.connect(self._refresh_icon_view)
 
         self._global_folder_checkbox = QCheckBox("Check the global art folder?")
         self._global_folder_checkbox.setChecked(True)
-        enabled_condition = self._selected_game.is_a_game_selected() \
-                            and Path("{}/art/".format(self._selected_game.game_path)).exists()
+        enabled_condition = self._selected_game_info is not None and (self._selected_game_info.game_path / "art").exists()
+        # enabled_condition = self._selected_game.is_a_game_selected() \
+        #                     and Path("{}/art/".format(self._selected_game.game_path)).exists()
         self._global_folder_checkbox.setEnabled(enabled_condition)
         self._global_folder_checkbox.clicked.connect(self._refresh_subfolders)
         self._global_folder_checkbox.setWhatsThis("If checked, the icon picker will query the jpg and png files in the "
@@ -80,7 +81,7 @@ class IconPickerDialog(QDialog):
     def _query_subfolders(self):
         checking_root_art = self._global_folder_checkbox.isChecked()
 
-        selected_root_folder = self._pywright_root_dir if checking_root_art else self._selected_game.game_path
+        selected_root_folder = self._pywright_root_dir if checking_root_art else str(self._selected_game_info.game_path)
 
         art_folder_path = Path("{}/art/".format(selected_root_folder))
 
@@ -93,7 +94,7 @@ class IconPickerDialog(QDialog):
         subfolder_name = self._subfolder_combobox.currentText()
 
         checking_root_art = self._global_folder_checkbox.isChecked()
-        selected_root_folder = self._pywright_root_dir if checking_root_art else self._selected_game.game_path
+        selected_root_folder = self._pywright_root_dir if checking_root_art else str(self._selected_game_info.game_path)
 
         folder_path = Path("{}/art/{}".format(selected_root_folder, subfolder_name))
 
