@@ -1,7 +1,5 @@
 # PyWright IDE Credits
 
----
-
 ## Thanks to:
 
 * Zetrypio: Basic autocompletion support.
