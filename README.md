@@ -1,5 +1,7 @@
 # PyWright IDE: A simple IDE for working on PyWright games.
 
+---
+
 This project is a simple IDE written in Python and PyQt, that aims to make developing PyWright games easier. It features a tabbed text editor with syntax highlighting, dialogs to create new or interact with games/cases, and asset browsers.
 
 ## Dependencies
@@ -47,8 +49,10 @@ Code is licensed under **GPLv3**
 Custom-made icons in `/res/icons` and `/res/iconthemes` that are supplied with this program are licensed with **Creative Commons BY/NC/SA**, with the exception of the ones that utilize official artworks in any way
 (the icons that has the Blue Badger), "pwicon.png", which comes from PyWright, and its edited versions "ideicon.ico" and "ideicon.png".
 
+## Changelog
+
+See [CHANGELOG.md](CHANGELOG.md) for details!
+
 ## Credits
 
-[PyWright](http://pywright.dawnsoft.org/) is made by Saluk.
-
-A heartfelt thanks goes to BirbIsTheWord for his extensive usage and testing (and inspiring me to make this program in the first place)!
+See [CREDITS.md](CREDITS.md) for details!
