@@ -1,7 +1,5 @@
 # PyWright IDE: A simple IDE for working on PyWright games.
 
----
-
 This project is a simple IDE written in Python and PyQt, that aims to make developing PyWright games easier. It features a tabbed text editor with syntax highlighting, dialogs to create new or interact with games/cases, and asset browsers.
 
 ## Dependencies
