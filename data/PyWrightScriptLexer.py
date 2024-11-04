@@ -8,7 +8,6 @@ from PyQt6.Qsci import QsciLexerCustom, QsciScintilla, QsciAPIs
 from data import IDESettings, EditorThemes
 
 commands = [
-
     # In the written order in doc.txt (with some additions):
     # "To add various objects"
     "emo",
@@ -59,7 +58,6 @@ commands = [
 ]
 
 special_variables = [
-
     # In the written order in doc.txt
     # "Used in actual game logic"
     "_speaking",
@@ -149,15 +147,15 @@ class PyWrightScriptLexer(QsciLexerCustom):
         self.setup_autocompletion()
 
     def setup_autocompletion(self):
-        ## Create an API for us to populate with our autocomplete terms
+        # Create an API for us to populate with our autocomplete terms
         api = QsciAPIs(self)
 
-        ## Add autocompletion strings
+        # Add autocompletion strings
         for l in (commands, special_variables, named_parameters, parameters, string_tokens, self.builtin_macros, self.game_macros):
             for c in l:
                 api.add(c)
 
-        ## Compile the api for use in the lexer
+        # Compile the api for use in the lexer
         api.prepare()
 
     def set_font_properties(self, font_name: str, font_size: int, bold_font: bool):
