@@ -187,8 +187,23 @@ class IDEMainWindow(QMainWindow):
         picker = QFileDialog.getExistingDirectory()
 
         if picker != "":
-            if self.attempt_closing_unsaved_tabs():
-                self.pick_game_folder(Path(picker))
+            # See if the user pointed to a game folder.
+            # If that's the case, try to load it.
+            if PyWrightGameInfo.is_valid_game_folder(Path(picker)):
+                if self.attempt_closing_unsaved_tabs():
+                    self.pick_game_folder(Path(picker))
+            # See if the user pointed to a PyWright folder instead of a game folder.
+            # Open the Open Game Dialog if that's the case.
+            elif PyWrightFolder.is_valid_pywright_folder(picker) \
+                    or PyWrightFolder.is_valid_pywright_folder(str(Path(picker).parent)):
+                open_game_dialog = OpenGameDialog(picker, self)
+
+                if open_game_dialog.exec():
+                    if self.attempt_closing_unsaved_tabs():
+                        game_path = Path(picker) / "games" / open_game_dialog.selected_game
+                        self.pick_game_folder(game_path)
+            else:
+                QMessageBox.critical(self, "Error", "Invalid folder selected!")
 
     def _add_pywright_folder_to_recent(self, folder_path: str):
         for recent_folder_path in self.recent_folders:
