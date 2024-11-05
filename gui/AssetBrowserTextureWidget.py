@@ -85,8 +85,8 @@ class AssetManagerTextureWidget(QWidget):
         if self._pywright_dir == "":
             return
 
-        if self._game_info is None:
-            return
+        # if self._game_info is None:
+        #     return
 
         global_art_folder_path = Path("{}/art/".format(self._pywright_dir))
 
@@ -122,7 +122,7 @@ class AssetManagerTextureWidget(QWidget):
 
         is_global = subfolder_name.startswith("global/")
 
-        root_folder = self._pywright_dir if is_global else self._game_info.game_path
+        root_folder = self._pywright_dir if is_global or self._game_info is None else self._game_info.game_path
 
         if is_global:
             subfolder_name = subfolder_name.split("global/", maxsplit=1)[1]

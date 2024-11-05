@@ -165,7 +165,7 @@ class IDEMainWindow(QMainWindow):
         self._top_toolbar.update_run_pywright_status_tip(self.pywright_executable_name)
         self._top_toolbar.update_toolbar_buttons(self.selected_pywright_installation != "",
                                                  self.selected_game_info.get_game_name() != "")
-        self.asset_manager_widget.clear_everything()
+        self.asset_manager_widget.update_assets(self.selected_game_info)
 
         self._switch_to_selected_game(self.selected_game_info.get_game_name())
 
@@ -211,7 +211,7 @@ class IDEMainWindow(QMainWindow):
             self.central_widget.open_game_properties_tab(self.game_properties_widget)
             self._top_toolbar.update_toolbar_buttons(self.selected_pywright_installation != "",
                                                      self.selected_game_info.get_game_name() != "")
-            self.asset_manager_widget.update_assets(self.selected_pywright_installation, self.selected_game_info)
+            self.asset_manager_widget.update_assets(self.selected_game_info)
 
     def _handle_open_file(self):
         # open_dialog = QFileDialog.getOpenFileName(self, "Open File",
