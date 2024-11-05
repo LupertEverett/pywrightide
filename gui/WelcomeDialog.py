@@ -13,7 +13,7 @@ from pathlib import Path
 
 
 _welcome_label_text = """<h1>Welcome to PyWright IDE {}!</h1>
-<p>Please select a PyWright folder below to start editing cases!</p>
+<p>Please select a PyWright game folder below to start editing cases!</p>
 """.format(IDESettings.IDE_VERSION_STRING)
 
 
