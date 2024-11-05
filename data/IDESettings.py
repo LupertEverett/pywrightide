@@ -12,14 +12,17 @@ FONT_NAME_KEY = "editor/font/name"
 FONT_SIZE_KEY = "editor/font/size"
 FONT_BOLD_KEY = "editor/font/bold"
 AUTOLOAD_LAST_PROJECT_KEY = "autoload_last_project"
+AUTOLOAD_LAST_GAME_KEY = "autoload_last_game"
 AUTOLOAD_LAST_PROJECT_PATH_KEY = "last_project_path"
 AUTOLOAD_LAST_GAME_NAME_KEY = "last_game_name"
+AUTOLOAD_LAST_GAME_PATH_KEY = "last_game_path"
 WINDOW_GEOMETRY_KEY = "window_geometry"
 WINDOW_STATE_KEY = "window_state"
 ICON_THEME_KEY = "icon_theme"
 COLOR_THEME_KEY = "color_theme"
 EDITOR_THEME_KEY = "editor/color_theme"
 RECENT_DOCS_KEY = "recent_docs"
+RECENT_GAMES_KEY = "recent_games"
 
 # Functions
 
@@ -56,6 +59,14 @@ def set_autoload_last_project_check(new_value: bool):
     __program_settings.setValue(AUTOLOAD_LAST_PROJECT_KEY, new_value)
 
 
+def get_autoload_last_game_check() -> bool:
+    return __program_settings.value(AUTOLOAD_LAST_GAME_KEY, False, bool)
+
+
+def set_autoload_last_game_check(new_value: bool):
+    __program_settings.setValue(AUTOLOAD_LAST_GAME_KEY, new_value)
+
+
 def get_autoload_last_project_path() -> str:
     return __program_settings.value(AUTOLOAD_LAST_PROJECT_PATH_KEY, "", str)
 
@@ -70,6 +81,14 @@ def get_autoload_last_game_name() -> str:
 
 def set_autoload_last_game_name(new_game_name_str: str):
     __program_settings.setValue(AUTOLOAD_LAST_GAME_NAME_KEY, new_game_name_str)
+
+
+def get_autoload_last_game_path() -> str:
+    return __program_settings.value(AUTOLOAD_LAST_GAME_PATH_KEY, "", str)
+
+
+def set_autoload_last_game_path(new_game_path_str: str):
+    __program_settings.setValue(AUTOLOAD_LAST_GAME_PATH_KEY, new_game_path_str)
 
 
 def get_window_geometry() -> QByteArray:
@@ -138,6 +157,28 @@ def set_recent_docs(docs: list[str]):
     __program_settings.endArray()
 
 
+def get_recent_games() -> list[str]:
+    result: list[str] = []
+
+    size = __program_settings.beginReadArray(RECENT_GAMES_KEY)
+    for idx in range(size):
+        __program_settings.setArrayIndex(idx)
+        result.append(__program_settings.value("folder_path"))
+    __program_settings.endArray()
+
+    return result
+
+
+def set_recent_games(docs: list[str]):
+    __program_settings.beginWriteArray(RECENT_GAMES_KEY)
+
+    for idx in range(len(docs)):
+        __program_settings.setArrayIndex(idx)
+        __program_settings.setValue("folder_path", docs[idx])
+
+    __program_settings.endArray()
+
+
 def all_keys() -> list[str]:
     return __program_settings.allKeys()
 
@@ -161,6 +202,7 @@ def reset_settings():
     __program_settings.setValue(AUTOLOAD_LAST_PROJECT_KEY, False)
     __program_settings.setValue(AUTOLOAD_LAST_PROJECT_PATH_KEY, "")
     __program_settings.setValue(AUTOLOAD_LAST_GAME_NAME_KEY, "")
+    __program_settings.setValue(AUTOLOAD_LAST_GAME_PATH_KEY, "")
     __program_settings.setValue(WINDOW_GEOMETRY_KEY, None)
     __program_settings.setValue(ICON_THEME_KEY, "default")
     __program_settings.setValue(COLOR_THEME_KEY, "System Theme")

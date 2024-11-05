@@ -30,7 +30,7 @@ class SettingsDialog(QDialog):
         general_group_layout = QVBoxLayout()
 
         self.autoreload_last_checkbox = QCheckBox("Autoreload the last open project")
-        self.autoreload_last_checkbox.setChecked(IDESettings.get_autoload_last_project_check())
+        self.autoreload_last_checkbox.setChecked(IDESettings.get_autoload_last_game_check())
 
         icon_theme_section_layout = QHBoxLayout()
         self.icon_theme_combobox = QComboBox()
@@ -127,7 +127,7 @@ class SettingsDialog(QDialog):
         IDESettings.set_font_name(current_font.family())
         IDESettings.set_font_size(self.font_size_spinbox.value())
         IDESettings.set_font_boldness(self.bold_toggle_button.isChecked())
-        IDESettings.set_autoload_last_project_check(self.autoreload_last_checkbox.isChecked())
+        IDESettings.set_autoload_last_game_check(self.autoreload_last_checkbox.isChecked())
         IDESettings.set_icon_theme(self.icon_theme_combobox.currentText())
         IDESettings.set_color_theme(self.color_theme_combobox.currentText())
         IDESettings.set_editor_color_theme(self.editor_theme_combobox.currentText())
