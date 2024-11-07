@@ -11,17 +11,13 @@ __program_settings = QSettings("PyWrightIDE", "PyWrightIDE")
 FONT_NAME_KEY = "editor/font/name"
 FONT_SIZE_KEY = "editor/font/size"
 FONT_BOLD_KEY = "editor/font/bold"
-AUTOLOAD_LAST_PROJECT_KEY = "autoload_last_project"
 AUTOLOAD_LAST_GAME_KEY = "autoload_last_game"
-AUTOLOAD_LAST_PROJECT_PATH_KEY = "last_project_path"
-AUTOLOAD_LAST_GAME_NAME_KEY = "last_game_name"
 AUTOLOAD_LAST_GAME_PATH_KEY = "last_game_path"
 WINDOW_GEOMETRY_KEY = "window_geometry"
 WINDOW_STATE_KEY = "window_state"
 ICON_THEME_KEY = "icon_theme"
 COLOR_THEME_KEY = "color_theme"
 EDITOR_THEME_KEY = "editor/color_theme"
-RECENT_DOCS_KEY = "recent_docs"
 RECENT_GAMES_KEY = "recent_games"
 
 # Functions
@@ -51,36 +47,12 @@ def set_font_boldness(new_value: bool):
     return __program_settings.setValue(FONT_BOLD_KEY, new_value)
 
 
-def get_autoload_last_project_check() -> bool:
-    return __program_settings.value(AUTOLOAD_LAST_PROJECT_KEY, False, bool)
-
-
-def set_autoload_last_project_check(new_value: bool):
-    __program_settings.setValue(AUTOLOAD_LAST_PROJECT_KEY, new_value)
-
-
 def get_autoload_last_game_check() -> bool:
     return __program_settings.value(AUTOLOAD_LAST_GAME_KEY, False, bool)
 
 
 def set_autoload_last_game_check(new_value: bool):
     __program_settings.setValue(AUTOLOAD_LAST_GAME_KEY, new_value)
-
-
-def get_autoload_last_project_path() -> str:
-    return __program_settings.value(AUTOLOAD_LAST_PROJECT_PATH_KEY, "", str)
-
-
-def set_autoload_last_project_path(new_path_str: str):
-    __program_settings.setValue(AUTOLOAD_LAST_PROJECT_PATH_KEY, new_path_str)
-
-
-def get_autoload_last_game_name() -> str:
-    return __program_settings.value(AUTOLOAD_LAST_GAME_NAME_KEY, "", str)
-
-
-def set_autoload_last_game_name(new_game_name_str: str):
-    __program_settings.setValue(AUTOLOAD_LAST_GAME_NAME_KEY, new_game_name_str)
 
 
 def get_autoload_last_game_path() -> str:
@@ -135,28 +107,6 @@ def set_editor_color_theme(new_editor_theme_name: str):
     __program_settings.setValue(EDITOR_THEME_KEY, new_editor_theme_name)
 
 
-def get_recent_docs() -> list[str]:
-    result: list[str] = []
-
-    size = __program_settings.beginReadArray(RECENT_DOCS_KEY)
-    for idx in range(size):
-        __program_settings.setArrayIndex(idx)
-        result.append(__program_settings.value("folder_path"))
-    __program_settings.endArray()
-
-    return result
-
-
-def set_recent_docs(docs: list[str]):
-    __program_settings.beginWriteArray(RECENT_DOCS_KEY)
-
-    for idx in range(len(docs)):
-        __program_settings.setArrayIndex(idx)
-        __program_settings.setValue("folder_path", docs[idx])
-
-    __program_settings.endArray()
-
-
 def get_recent_games() -> list[str]:
     result: list[str] = []
 
@@ -199,9 +149,7 @@ def reset_settings():
     __program_settings.setValue(FONT_NAME_KEY, "Consolas")
     __program_settings.setValue(FONT_SIZE_KEY, 10)
     __program_settings.setValue(FONT_BOLD_KEY, True)
-    __program_settings.setValue(AUTOLOAD_LAST_PROJECT_KEY, False)
-    __program_settings.setValue(AUTOLOAD_LAST_PROJECT_PATH_KEY, "")
-    __program_settings.setValue(AUTOLOAD_LAST_GAME_NAME_KEY, "")
+    __program_settings.setValue(AUTOLOAD_LAST_GAME_KEY, False)
     __program_settings.setValue(AUTOLOAD_LAST_GAME_PATH_KEY, "")
     __program_settings.setValue(WINDOW_GEOMETRY_KEY, None)
     __program_settings.setValue(ICON_THEME_KEY, "default")

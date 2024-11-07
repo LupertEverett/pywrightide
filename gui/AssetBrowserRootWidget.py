@@ -6,7 +6,7 @@ import pygame.mixer
 
 from .AssetBrowserTextureWidget import AssetManagerTextureWidget
 from .AssetBrowserAudioWidget import AssetBrowserAudioWidget, AudioType
-from data.PyWrightGame import PyWrightGame, PyWrightGameInfo
+from data.PyWrightGame import PyWrightGameInfo
 
 
 # Custom event type that signals the audio file currently playing has finished

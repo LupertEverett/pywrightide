@@ -8,7 +8,7 @@ from PyQt6.QtGui import QIcon, QMouseEvent, QDesktopServices, QFileSystemModel, 
 from PyQt6.QtCore import Qt, QModelIndex, pyqtSignal, QUrl
 
 from .CasePropertiesEditorDialog import CasePropertiesEditorDialog
-from data.PyWrightGame import PyWrightGame, PyWrightGameInfo
+from data.PyWrightGame import PyWrightGameInfo
 
 import data.IconThemes as IconThemes
 
@@ -57,7 +57,6 @@ class DirectoryViewWidget(QDockWidget):
 
         self._top_widget = self._create_custom_title_bar()
 
-        # self._pywright_game = PyWrightGame()
         self._game_info: PyWrightGameInfo | None = None
 
         layout.addWidget(self._top_widget)
@@ -83,7 +82,6 @@ class DirectoryViewWidget(QDockWidget):
         fs_model.setNameFilters(name_filter)
         fs_model.setNameFilterDisables(False)
 
-        # self._pywright_game = selected_game
         self._game_info = selected_game_info
 
         self._game_title_label.setText(self._game_info.get_game_name())

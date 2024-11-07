@@ -6,7 +6,7 @@ from PyQt6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit
 from PyQt6.QtCore import pyqtSignal
 
 from .IconPickerDialog import IconPickerDialog
-from data.PyWrightGame import PyWrightGame, PyWrightGameInfo
+from data.PyWrightGame import PyWrightGameInfo
 
 
 class GameDataWidget(QWidget):
@@ -16,7 +16,6 @@ class GameDataWidget(QWidget):
     def __init__(self, pywright_root_dir: str):
         super().__init__()
 
-        self._selected_game = PyWrightGame()
         self._game_info: PyWrightGameInfo | None = None
 
         self._pywright_root_dir = pywright_root_dir
@@ -86,22 +85,10 @@ class GameDataWidget(QWidget):
         self._pywright_root_dir = new_path
 
     def load_data_txt(self, selected_game_info: PyWrightGameInfo):
-        # self._selected_game = selected_game
-        # if self._selected_game.is_a_game_selected():
-        #     self.populate_game_info()
-
         self._game_info = selected_game_info
         self.populate_game_info()
 
     def save_data_txt(self):
-        # if self._selected_game.is_a_game_selected():
-        #     self._selected_game.set_data_txt_fields(self._game_version_lineedit.text(),
-        #                                             self._game_title_lineedit.text(),
-        #                                             self._game_icon_lineedit.text(),
-        #                                             self._game_author_lineedit.text())
-        #     self._selected_game.write_data_txt()
-        #     self._handle_data_txt_fields_change()
-
         if self._game_info is not None:
             self._game_info.game_version = self._game_version_lineedit.text()
             self._game_info.game_title = self._game_title_lineedit.text()
@@ -126,10 +113,10 @@ class GameDataWidget(QWidget):
 
     def are_data_txt_areas_different(self) -> bool:
         return not self.are_data_txt_areas_empty() and (
-                self._game_title_lineedit.text() != self._selected_game.game_title
-                or self._game_icon_lineedit.text() != str(self._selected_game.game_icon_path)
-                or self._game_version_lineedit.text() != self._selected_game.game_version
-                or self._game_author_lineedit.text() != self._selected_game.game_author)
+                self._game_title_lineedit.text() != self._game_info.game_title
+                or self._game_icon_lineedit.text() != str(self._game_info.game_icon_path)
+                or self._game_version_lineedit.text() != self._game_info.game_version
+                or self._game_author_lineedit.text() != self._game_info.game_author)
 
     def are_data_txt_areas_empty(self) -> bool:
         return self._game_title_lineedit.text() == "" \

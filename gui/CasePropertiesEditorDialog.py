@@ -4,7 +4,7 @@ from PyQt6.QtWidgets import QDialog, QDialogButtonBox, QVBoxLayout, QMessageBox
 
 from .CasePropertiesWidget import CasePropertiesWidget
 
-from data.PyWrightGame import PyWrightGame, PyWrightGameInfo
+from data.PyWrightGame import PyWrightGameInfo
 from data.PyWrightCase import PyWrightCase
 
 

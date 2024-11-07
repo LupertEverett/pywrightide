@@ -4,7 +4,7 @@ from PyQt6.QtCore import pyqtSignal
 from PyQt6.QtWidgets import QWidget, QTabWidget, QVBoxLayout, QMessageBox
 
 from data import IDESettings, EditorThemes
-from data.PyWrightGame import PyWrightGame, PyWrightGameInfo
+from data.PyWrightGame import PyWrightGameInfo
 from .FileEditWidget import FileEditWidget
 from .FindReplaceDialog import SearchScope, FindType, ReplaceType
 from .GamePropertiesWidget import GamePropertiesWidget

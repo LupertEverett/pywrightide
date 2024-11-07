@@ -6,7 +6,7 @@ from PyQt6.QtWidgets import QDialog, QDialogButtonBox, QVBoxLayout, QHBoxLayout,
     QPushButton, QFileDialog
 
 from .GameDataWidget import GameDataWidget
-from data.PyWrightGame import PyWrightGame, PyWrightGameInfo
+from data.PyWrightGame import PyWrightGameInfo
 from data import PyWrightFolder
 
 

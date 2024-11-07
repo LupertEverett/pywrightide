@@ -4,7 +4,7 @@ from pathlib import Path
 
 from PyQt6.QtWidgets import QDialog, QDialogButtonBox, QListWidget, QVBoxLayout, QPushButton
 
-from data.PyWrightGame import PyWrightGame, PyWrightGameInfo
+from data.PyWrightGame import PyWrightGameInfo
 
 # These folders will NEVER appear in the dialog, as they're definitely NOT case folders
 disallowed_folders = ("art", "sfx", "music", "movies")

@@ -6,7 +6,7 @@ from PyQt6.QtGui import QIcon, QAction
 from .CasePropertiesEditorDialog import CasePropertiesEditorDialog
 from .AddExistingCaseDialog import AddExistingCaseDialog
 
-from data.PyWrightGame import PyWrightGame, PyWrightGameInfo
+from data.PyWrightGame import PyWrightGameInfo
 from data.PyWrightCase import PyWrightCase
 
 import data.IconThemes as IconThemes
@@ -17,7 +17,6 @@ class GameIntroWidget(QWidget):
     def __init__(self, game_info: PyWrightGameInfo | None = None):
         super().__init__()
 
-        # self._selected_game = PyWrightGame()
         self._game_info = game_info
 
         self._game_cases_list_widget = QListWidget()
@@ -82,19 +81,14 @@ class GameIntroWidget(QWidget):
 
     def load_intro_txt(self, selected_game_info: PyWrightGameInfo):
         self._game_info = selected_game_info
-        # if selected_game.is_a_game_selected():
         self._populate_cases_list()
 
     def save_intro_txt(self):
-        # if self._selected_game.is_a_game_selected():
-        #     self._selected_game.write_intro_txt()
         if self._game_info is not None:
             self._game_info.write_intro_txt()
 
     def _populate_cases_list(self):
         self._game_cases_list_widget.clear()
-        # for game_case in self._selected_game.game_cases:
-        #     self._game_cases_list_widget.addItem(game_case)
         for game_case in self._game_info.game_cases:
             self._game_cases_list_widget.addItem(game_case)
 
@@ -102,11 +96,6 @@ class GameIntroWidget(QWidget):
         self._update_widget_toolbar_buttons()
 
     def _handle_add_new_case(self):
-        # add_new_case_dialog = CasePropertiesEditorDialog(self._selected_game, None, self)
-
-        # if add_new_case_dialog.exec():
-        #     self._selected_game.create_new_case(add_new_case_dialog.get_case())
-        #     self._populate_cases_list()
         add_new_case_dialog = CasePropertiesEditorDialog(self._game_info, None, self)
 
         if add_new_case_dialog.exec():
@@ -114,11 +103,6 @@ class GameIntroWidget(QWidget):
             self._populate_cases_list()
 
     def _handle_add_existing_case(self):
-        # add_existing_case_dialog = AddExistingCaseDialog(self._selected_game, self)
-        # if add_existing_case_dialog.exec():
-        #     self._selected_game.update_intro_txt_cases()
-        #     self._populate_cases_list()
-
         add_existing_case_dialog = AddExistingCaseDialog(self._game_info, self)
         if add_existing_case_dialog.exec():
             self._game_info.update_intro_txt_cases()
@@ -135,7 +119,6 @@ class GameIntroWidget(QWidget):
                                                   QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
                                                   QMessageBox.StandardButton.No)
         selected_case: str = self._game_cases_list_widget.currentItem().text()
-        # self._selected_game.remove_case(selected_case, also_remove_folder == QMessageBox.StandardButton.Yes)
 
         self._game_info.remove_case(selected_case, also_remove_folder == QMessageBox.StandardButton.Yes)
         self._populate_cases_list()
@@ -145,7 +128,6 @@ class GameIntroWidget(QWidget):
         selected_case_path = self._game_info.game_path/selected_case_name
         selected_case = PyWrightCase.from_existing_case_folder(selected_case_path)
 
-        # case_properties_dialog = CasePropertiesEditorDialog(self._selected_game, selected_case, self)
         case_properties_dialog = CasePropertiesEditorDialog(self._game_info, selected_case, self)
 
         if case_properties_dialog.exec():
@@ -161,13 +143,6 @@ class GameIntroWidget(QWidget):
         # Stop if we're already at the top item
         if curr_index == 0:
             return
-
-        # self._selected_game.game_cases[curr_index - 1], self._selected_game.game_cases[curr_index] = \
-        #     self._selected_game.game_cases[curr_index], self._selected_game.game_cases[curr_index - 1]
-
-        # self._selected_game.update_intro_txt_cases()
-        # self._populate_cases_list()
-        # self._game_cases_list_widget.setCurrentRow(curr_index - 1)
 
         self._game_info.game_cases[curr_index - 1], self._game_info.game_cases[curr_index] = \
             self._game_info.game_cases[curr_index], self._game_info.game_cases[curr_index - 1]
@@ -185,11 +160,6 @@ class GameIntroWidget(QWidget):
         # Stop if we're already at the bottom item
         if curr_index == self._game_cases_list_widget.count() - 1:
             return
-
-        # self._selected_game.game_cases[curr_index], self._selected_game.game_cases[curr_index + 1] = \
-        #     self._selected_game.game_cases[curr_index + 1], self._selected_game.game_cases[curr_index]
-
-        # self._selected_game.update_intro_txt_cases()
 
         self._game_info.game_cases[curr_index], self._game_info.game_cases[curr_index + 1] = \
             self._game_info.game_cases[curr_index + 1], self._game_info.game_cases[curr_index]

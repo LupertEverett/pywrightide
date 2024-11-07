@@ -6,7 +6,7 @@ from PyQt6.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QGroupBox, QPushB
 from .GameDataWidget import GameDataWidget
 from .GameIntroWidget import GameIntroWidget
 
-from data.PyWrightGame import PyWrightGame, PyWrightGameInfo
+from data.PyWrightGame import PyWrightGameInfo
 
 
 class GamePropertiesWidget(QWidget):

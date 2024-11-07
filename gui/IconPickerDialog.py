@@ -9,7 +9,7 @@ from PyQt6.QtWidgets import (QDialog, QDialogButtonBox, QComboBox, QCheckBox,
 from PyQt6.QtGui import QPixmap, QIcon, QFileSystemModel
 from PyQt6.QtCore import QDir, QSize, Qt
 
-from data.PyWrightGame import PyWrightGame, PyWrightGameInfo
+from data.PyWrightGame import PyWrightGameInfo
 
 accepted_types = (".png", ".jpg")
 ICON_SIZE = QSize(128, 128)
@@ -32,8 +32,6 @@ class IconPickerDialog(QDialog):
         self._global_folder_checkbox = QCheckBox("Check the global art folder?")
         self._global_folder_checkbox.setChecked(True)
         enabled_condition = self._selected_game_info is not None and (self._selected_game_info.game_path / "art").exists()
-        # enabled_condition = self._selected_game.is_a_game_selected() \
-        #                     and Path("{}/art/".format(self._selected_game.game_path)).exists()
         self._global_folder_checkbox.setEnabled(enabled_condition)
         self._global_folder_checkbox.clicked.connect(self._refresh_subfolders)
         self._global_folder_checkbox.setWhatsThis("If checked, the icon picker will query the jpg and png files in the "

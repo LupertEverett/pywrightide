@@ -8,7 +8,7 @@ from PyQt6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QComboBox,
 from PyQt6.QtGui import QDesktopServices, QGuiApplication, QClipboard, QAction, QIcon, QStandardItemModel, QStandardItem
 from PyQt6.QtCore import pyqtSignal, Qt, QUrl, QFileSystemWatcher, QModelIndex
 
-from data.PyWrightGame import PyWrightGame, PyWrightGameInfo
+from data.PyWrightGame import PyWrightGameInfo
 from data import IconThemes
 
 MUSIC_FOLDER_NAME = "music"
@@ -32,7 +32,6 @@ class AssetBrowserAudioWidget(QWidget):
     def __init__(self, audio_type: AudioType, parent=None):
         super().__init__(parent)
         self._pywright_dir = ""
-        # self._selected_game = PyWrightGame()
         self._game_info: PyWrightGameInfo | None = None
 
         self.__audio_type = audio_type
