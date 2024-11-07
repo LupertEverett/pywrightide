@@ -136,10 +136,8 @@ class WelcomeDialog(QDialog):
         idx = indexes[0]
         self.__selected_folder_path = self._recent_docs_model.item(idx.row()).text()
         if self._always_autoload_checkbox.isChecked():
-            pass
-            # IDESettings.set_autoload_last_project_path(self.__selected_folder_path)
-            # IDESettings.set_autoload_last_game_name("")  # Should be set after closing the main window instead
-            # IDESettings.set_autoload_last_project_check(True)
+            IDESettings.set_autoload_last_game_path(self.__selected_folder_path)
+            IDESettings.set_autoload_last_game_check(True)
 
         IDESettings.set_recent_games(self._recent_docs)
         self.accept()
