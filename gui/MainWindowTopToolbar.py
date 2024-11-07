@@ -1,12 +1,11 @@
 # Main Window Toolbar
 # Contains stuff like "New File", "Load File", etc.
 
-from PyQt6.QtWidgets import QToolBar, QWidget, QFileDialog, QMessageBox, QMenu
+from PyQt6.QtWidgets import QToolBar, QWidget, QMenu
 from PyQt6.QtGui import QIcon, QKeySequence, QAction
 
 import gui.IDEMainWindow
 from gui import AboutDialog
-from data import IDESettings, PyWrightFolder
 from data.PyWrightGame import PyWrightGameInfo
 import data.IconThemes as IconThemes
 
