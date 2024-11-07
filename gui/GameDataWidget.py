@@ -82,6 +82,9 @@ class GameDataWidget(QWidget):
 
         return result
 
+    def change_pywright_path(self, new_path: str):
+        self._pywright_root_dir = new_path
+
     def load_data_txt(self, selected_game_info: PyWrightGameInfo):
         # self._selected_game = selected_game
         # if self._selected_game.is_a_game_selected():
@@ -147,7 +150,7 @@ class GameDataWidget(QWidget):
         return self._game_version_lineedit.text()
 
     def _handle_icon_picker_clicked(self):
-        if self._game_info is not None:
+        if self._pywright_root_dir != "":
             icon_picker = IconPickerDialog(self._pywright_root_dir, self._game_info, self)
 
             if icon_picker.exec():
