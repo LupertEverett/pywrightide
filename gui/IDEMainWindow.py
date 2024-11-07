@@ -150,34 +150,40 @@ class IDEMainWindow(QMainWindow):
         # except Exception as e:
         #     QMessageBox.critical(self, "Error", str(e))
         #     return
-        self.selected_game_info = PyWrightGameInfo.load_from_folder(game_folder_path)
-        self.selected_pywright_installation = str(self.selected_game_info.pywright_folder_path)
+        if self.central_widget.attempt_closing_unsaved_tabs():
+            self.selected_game_info = PyWrightGameInfo.load_from_folder(game_folder_path)
+            self.selected_pywright_installation = str(self.selected_game_info.pywright_folder_path)
 
-        self.game_properties_widget = GamePropertiesWidget(self.selected_game_info)
+            self.game_properties_widget = GamePropertiesWidget(self.selected_game_info)
 
-        self.directory_view.clear_directory_view()
-        if self.central_widget.tabs_count() > 0:
-            self.central_widget.clear_tabs()
+            self.directory_view.clear_directory_view()
+            if self.central_widget.tabs_count() > 0:
+                self.central_widget.clear_tabs()
 
-        self.installation_path_label.setText(self.selected_pywright_installation)
+            self.installation_path_label.setText(self.selected_pywright_installation)
 
-        self.pywright_executable_name = PyWrightFolder.pick_pywright_executable(self.selected_pywright_installation)
-        self._parse_builtin_macros(self.selected_pywright_installation)
-        self.central_widget.set_pywright_installation_path(self.selected_pywright_installation)
-        self.central_widget.load_builtin_macros(self._pywright_builtin_macros)
-        self._add_folder_to_recent(str(game_folder_path))
-        self._top_toolbar.update_run_pywright_status_tip(self.pywright_executable_name)
-        self._top_toolbar.update_toolbar_buttons(self.selected_pywright_installation != "",
-                                                 self.selected_game_info.get_game_name() != "")
-        self.asset_manager_widget.update_assets(self.selected_game_info)
+            self.pywright_executable_name = PyWrightFolder.pick_pywright_executable(self.selected_pywright_installation)
+            self._parse_builtin_macros(self.selected_pywright_installation)
+            self.central_widget.set_selected_game(self.selected_game_info)
+            self.central_widget.load_builtin_macros(self._pywright_builtin_macros)
+            self._add_folder_to_recent(str(game_folder_path))
+            self._top_toolbar.update_run_pywright_status_tip(self.pywright_executable_name)
+            self._top_toolbar.update_toolbar_buttons(self.selected_pywright_installation != "",
+                                                     self.selected_game_info.get_game_name() != "")
+            self.asset_manager_widget.update_assets(self.selected_game_info)
 
-        self._switch_to_selected_game(self.selected_game_info.get_game_name())
+            self.game_properties_widget.load_game(self.selected_game_info)
+
+            self.directory_view.update_directory_view(self.selected_game_info)
+
+            self.asset_manager_widget.update_assets(self.selected_game_info)
+            self.central_widget.open_game_properties_tab(self.game_properties_widget)
 
     def _handle_new_game(self):
         new_game_dialog = NewGameDialog(self.selected_pywright_installation, self)
 
         if new_game_dialog.exec():
-            self._switch_to_selected_game(new_game_dialog.get_new_game_name())
+            self.pick_game_folder(new_game_dialog.get_new_game().game_path)
 
     def _handle_open_game(self):
         # if self.selected_pywright_installation == "":
@@ -216,23 +222,6 @@ class IDEMainWindow(QMainWindow):
             if folder_path == recent_folder_path:
                 return
         self.recent_folders.append(folder_path)
-
-    def _switch_to_selected_game(self, selected_game: str):
-        """Switches the IDE to the selected PyWright game, closing all open tabs in the process
-
-        :param selected_game: Name of the selected PyWright game."""
-
-        if self.central_widget.attempt_closing_unsaved_tabs():
-            # self.selected_game_info = PyWrightGameInfo.load_from_folder(Path("{}/games/{}".format(self.selected_pywright_installation, selected_game)))
-            # self.selected_game.load_game(Path("{}/games/{}".format(self.selected_pywright_installation, selected_game)))
-            self.game_properties_widget.load_game(self.selected_game_info)
-            self.central_widget.clear_tabs()
-            self.central_widget.set_selected_game(self.selected_game_info)
-            self.directory_view.update_directory_view(self.selected_game_info)
-            self.central_widget.open_game_properties_tab(self.game_properties_widget)
-            self._top_toolbar.update_toolbar_buttons(self.selected_pywright_installation != "",
-                                                     self.selected_game_info.get_game_name() != "")
-            self.asset_manager_widget.update_assets(self.selected_game_info)
 
     def _handle_open_file(self):
         # open_dialog = QFileDialog.getOpenFileName(self, "Open File",
