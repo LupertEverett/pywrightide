@@ -37,7 +37,7 @@ class WelcomeDialog(QDialog):
 
         self.__selected_folder_path = ""
 
-        pywright_icon_path = IconThemes.icon_path_from_theme(IconThemes.ICON_NAME_FIND_PYWRIGHT)
+        pywright_icon_path = IconThemes.icon_path_from_theme(IconThemes.ICON_NAME_PYWRIGHT)
 
         for doc_path in self._recent_docs:
             self.__add_item_to_model(doc_path, pywright_icon_path)
@@ -101,7 +101,7 @@ class WelcomeDialog(QDialog):
                     return
 
                 self.__add_item_to_model(str(picker),
-                                         IconThemes.icon_path_from_theme(IconThemes.ICON_NAME_FIND_PYWRIGHT))
+                                         IconThemes.icon_path_from_theme(IconThemes.ICON_NAME_PYWRIGHT))
                 self._recent_docs.append(str(picker))
             elif PyWrightFolder.is_valid_pywright_folder(str(picker)):
                 open_game_dialog = OpenGameDialog(str(picker), self)
@@ -116,7 +116,7 @@ class WelcomeDialog(QDialog):
                         return
 
                     self.__add_item_to_model(str(final_path),
-                                             IconThemes.icon_path_from_theme(IconThemes.ICON_NAME_FIND_PYWRIGHT))
+                                             IconThemes.icon_path_from_theme(IconThemes.ICON_NAME_PYWRIGHT))
                     self._recent_docs.append(str(final_path))
             else:
                 QMessageBox.critical(self, "Error", "Could not find a PyWright game!")
