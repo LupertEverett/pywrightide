@@ -39,11 +39,9 @@ class MainWindowCentralWidget(QWidget):
     def load_builtin_macros(self, macros_list: list[str]):
         self._pywright_builtin_macros = macros_list
 
-    def set_pywright_installation_path(self, installation_path: str):
-        self.pywright_installation_path = installation_path
-
     def set_selected_game(self, selected_game_info: PyWrightGameInfo):
         self.selected_game_info = selected_game_info
+        self.pywright_installation_path = str(self.selected_game_info.pywright_folder_path)
 
     # ====== Tab Handling ======
     # ==== Opening new tab ====
