@@ -8,7 +8,7 @@ from PyQt6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QComboBox,
 from PyQt6.QtGui import QDesktopServices, QGuiApplication, QClipboard, QAction, QIcon, QStandardItemModel, QStandardItem
 from PyQt6.QtCore import pyqtSignal, Qt, QUrl, QFileSystemWatcher, QModelIndex
 
-from data.PyWrightGame import PyWrightGame
+from data.PyWrightGame import PyWrightGameInfo
 from data import IconThemes
 
 MUSIC_FOLDER_NAME = "music"
@@ -32,7 +32,7 @@ class AssetBrowserAudioWidget(QWidget):
     def __init__(self, audio_type: AudioType, parent=None):
         super().__init__(parent)
         self._pywright_dir = ""
-        self._selected_game = PyWrightGame()
+        self._game_info: PyWrightGameInfo | None = None
 
         self.__audio_type = audio_type
         self.__AUDIO_FOLDER = MUSIC_FOLDER_NAME if audio_type == AudioType.Music else SFX_FOLDER_NAME
@@ -94,20 +94,20 @@ class AssetBrowserAudioWidget(QWidget):
     def select_pywright(self, pywright_dir: str):
         self._pywright_dir = pywright_dir
 
-    def set_selected_game(self, selected_game: PyWrightGame):
-        self._selected_game = selected_game
+    def set_selected_game(self, selected_game_info: PyWrightGameInfo):
+        self._game_info = selected_game_info
 
     def _query_available_folders(self):
         self.__file_system_watcher.removePaths(self.__file_system_watcher.directories())
         if self._pywright_dir == "":
             return
 
-        if not self._selected_game.is_a_game_selected():
+        if self._game_info is None:
             return
 
         global_audio_folder_path = Path("{}/{}/".format(self._pywright_dir, self.__AUDIO_FOLDER))
 
-        game_audio_folder_path = Path("{}/{}/".format(self._selected_game.game_path, self.__AUDIO_FOLDER))
+        game_audio_folder_path = Path("{}/{}/".format(self._game_info.game_path, self.__AUDIO_FOLDER))
 
         self._available_audio_folders.clear()
 
@@ -120,9 +120,9 @@ class AssetBrowserAudioWidget(QWidget):
             self._available_audio_folders.append("Game specific")
 
         # Also add the relevant folders in Cases if they exist
-        for current_case in self._selected_game.game_cases:
+        for current_case in self._game_info.game_cases:
             case_audio_folder_path = Path("{}/{}/{}/".format(
-                self._selected_game.game_path,
+                self._game_info.game_path,
                 current_case,
                 self.__AUDIO_FOLDER
             ))
@@ -164,7 +164,7 @@ class AssetBrowserAudioWidget(QWidget):
         self._audio_list_model.appendRow(item)
 
     def _handle_audio_context_menu(self, position):
-        if not self._selected_game.is_a_game_selected():
+        if self._game_info is None:
             return
 
         menu = QMenu()
@@ -210,18 +210,18 @@ class AssetBrowserAudioWidget(QWidget):
             if case_text == "":
                 return Path()
 
-            return Path("{}/{}/{}/".format(self._selected_game.game_path, case_text, self.__AUDIO_FOLDER))
+            return Path("{}/{}/{}/".format(self._game_info.game_path, case_text, self.__AUDIO_FOLDER))
         else:
             is_global = folder_text == "Global"
 
-            return Path("{}/{}/".format(self._pywright_dir if is_global else self._selected_game.game_path,
+            return Path("{}/{}/".format(self._pywright_dir if is_global else self._game_info.game_path,
                                         self.__AUDIO_FOLDER))
 
     def _handle_open_current_folder(self):
         folder_text = self._audio_folders_combo_box.currentText()
         is_global = folder_text == "Global"
 
-        folder_path = Path("{}/{}/".format(self._pywright_dir if is_global else self._selected_game.game_path,
+        folder_path = Path("{}/{}/".format(self._pywright_dir if is_global else self._game_info.game_path,
                                            self.__AUDIO_FOLDER))
 
         QDesktopServices.openUrl(QUrl.fromLocalFile(str(folder_path)))
@@ -257,7 +257,7 @@ class AssetBrowserAudioWidget(QWidget):
     def _handle_play_pressed(self):
         if self._pywright_dir == "":
             return
-        if not self._selected_game.is_a_game_selected():
+        if self._game_info is None:
             return
 
         folder_text = self._audio_folders_combo_box.currentText()
@@ -307,7 +307,7 @@ class AssetBrowserAudioWidget(QWidget):
             self._currently_playing_index = None
 
     def clear_everything(self):
-        self._selected_game = PyWrightGame()
+        self._game_info = None
         self._audio_list_model.removeRows(0, self._audio_list_model.rowCount())
         self._audio_folders_combo_box.clear()
         self._play_button.setEnabled(False)

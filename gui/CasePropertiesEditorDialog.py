@@ -4,22 +4,22 @@ from PyQt6.QtWidgets import QDialog, QDialogButtonBox, QVBoxLayout, QMessageBox
 
 from .CasePropertiesWidget import CasePropertiesWidget
 
-from data.PyWrightGame import PyWrightGame
+from data.PyWrightGame import PyWrightGameInfo
 from data.PyWrightCase import PyWrightCase
 
 
 class CasePropertiesEditorDialog(QDialog):
 
-    def __init__(self, selected_game: PyWrightGame, selected_case: PyWrightCase | None, parent=None):
+    def __init__(self, selected_game_info: PyWrightGameInfo, selected_case: PyWrightCase | None, parent=None):
         """Opens up a dialog to edit a case's properties.
-        :param selected_game: The PyWright game the case is in
+        :param selected_game_info: The PyWright game the case is in
         :param selected_case: The case that's going to be edited, or None if it is a new case
         :param parent: Parent Widget of this dialog"""
         super().__init__(parent)
 
         self.setFixedSize(300, 200)
 
-        self._selected_game = selected_game
+        self._selected_game_info = selected_game_info
 
         self._is_a_new_case: bool = selected_case is None
 
@@ -55,7 +55,7 @@ class CasePropertiesEditorDialog(QDialog):
 
         # If we're creating a new case, check if a case with the same name doesn't exist first
         if self._is_a_new_case:
-            for case in self._selected_game.game_cases:
+            for case in self._selected_game_info.game_cases:
                 if self._case_properties_widget.get_case_name_field_text().lower() == case.lower():
                     QMessageBox.critical(self, "Error", "A case with name \"{}\" already exists!".format(case))
                     return

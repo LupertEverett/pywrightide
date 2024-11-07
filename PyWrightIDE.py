@@ -13,7 +13,7 @@ if __name__ == '__main__':
     if sys.platform == "win32":
         app.setStyle("WindowsVista")
 
-    if not IDESettings.get_autoload_last_project_check():
+    if not IDESettings.get_autoload_last_game_check():
         welcome_dialog = WelcomeDialog()
         if welcome_dialog.exec():
             main_window = IDEMainWindow(welcome_dialog.get_selected_folder_path())

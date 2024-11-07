@@ -8,7 +8,7 @@ from PyQt6.QtWidgets import QWidget, QListView, QFileIconProvider, QVBoxLayout, 
 from PyQt6.QtGui import QIcon, QPixmap, QDesktopServices, QClipboard, QGuiApplication, QFileSystemModel, QAction
 from PyQt6.QtCore import QSize, QDir, Qt, QUrl, pyqtSignal, QFileSystemWatcher
 
-from data.PyWrightGame import PyWrightGame
+from data.PyWrightGame import PyWrightGameInfo
 from data import IconThemes
 
 insertable_folders = ("bg", "ev", "fg")
@@ -27,7 +27,7 @@ class AssetManagerTextureWidget(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
         self._pywright_dir = ""
-        self._selected_game = PyWrightGame()
+        self._game_info: PyWrightGameInfo | None = None
 
         self._textures_list_view = QListView(self)
         self._textures_list_view.setViewMode(QListView.ViewMode.IconMode)
@@ -68,14 +68,14 @@ class AssetManagerTextureWidget(QWidget):
 
     def clear(self):
         self._pywright_dir = ""
-        self._selected_game = PyWrightGame()
+        self._game_info = None
         self.__file_system_watcher.removePaths(self.__file_system_watcher.directories())
 
     def select_pywright(self, pywright_dir: str):
         self._pywright_dir = pywright_dir
 
-    def set_selected_game(self, selected_game: PyWrightGame):
-        self._selected_game = selected_game
+    def set_selected_game(self, selected_game_info: PyWrightGameInfo):
+        self._game_info = selected_game_info
 
     def _query_available_folders(self):
         self.__file_system_watcher.removePaths(self.__file_system_watcher.directories())
@@ -83,14 +83,11 @@ class AssetManagerTextureWidget(QWidget):
         if self._pywright_dir == "":
             return
 
-        if not self._selected_game.is_a_game_selected():
-            return
-
         global_art_folder_path = Path("{}/art/".format(self._pywright_dir))
 
         global_art_folders = ["global/" + x.name for x in global_art_folder_path.iterdir() if x.is_dir()]
 
-        game_art_folder_path = Path("{}/art/".format(self._selected_game.game_path))
+        game_art_folder_path = Path("{}/art/".format(self._game_info.game_path))
         game_art_folders = []
         game_art_subfolders = []
 
@@ -102,7 +99,7 @@ class AssetManagerTextureWidget(QWidget):
             game_art_subfolders = []
 
             for folder in game_art_folders:
-                folder_path = Path("{}/art/{}".format(self._selected_game.game_path, folder))
+                folder_path = Path("{}/art/{}".format(self._game_info.game_path, folder))
                 game_art_subfolders.extend([folder + "/" + x.name for x in folder_path.iterdir() if x.is_dir()])
 
         self._available_folders = global_art_folders + game_art_folders + game_art_subfolders
@@ -120,7 +117,7 @@ class AssetManagerTextureWidget(QWidget):
 
         is_global = subfolder_name.startswith("global/")
 
-        root_folder = self._pywright_dir if is_global else self._selected_game.game_path
+        root_folder = self._pywright_dir if is_global or self._game_info is None else self._game_info.game_path
 
         if is_global:
             subfolder_name = subfolder_name.split("global/", maxsplit=1)[1]
@@ -149,7 +146,7 @@ class AssetManagerTextureWidget(QWidget):
             self._refresh_texture_view()
 
     def _handle_texture_context_menu(self, position):
-        if not self._selected_game.is_a_game_selected():
+        if self._game_info is None:
             return
 
         indexes = self._textures_list_view.selectedIndexes()
@@ -227,7 +224,10 @@ class AssetManagerTextureWidget(QWidget):
 
         is_global = subfolder_name.startswith("global/")
 
-        root_folder = self._pywright_dir if is_global else self._selected_game.game_path
+        if self._game_info is not None:
+            root_folder = self._pywright_dir if is_global else self._game_info.game_path
+        else:
+            root_folder = self._pywright_dir
 
         if is_global:
             subfolder_name = subfolder_name.split("global/", maxsplit=1)[1]

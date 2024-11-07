@@ -8,7 +8,7 @@ from PyQt6.QtGui import QIcon, QMouseEvent, QDesktopServices, QFileSystemModel, 
 from PyQt6.QtCore import Qt, QModelIndex, pyqtSignal, QUrl
 
 from .CasePropertiesEditorDialog import CasePropertiesEditorDialog
-from data.PyWrightGame import PyWrightGame
+from data.PyWrightGame import PyWrightGameInfo
 
 import data.IconThemes as IconThemes
 
@@ -57,7 +57,7 @@ class DirectoryViewWidget(QDockWidget):
 
         self._top_widget = self._create_custom_title_bar()
 
-        self._pywright_game = PyWrightGame()
+        self._game_info: PyWrightGameInfo | None = None
 
         layout.addWidget(self._top_widget)
         layout.addWidget(self._directory_view)
@@ -72,7 +72,7 @@ class DirectoryViewWidget(QDockWidget):
                          QDockWidget.DockWidgetFeature.DockWidgetMovable)
         self.setMinimumWidth(150)
 
-    def update_directory_view(self, selected_game: PyWrightGame):
+    def update_directory_view(self, selected_game_info: PyWrightGameInfo):
         fs_model = QFileSystemModel()
         icon_provider = QFileIconProvider()
 
@@ -82,12 +82,12 @@ class DirectoryViewWidget(QDockWidget):
         fs_model.setNameFilters(name_filter)
         fs_model.setNameFilterDisables(False)
 
-        self._pywright_game = selected_game
+        self._game_info = selected_game_info
 
-        self._game_title_label.setText(self._pywright_game.get_game_name())
+        self._game_title_label.setText(self._game_info.get_game_name())
 
         self._directory_view.setModel(fs_model)
-        self._directory_view.setRootIndex(fs_model.setRootPath(str(self._pywright_game.game_path)))
+        self._directory_view.setRootIndex(fs_model.setRootPath(str(self._game_info.game_path)))
         self._directory_view.setIndentation(20)
         self._directory_view.setSortingEnabled(True)
         self._directory_view.sortByColumn(0, Qt.SortOrder.AscendingOrder)
@@ -193,10 +193,10 @@ class DirectoryViewWidget(QDockWidget):
         menu.exec(self._directory_view.mapToGlobal(position))
 
     def _handle_add_new_case_action(self):
-        add_dialog = CasePropertiesEditorDialog(self._pywright_game, None, self)
+        add_dialog = CasePropertiesEditorDialog(self._game_info, None, self)
 
         if add_dialog.exec():
-            self._pywright_game.create_new_case(add_dialog.get_case())
+            self._game_info.create_new_case(add_dialog.get_case())
 
     def _handle_new_script_action(self):
         index = self._directory_view.selectedIndexes()[0]
@@ -260,7 +260,7 @@ class DirectoryViewWidget(QDockWidget):
     def _handle_open_dir_action(self):
         if len(self._directory_view.selectedIndexes()) == 0:
             # Open the Game's root dir instead.
-            QDesktopServices.openUrl(QUrl.fromLocalFile(str(self._pywright_game.game_path)))
+            QDesktopServices.openUrl(QUrl.fromLocalFile(str(self._game_info.game_path)))
             return
 
         index = self._directory_view.selectedIndexes()[0]
@@ -338,6 +338,7 @@ class DirectoryViewWidget(QDockWidget):
         from .IDEMainWindow import IDEMainWindow
         ide_main_window: IDEMainWindow = self.parent()
         ide_main_window.update_toolbar_toggle_buttons()
+
 
 class DeselectableTreeView(QTreeView):
     """Custom Tree View that has the ability to unselect items when clicked on an empty area"""

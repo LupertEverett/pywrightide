@@ -3,13 +3,17 @@ from PyQt6.QtWidgets import QLabel, QDialog, QListView, QPushButton, QHBoxLayout
     QMessageBox
 from PyQt6.QtGui import QStandardItem, QStandardItemModel, QIcon, QCloseEvent, QPixmap
 
+from .OpenGameDialog import OpenGameDialog
+
 from data import IDESettings, IconThemes, PyWrightFolder
+
+from data.PyWrightGame import PyWrightGameInfo
 
 from pathlib import Path
 
 
 _welcome_label_text = """<h1>Welcome to PyWright IDE {}!</h1>
-<p>Please select a PyWright folder below to start editing cases!</p>
+<p>Please select a PyWright game folder below to start editing cases!</p>
 """.format(IDESettings.IDE_VERSION_STRING)
 
 
@@ -22,7 +26,7 @@ class WelcomeDialog(QDialog):
         self.setWindowIcon(QIcon("res/icons/ideicon.png"))
         self.setMinimumSize(600, 600)
 
-        self._recent_docs = [path for path in IDESettings.get_recent_docs()
+        self._recent_docs = [path for path in IDESettings.get_recent_games()
                              if Path(path).exists() and Path(path).is_dir()]
 
         self._recent_docs_view = QListView()
@@ -33,7 +37,7 @@ class WelcomeDialog(QDialog):
 
         self.__selected_folder_path = ""
 
-        pywright_icon_path = IconThemes.icon_path_from_theme(IconThemes.ICON_NAME_FIND_PYWRIGHT)
+        pywright_icon_path = IconThemes.icon_path_from_theme(IconThemes.ICON_NAME_PYWRIGHT)
 
         for doc_path in self._recent_docs:
             self.__add_item_to_model(doc_path, pywright_icon_path)
@@ -56,7 +60,7 @@ class WelcomeDialog(QDialog):
         self.add_folder_button.clicked.connect(self._handle_add_folder_clicked)
 
         self._always_autoload_checkbox = QCheckBox("Always load the selected folder at startup (skips this dialog)")
-        self._always_autoload_checkbox.setChecked(IDESettings.get_autoload_last_project_check())
+        self._always_autoload_checkbox.setChecked(IDESettings.get_autoload_last_game_check())
 
         # Button layout
         button_layout = QHBoxLayout()
@@ -87,18 +91,35 @@ class WelcomeDialog(QDialog):
         picker = QFileDialog.getExistingDirectory()
 
         if picker != "":
-            if not PyWrightFolder.is_valid_pywright_folder(picker):
-                QMessageBox.critical(self, "Error", "Could not find a PyWright installation")
-                return
+            picker = Path(picker)  # Correct the folder separators
 
-            # Check if the item has already added before
-            items = self._recent_docs_model.findItems(picker)
-            if len(items) > 0:
-                QMessageBox.information(self, "Notice", "Selected folder is already in the list!")
-                return
+            if PyWrightGameInfo.is_valid_game_folder(Path(picker)):
+                # Check if the item has already added before
+                items = self._recent_docs_model.findItems(str(picker))
+                if len(items) > 0:
+                    QMessageBox.information(self, "Notice", "Selected folder is already in the list!")
+                    return
 
-            self.__add_item_to_model(picker, IconThemes.icon_path_from_theme(IconThemes.ICON_NAME_FIND_PYWRIGHT))
-            self._recent_docs.append(picker)
+                self.__add_item_to_model(str(picker),
+                                         IconThemes.icon_path_from_theme(IconThemes.ICON_NAME_PYWRIGHT))
+                self._recent_docs.append(str(picker))
+            elif PyWrightFolder.is_valid_pywright_folder(str(picker)):
+                open_game_dialog = OpenGameDialog(str(picker), self)
+
+                if open_game_dialog.exec():
+                    final_path = picker / "games" / open_game_dialog.selected_game
+
+                    # Check if the item has already added before
+                    items = self._recent_docs_model.findItems(str(final_path))
+                    if len(items) > 0:
+                        QMessageBox.information(self, "Notice", "Selected folder is already in the list!")
+                        return
+
+                    self.__add_item_to_model(str(final_path),
+                                             IconThemes.icon_path_from_theme(IconThemes.ICON_NAME_PYWRIGHT))
+                    self._recent_docs.append(str(final_path))
+            else:
+                QMessageBox.critical(self, "Error", "Could not find a PyWright game!")
 
     def __add_item_to_model(self, text: str, icon_path: str):
         item = QStandardItem(text)
@@ -115,16 +136,15 @@ class WelcomeDialog(QDialog):
         idx = indexes[0]
         self.__selected_folder_path = self._recent_docs_model.item(idx.row()).text()
         if self._always_autoload_checkbox.isChecked():
-            IDESettings.set_autoload_last_project_path(self.__selected_folder_path)
-            IDESettings.set_autoload_last_game_name("")  # Should be set after closing the main window instead
-            IDESettings.set_autoload_last_project_check(True)
+            IDESettings.set_autoload_last_game_path(self.__selected_folder_path)
+            IDESettings.set_autoload_last_game_check(True)
 
-        IDESettings.set_recent_docs(self._recent_docs)
+        IDESettings.set_recent_games(self._recent_docs)
         self.accept()
 
     def get_selected_folder_path(self) -> str:
         return self.__selected_folder_path
 
     def closeEvent(self, event: QCloseEvent):
-        IDESettings.set_recent_docs(self._recent_docs)
+        IDESettings.set_recent_games(self._recent_docs)
         event.accept()

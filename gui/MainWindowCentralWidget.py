@@ -4,7 +4,7 @@ from PyQt6.QtCore import pyqtSignal
 from PyQt6.QtWidgets import QWidget, QTabWidget, QVBoxLayout, QMessageBox
 
 from data import IDESettings, EditorThemes
-from data.PyWrightGame import PyWrightGame
+from data.PyWrightGame import PyWrightGameInfo
 from .FileEditWidget import FileEditWidget
 from .FindReplaceDialog import SearchScope, FindType, ReplaceType
 from .GamePropertiesWidget import GamePropertiesWidget
@@ -34,16 +34,14 @@ class MainWindowCentralWidget(QWidget):
         self._pywright_builtin_macros: list[str] = []
 
         self.pywright_installation_path: str = ""
-        self.selected_game: PyWrightGame = PyWrightGame()
+        self.selected_game_info: PyWrightGameInfo | None = None
 
     def load_builtin_macros(self, macros_list: list[str]):
         self._pywright_builtin_macros = macros_list
 
-    def set_pywright_installation_path(self, installation_path: str):
-        self.pywright_installation_path = installation_path
-
-    def set_selected_game(self, selected_game: PyWrightGame):
-        self.selected_game = selected_game
+    def set_selected_game(self, selected_game_info: PyWrightGameInfo):
+        self.selected_game_info = selected_game_info
+        self.pywright_installation_path = str(self.selected_game_info.pywright_folder_path)
 
     # ====== Tab Handling ======
     # ==== Opening new tab ====
@@ -78,7 +76,8 @@ class MainWindowCentralWidget(QWidget):
         file_edit_widget.file_name_changed.connect(self.handle_rename_tab)
         file_edit_widget.file_modified.connect(self._update_save_button_and_current_tab)
         file_edit_widget.supply_builtin_macros_to_lexer(self._pywright_builtin_macros)
-        file_edit_widget.supply_game_macros_to_lexer(self.selected_game.game_macros)
+        if self.selected_game_info is not None:
+            file_edit_widget.supply_game_macros_to_lexer(self.selected_game_info.game_macros)
         file_edit_widget.supply_editor_color_theme_to_lexer()
         file_edit_widget.move_to_tab_requested.connect(self._handle_move_to_tab)
         file_edit_widget.replace_next_in_next_tabs_requested.connect(self.replace_next_in_next_tabs)

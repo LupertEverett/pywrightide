@@ -6,19 +6,19 @@ from PyQt6.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QGroupBox, QPushB
 from .GameDataWidget import GameDataWidget
 from .GameIntroWidget import GameIntroWidget
 
-from data.PyWrightGame import PyWrightGame
+from data.PyWrightGame import PyWrightGameInfo
 
 
 class GamePropertiesWidget(QWidget):
 
-    def __init__(self, pywright_root_dir: str):
+    def __init__(self, selected_game_info: PyWrightGameInfo):
         super().__init__()
 
-        self._selected_game = PyWrightGame()
+        self._selected_game_info = selected_game_info
 
         self.main_layout = QVBoxLayout()
 
-        self.game_data_widget = GameDataWidget(pywright_root_dir)
+        self.game_data_widget = GameDataWidget(self._selected_game_info.pywright_folder_path)
         self.game_data_widget.data_txt_fields_changed.connect(self._handle_data_txt_fields_change)
         self._game_intro_widget = GameIntroWidget()
 
@@ -64,17 +64,17 @@ class GamePropertiesWidget(QWidget):
         result.setLayout(intro_txt_group_layout)
         return result
 
-    def load_game(self, selected_game: PyWrightGame):
-        self._selected_game = selected_game
-        self.game_data_widget.load_data_txt(self._selected_game)
-        self._game_intro_widget.load_intro_txt(self._selected_game)
+    def load_game(self, selected_game_info: PyWrightGameInfo):
+        self._selected_game_info = selected_game_info
+        self.game_data_widget.load_data_txt(self._selected_game_info)
+        self._game_intro_widget.load_intro_txt(self._selected_game_info)
 
     def save_game(self):
         self.game_data_widget.save_data_txt()
         self._game_intro_widget.save_intro_txt()
 
     def _handle_data_txt_fields_change(self):
-        valid_to_change = self._selected_game.is_a_game_selected() and \
+        valid_to_change = self._selected_game_info is not None and \
                           self.game_data_widget.are_data_txt_areas_different()
         self._save_data_button.setEnabled(valid_to_change)
         self._revert_data_button.setEnabled(valid_to_change)

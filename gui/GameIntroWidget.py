@@ -6,7 +6,7 @@ from PyQt6.QtGui import QIcon, QAction
 from .CasePropertiesEditorDialog import CasePropertiesEditorDialog
 from .AddExistingCaseDialog import AddExistingCaseDialog
 
-from data.PyWrightGame import PyWrightGame
+from data.PyWrightGame import PyWrightGameInfo
 from data.PyWrightCase import PyWrightCase
 
 import data.IconThemes as IconThemes
@@ -14,10 +14,10 @@ import data.IconThemes as IconThemes
 
 class GameIntroWidget(QWidget):
 
-    def __init__(self):
+    def __init__(self, game_info: PyWrightGameInfo | None = None):
         super().__init__()
 
-        self._selected_game = PyWrightGame()
+        self._game_info = game_info
 
         self._game_cases_list_widget = QListWidget()
         self._game_cases_list_widget.clicked.connect(self._handle_list_widget_clicked)
@@ -79,34 +79,33 @@ class GameIntroWidget(QWidget):
 
         return result
 
-    def load_intro_txt(self, selected_game: PyWrightGame):
-        self._selected_game = selected_game
-        if selected_game.is_a_game_selected():
-            self._populate_cases_list()
+    def load_intro_txt(self, selected_game_info: PyWrightGameInfo):
+        self._game_info = selected_game_info
+        self._populate_cases_list()
 
     def save_intro_txt(self):
-        if self._selected_game.is_a_game_selected():
-            self._selected_game.write_intro_txt()
+        if self._game_info is not None:
+            self._game_info.write_intro_txt()
 
     def _populate_cases_list(self):
         self._game_cases_list_widget.clear()
-        for game_case in self._selected_game.game_cases:
+        for game_case in self._game_info.game_cases:
             self._game_cases_list_widget.addItem(game_case)
 
     def _handle_list_widget_clicked(self):
         self._update_widget_toolbar_buttons()
 
     def _handle_add_new_case(self):
-        add_new_case_dialog = CasePropertiesEditorDialog(self._selected_game, None, self)
+        add_new_case_dialog = CasePropertiesEditorDialog(self._game_info, None, self)
 
         if add_new_case_dialog.exec():
-            self._selected_game.create_new_case(add_new_case_dialog.get_case())
+            self._game_info.create_new_case(add_new_case_dialog.get_case())
             self._populate_cases_list()
 
     def _handle_add_existing_case(self):
-        add_existing_case_dialog = AddExistingCaseDialog(self._selected_game, self)
+        add_existing_case_dialog = AddExistingCaseDialog(self._game_info, self)
         if add_existing_case_dialog.exec():
-            self._selected_game.update_intro_txt_cases()
+            self._game_info.update_intro_txt_cases()
             self._populate_cases_list()
 
     def _handle_remove_case(self):
@@ -120,15 +119,16 @@ class GameIntroWidget(QWidget):
                                                   QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
                                                   QMessageBox.StandardButton.No)
         selected_case: str = self._game_cases_list_widget.currentItem().text()
-        self._selected_game.remove_case(selected_case, also_remove_folder == QMessageBox.StandardButton.Yes)
+
+        self._game_info.remove_case(selected_case, also_remove_folder == QMessageBox.StandardButton.Yes)
         self._populate_cases_list()
 
     def _handle_case_properties(self):
         selected_case_name = self._game_cases_list_widget.selectedItems()[0].text()
-        selected_case_path = self._selected_game.game_path/selected_case_name
+        selected_case_path = self._game_info.game_path/selected_case_name
         selected_case = PyWrightCase.from_existing_case_folder(selected_case_path)
 
-        case_properties_dialog = CasePropertiesEditorDialog(self._selected_game, selected_case, self)
+        case_properties_dialog = CasePropertiesEditorDialog(self._game_info, selected_case, self)
 
         if case_properties_dialog.exec():
             selected_case.update_case_intro_txt(selected_case_path)
@@ -144,10 +144,10 @@ class GameIntroWidget(QWidget):
         if curr_index == 0:
             return
 
-        self._selected_game.game_cases[curr_index - 1], self._selected_game.game_cases[curr_index] = \
-            self._selected_game.game_cases[curr_index], self._selected_game.game_cases[curr_index - 1]
+        self._game_info.game_cases[curr_index - 1], self._game_info.game_cases[curr_index] = \
+            self._game_info.game_cases[curr_index], self._game_info.game_cases[curr_index - 1]
 
-        self._selected_game.update_intro_txt_cases()
+        self._game_info.update_intro_txt_cases()
         self._populate_cases_list()
         self._game_cases_list_widget.setCurrentRow(curr_index - 1)
 
@@ -161,10 +161,10 @@ class GameIntroWidget(QWidget):
         if curr_index == self._game_cases_list_widget.count() - 1:
             return
 
-        self._selected_game.game_cases[curr_index], self._selected_game.game_cases[curr_index + 1] = \
-            self._selected_game.game_cases[curr_index + 1], self._selected_game.game_cases[curr_index]
+        self._game_info.game_cases[curr_index], self._game_info.game_cases[curr_index + 1] = \
+            self._game_info.game_cases[curr_index + 1], self._game_info.game_cases[curr_index]
 
-        self._selected_game.update_intro_txt_cases()
+        self._game_info.update_intro_txt_cases()
         self._populate_cases_list()
         self._game_cases_list_widget.setCurrentRow(curr_index + 1)
 
@@ -172,5 +172,5 @@ class GameIntroWidget(QWidget):
         selected_items = self._game_cases_list_widget.selectedItems()
         self.remove_case_action.setEnabled(len(selected_items) > 0)
         self.case_properties_action.setEnabled(len(selected_items) > 0)
-        self.move_case_up_action.setEnabled(len(selected_items) > 0 and len(self._selected_game.game_cases) > 1)
-        self.move_case_down_action.setEnabled(len(selected_items) > 0 and len(self._selected_game.game_cases) > 1)
+        self.move_case_up_action.setEnabled(len(selected_items) > 0 and len(self._game_info.game_cases) > 1)
+        self.move_case_down_action.setEnabled(len(selected_items) > 0 and len(self._game_info.game_cases) > 1)

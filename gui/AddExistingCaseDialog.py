@@ -4,7 +4,7 @@ from pathlib import Path
 
 from PyQt6.QtWidgets import QDialog, QDialogButtonBox, QListWidget, QVBoxLayout, QPushButton
 
-from data.PyWrightGame import PyWrightGame
+from data.PyWrightGame import PyWrightGameInfo
 
 # These folders will NEVER appear in the dialog, as they're definitely NOT case folders
 disallowed_folders = ("art", "sfx", "music", "movies")
@@ -12,10 +12,10 @@ disallowed_folders = ("art", "sfx", "music", "movies")
 
 class AddExistingCaseDialog(QDialog):
 
-    def __init__(self, selected_game: PyWrightGame, parent):
+    def __init__(self, selected_game_info: PyWrightGameInfo, parent):
         super().__init__(parent)
 
-        self._selected_game = selected_game
+        self._selected_game_info = selected_game_info
 
         self.setWindowTitle("Add Existing Case")
 
@@ -39,11 +39,11 @@ class AddExistingCaseDialog(QDialog):
 
     def _populate_cases_list(self):
         # Get a list of folders
-        p = self._selected_game.game_path
+        p = self._selected_game_info.game_path
 
         folders = [x.stem for x in p.iterdir() if x.is_dir()
                    and x.stem not in disallowed_folders
-                   and x.stem not in self._selected_game.game_cases
+                   and x.stem not in self._selected_game_info.game_cases
                    and self._is_valid_case(p/x)]
 
         self._available_cases_list_widget.addItems(folders)
@@ -58,5 +58,5 @@ class AddExistingCaseDialog(QDialog):
         return file.exists() and file.is_file()
 
     def _handle_accept(self):
-        self._selected_game.game_cases.append(self._available_cases_list_widget.selectedItems()[0].text())
+        self._selected_game_info.game_cases.append(self._available_cases_list_widget.selectedItems()[0].text())
         self.accept()

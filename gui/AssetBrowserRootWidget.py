@@ -6,11 +6,12 @@ import pygame.mixer
 
 from .AssetBrowserTextureWidget import AssetManagerTextureWidget
 from .AssetBrowserAudioWidget import AssetBrowserAudioWidget, AudioType
-from data.PyWrightGame import PyWrightGame
+from data.PyWrightGame import PyWrightGameInfo
 
 
 # Custom event type that signals the audio file currently playing has finished
 AUDIO_END_EVENT = pygame.USEREVENT + 1
+
 
 class AssetBrowserRootWidget(QDockWidget):
 
@@ -63,18 +64,18 @@ class AssetBrowserRootWidget(QDockWidget):
         self.tab_widget.addTab(self.music_browser, "Music")
         self.tab_widget.addTab(self.sfx_browser, "SFX")
 
-    def update_assets(self, pywright_path: str, selected_game: PyWrightGame):
+    def update_assets(self, selected_game_info: PyWrightGameInfo):
         self.clear_everything()
-        self.texture_browser.select_pywright(pywright_path)
-        self.texture_browser.set_selected_game(selected_game)
+        self.texture_browser.select_pywright(selected_game_info.pywright_folder_path)
+        self.texture_browser.set_selected_game(selected_game_info)
         self.texture_browser.refresh_art_folders()
 
-        self.music_browser.select_pywright(pywright_path)
-        self.music_browser.set_selected_game(selected_game)
+        self.music_browser.select_pywright(selected_game_info.pywright_folder_path)
+        self.music_browser.set_selected_game(selected_game_info)
         self.music_browser.refresh_audio_folders()
 
-        self.sfx_browser.select_pywright(pywright_path)
-        self.sfx_browser.set_selected_game(selected_game)
+        self.sfx_browser.select_pywright(selected_game_info.pywright_folder_path)
+        self.sfx_browser.set_selected_game(selected_game_info)
         self.sfx_browser.refresh_audio_folders()
 
     def _handle_visibility_change(self):
