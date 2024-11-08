@@ -8,7 +8,8 @@
   * Thus, the corresponding button has been removed from the toolbar, and its functionality has been given to the "Open PyWright Game" button.
   * New Game Dialog now also has a PyWright Folder Path text field, due to the changes above.
   * **Note: This will "reset" some of the settings, namely the autoloading the last folder and the recent docs functionality, in order to avoid any oddities with the older, now incompatible data.**
-* Added the ability to restore the last open tabs, when the "Autoreload the last open project" setting is enabled.
+* Renamed the "Autoreload the last open project" setting to "Restore the last open game and tabs on startup" to better reflect its purpose.
+* Added the ability to restore the last open tabs, when the "Restore the last open game and tabs on startup" setting is enabled.
 
 ---
 

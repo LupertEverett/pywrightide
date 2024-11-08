@@ -29,7 +29,7 @@ class SettingsDialog(QDialog):
         general_group_box = QGroupBox("General")
         general_group_layout = QVBoxLayout()
 
-        self.autoreload_last_checkbox = QCheckBox("Autoreload the last open project")
+        self.autoreload_last_checkbox = QCheckBox("Restore the last open game and tabs on startup")
         self.autoreload_last_checkbox.setChecked(IDESettings.get_autoload_last_game_check())
 
         icon_theme_section_layout = QHBoxLayout()
