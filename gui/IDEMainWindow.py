@@ -98,11 +98,18 @@ class IDEMainWindow(QMainWindow):
 
         # Try to load the last open game here, if the option is enabled, and the game folder still exists.
         if selected_game_path != "":
-            self.pick_game_folder(Path(selected_game_path))
+            self.pick_game_folder_and_open_game_properties_tab(Path(selected_game_path))
         elif IDESettings.get_autoload_last_game_check():
             autoload_path: str = IDESettings.get_autoload_last_game_path()
             if autoload_path != "" and PyWrightGameInfo.is_valid_game_folder(Path(autoload_path)):
                 self.pick_game_folder(Path(autoload_path))
+
+                # Also restore previously open tabs
+                open_tabs = IDESettings.get_last_open_tabs()
+                if len(open_tabs) > 0:
+                    last_tab_index = IDESettings.get_last_open_tab_index()
+                    self.restore_last_open_tabs(open_tabs)
+                    self.central_widget.set_current_tab_index(last_tab_index)
 
         # Try loading the window state (docks positions, visibility, etc.)
         if IDESettings.window_state_data_exists():
@@ -139,7 +146,10 @@ class IDEMainWindow(QMainWindow):
             self.directory_view.update_directory_view(self.selected_game_info)
 
             self.asset_manager_widget.update_assets(self.selected_game_info)
-            self.central_widget.open_game_properties_tab(self.game_properties_widget)
+
+    def pick_game_folder_and_open_game_properties_tab(self, game_path: Path):
+        self.pick_game_folder(game_path)
+        self.central_widget.open_game_properties_tab(self.game_properties_widget)
 
     def _handle_new_game(self):
         new_game_dialog = NewGameDialog(self.selected_pywright_installation, self)
@@ -155,7 +165,7 @@ class IDEMainWindow(QMainWindow):
             # If that's the case, try to load it.
             if PyWrightGameInfo.is_valid_game_folder(Path(picker)):
                 if self.attempt_closing_unsaved_tabs():
-                    self.pick_game_folder(Path(picker))
+                    self.pick_game_folder_and_open_game_properties_tab(Path(picker))
                     self._top_toolbar.update_recent_folders_list()
             # See if the user pointed to a PyWright folder instead of a game folder.
             # Open the Open Game Dialog if that's the case.
@@ -166,7 +176,7 @@ class IDEMainWindow(QMainWindow):
                 if open_game_dialog.exec():
                     if self.attempt_closing_unsaved_tabs():
                         game_path = Path(picker) / "games" / open_game_dialog.selected_game
-                        self.pick_game_folder(game_path)
+                        self.pick_game_folder_and_open_game_properties_tab(game_path)
                         self._top_toolbar.update_recent_folders_list()
             else:
                 QMessageBox.critical(self, "Error", "Invalid folder selected!")
@@ -242,6 +252,13 @@ class IDEMainWindow(QMainWindow):
     def update_toolbar_toggle_buttons(self):
         self._top_toolbar.update_toolbar_toggle_buttons()
 
+    def restore_last_open_tabs(self, open_tabs: list[str]):
+        for tab_path in open_tabs:
+            if tab_path == "Game Properties":
+                self.central_widget.open_game_properties_tab(self.game_properties_widget)
+            else:
+                self.central_widget.open_new_editing_tab(tab_path)
+
     def closeEvent(self, event: QCloseEvent):
         if not self.central_widget.attempt_closing_unsaved_tabs():
             event.ignore()
@@ -249,6 +266,8 @@ class IDEMainWindow(QMainWindow):
 
         # Always save the last open project's path and the selected game
         IDESettings.set_autoload_last_game_path(str(self.selected_game_info.game_path))
+        IDESettings.set_recent_open_tabs(self.central_widget.get_open_tabs_paths())
+        IDESettings.set_last_open_tab_index(self.central_widget.get_current_tab_index())
 
         IDESettings.set_recent_games(self.recent_folders)
 

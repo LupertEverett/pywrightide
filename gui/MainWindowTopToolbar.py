@@ -33,7 +33,8 @@ class MainWindowTopToolbar(QToolBar):
         self.recent_folders_menu = QMenu()
         self.update_recent_folders_list()
         self.recent_folders_menu.triggered.connect(lambda action:
-                                                   self.ide_main_window.pick_game_folder(Path(action.text()))
+                                                   self.ide_main_window.pick_game_folder_and_open_game_properties_tab(
+                                                       Path(action.text()))
                                                    )
 
         # Actions

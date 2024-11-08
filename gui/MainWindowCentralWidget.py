@@ -142,6 +142,27 @@ class MainWindowCentralWidget(QWidget):
         self.tab_widget.removeTab(index)
         self.tab_widget.setMovable(self.tab_widget.count() > 1)
 
+    def get_open_tabs_paths(self) -> list[str]:
+        """Returns a list of the paths of the open tabs."""
+        result = []
+
+        for tab_idx in range(self.tabs_count()):
+            if self._is_game_properties_tab(tab_idx):
+                result.append("Game Properties")
+            else:
+                file_widget: FileEditWidget = self.tab_widget.widget(tab_idx)
+                result.append(file_widget.file_path)
+
+        return result
+
+    def get_current_tab_index(self):
+        return self.tab_widget.currentIndex()
+
+    def set_current_tab_index(self, tab_idx: int):
+        if tab_idx < 0:
+            raise ValueError("Cannot switch to a negative tab index!")
+        self.tab_widget.setCurrentIndex(tab_idx)
+
     def _ask_for_closing_tab(self, index: int, multiple_tabs: bool):
         """Asks the user if they want to save the contents of the [index]th tab before closing it.
 

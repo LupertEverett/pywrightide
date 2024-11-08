@@ -19,6 +19,8 @@ ICON_THEME_KEY = "icon_theme"
 COLOR_THEME_KEY = "color_theme"
 EDITOR_THEME_KEY = "editor/color_theme"
 RECENT_GAMES_KEY = "recent_games"
+LAST_OPEN_TABS_KEY = "last_open_tabs"
+LAST_OPEN_TAB_INDEX_KEY = "last_open_tab_index"
 
 # Functions
 
@@ -129,6 +131,38 @@ def set_recent_games(docs: list[str]):
     __program_settings.endArray()
 
 
+def get_last_open_tabs() -> list[str]:
+    result: list[str] = []
+
+    size = __program_settings.beginReadArray(LAST_OPEN_TABS_KEY)
+    for idx in range(size):
+        __program_settings.setArrayIndex(idx)
+        result.append(__program_settings.value("file_path"))
+    __program_settings.endArray()
+
+    return result
+
+
+def set_recent_open_tabs(open_files_paths: list[str]):
+    __program_settings.beginWriteArray(LAST_OPEN_TABS_KEY)
+
+    for idx in range(len(open_files_paths)):
+        __program_settings.setArrayIndex(idx)
+        __program_settings.setValue("file_path", open_files_paths[idx])
+
+    __program_settings.endArray()
+
+
+def get_last_open_tab_index() -> int:
+    return __program_settings.value(LAST_OPEN_TAB_INDEX_KEY, 0)
+
+
+def set_last_open_tab_index(new_tab_index: int):
+    if new_tab_index < 0:
+        raise ValueError("New Tab Index cannot be negative!")
+    __program_settings.setValue(LAST_OPEN_TAB_INDEX_KEY, new_tab_index)
+
+
 def all_keys() -> list[str]:
     return __program_settings.allKeys()
 
@@ -146,6 +180,8 @@ def save_settings():
 
 
 def reset_settings():
+    __program_settings.clear()
+    __program_settings.sync()
     __program_settings.setValue(FONT_NAME_KEY, "Consolas")
     __program_settings.setValue(FONT_SIZE_KEY, 10)
     __program_settings.setValue(FONT_BOLD_KEY, True)

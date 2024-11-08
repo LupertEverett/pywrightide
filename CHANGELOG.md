@@ -6,8 +6,9 @@
 * Overhauled and streamlined game loading logic:
   * Now the user only has to select a PyWright Game folder! There is no need to select a PyWright root folder anymore, as it will be figured out from the selected game folder.
   * Thus, the corresponding button has been removed from the toolbar, and its functionality has been given to the "Open PyWright Game" button.
-  * New Game Dialog now also has a PyWright Folder Path text field, due to the above changes.
+  * New Game Dialog now also has a PyWright Folder Path text field, due to the changes above.
   * **Note: This will "reset" some of the settings, namely the autoloading the last folder and the recent docs functionality, in order to avoid any oddities with the older, now incompatible data.**
+* Added the ability to restore the last open tabs, when the "Autoreload the last open project" setting is enabled.
 
 ---
 
