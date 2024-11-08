@@ -10,6 +10,7 @@
   * **Note: This will "reset" some of the settings, namely the autoloading the last folder and the recent docs functionality, in order to avoid any oddities with the older, now incompatible data.**
 * Renamed the "Autoreload the last open project" setting to "Restore the last open game and tabs on startup" to better reflect its purpose.
 * Added the ability to restore the last open tabs, when the "Restore the last open game and tabs on startup" setting is enabled.
+* Main window's title now shows the currently open game.
 
 ---
 

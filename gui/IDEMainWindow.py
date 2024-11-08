@@ -147,6 +147,8 @@ class IDEMainWindow(QMainWindow):
 
             self.asset_manager_widget.update_assets(self.selected_game_info)
 
+            self.setWindowTitle("PyWright IDE - {}".format(self.selected_game_info.game_title))
+
     def pick_game_folder_and_open_game_properties_tab(self, game_path: Path):
         self.pick_game_folder(game_path)
         self.central_widget.open_game_properties_tab(self.game_properties_widget)
