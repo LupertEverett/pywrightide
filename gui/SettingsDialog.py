@@ -136,7 +136,9 @@ class SettingsDialog(QDialog):
             self.editor_theme_combobox.setCurrentIndex(found_idx)
 
     def _handle_reset_settings_clicked(self):
-        confirm_prompt = QMessageBox.question(self, "Confirm Reset", "Are you sure you want to reset ALL settings?",
+        confirm_prompt = QMessageBox.question(self, "Confirm Reset",
+                                              "Are you sure you want to reset ALL settings?<br>" +
+                                              "<b>Note: This will also clear the recently opened folders list!</b>",
                                               QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
                                               QMessageBox.StandardButton.No)
 
