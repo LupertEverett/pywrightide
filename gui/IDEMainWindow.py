@@ -223,6 +223,9 @@ class IDEMainWindow(QMainWindow):
         self._apply_new_color_theme()
         self._top_toolbar.update_toolbar_icons()
 
+        self.recent_folders = IDESettings.get_recent_games()
+        self._top_toolbar.update_recent_folders_list()
+
     def _apply_new_color_theme(self):
         self.setStyleSheet(ColorThemes.load_current_color_theme())
 
