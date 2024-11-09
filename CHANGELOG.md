@@ -1,6 +1,6 @@
 # PyWright IDE Changelog
 
-## Upcoming
+## Version 1.3 - 09.11.2024
 
 * Added basic autocompletion support (by Zetrypio)
 * Overhauled and streamlined game loading logic:
@@ -15,8 +15,6 @@
 * Drop down menu of the Open PyWright Game button now indicates that there are no other games to switch to when it is the case, instead of showing nothing.
 * Improved About Dialog.
 * Added a "Reset All Settings" button to Settings Dialog.
-
----
 
 ## Version 1.2.4 - 01.11.2024
 
