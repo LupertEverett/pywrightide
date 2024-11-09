@@ -12,6 +12,7 @@
 * Added the ability to restore the last open tabs, when the "Restore the last open game and tabs on startup" setting is enabled.
 * Main window's title now shows the currently open game.
 * Fixed the Settings and New PyWright Game windows looking squished on Linux
+* Drop down menu of the Open PyWright Game button now indicates that there are no other games to switch to when it is the case, instead of showing nothing.
 
 ---
 

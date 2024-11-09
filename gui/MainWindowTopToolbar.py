@@ -191,6 +191,13 @@ class MainWindowTopToolbar(QToolBar):
 
     def update_recent_folders_list(self):
         self.recent_folders_menu.clear()
+
+        if len(self.ide_main_window.recent_folders) <= 1:
+            empty_folder_action = QAction("(No other previously open games to switch to)", self.recent_folders_menu)
+            empty_folder_action.setEnabled(False)
+            self.recent_folders_menu.addAction(empty_folder_action)
+            return
+
         for folder_path in self.ide_main_window.recent_folders:
             if PyWrightGameInfo.is_valid_game_folder(Path(folder_path)):
                 # Do not add the folder we've already opened
