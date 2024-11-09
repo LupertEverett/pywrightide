@@ -3,7 +3,7 @@
 from pathlib import Path
 
 from PyQt6.QtWidgets import QDialog, QDialogButtonBox, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QMessageBox, \
-    QPushButton, QFileDialog
+    QPushButton, QFileDialog, QLayout
 
 from .GameDataWidget import GameDataWidget
 from data.PyWrightGame import PyWrightGameInfo
@@ -17,7 +17,6 @@ class NewGameDialog(QDialog):
         super().__init__(parent)
 
         self.setWindowTitle("New PyWright Game")
-        self.setFixedSize(500, 250)
 
         self._pywright_path_edit = QLineEdit()
         self._pywright_path_edit.setText(pywright_root_path)
@@ -54,6 +53,8 @@ class NewGameDialog(QDialog):
         main_layout.addLayout(folder_name_box)
         main_layout.addWidget(self._game_data_widget)
         main_layout.addWidget(self._dialog_box)
+
+        main_layout.setSizeConstraint(QLayout.SizeConstraint.SetFixedSize)
 
         self.setLayout(main_layout)
 

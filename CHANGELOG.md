@@ -11,7 +11,7 @@
 * Renamed the "Autoreload the last open project" setting to "Restore the last open game and tabs on startup" to better reflect its purpose.
 * Added the ability to restore the last open tabs, when the "Restore the last open game and tabs on startup" setting is enabled.
 * Main window's title now shows the currently open game.
-* Fixed the settings window looking squished on Linux
+* Fixed the Settings and New PyWright Game windows looking squished on Linux
 
 ---
 
