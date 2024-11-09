@@ -154,7 +154,7 @@ def set_recent_open_tabs(open_files_paths: list[str]):
 
 
 def get_last_open_tab_index() -> int:
-    return __program_settings.value(LAST_OPEN_TAB_INDEX_KEY, 0)
+    return __program_settings.value(LAST_OPEN_TAB_INDEX_KEY, 0, type=int)
 
 
 def set_last_open_tab_index(new_tab_index: int):
