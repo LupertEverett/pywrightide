@@ -8,7 +8,7 @@ a = Analysis(
     ['PyWrightIDE.py'],
     pathex=[],
     binaries=[],
-    datas=[("res", "res"), ("LICENSE", "."), ("Readme.md", ".")],
+    datas=[("res", "res"), ("LICENSE", "."), ("README.md", "."), ("CHANGELOG.md", "."), ("CREDITS.md", ".")],
     hiddenimports=["PyQt6"],
     hookspath=[],
     hooksconfig={},
