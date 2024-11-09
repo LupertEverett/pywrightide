@@ -181,7 +181,6 @@ def save_settings():
 
 def reset_settings():
     __program_settings.clear()
-    __program_settings.sync()
     __program_settings.setValue(FONT_NAME_KEY, "Consolas")
     __program_settings.setValue(FONT_SIZE_KEY, 10)
     __program_settings.setValue(FONT_BOLD_KEY, True)

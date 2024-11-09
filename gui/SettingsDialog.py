@@ -1,6 +1,6 @@
 from PyQt6.QtWidgets import (QDialog, QGroupBox, QVBoxLayout, QHBoxLayout,
                              QSpinBox, QDialogButtonBox, QLabel, QPushButton, QCheckBox, QFontComboBox, QComboBox,
-                             QLayout)
+                             QLayout, QMessageBox)
 from PyQt6.QtCore import pyqtSignal
 from PyQt6.QtGui import QFont
 
@@ -92,6 +92,17 @@ class SettingsDialog(QDialog):
         editor_group_layout.addLayout(editor_theme_selection_layout)
         editor_group_box.setLayout(editor_group_layout)
 
+        advanced_group_box = QGroupBox("Advanced")
+        advanced_group_layout = QHBoxLayout()
+
+        self._reset_settings_button = QPushButton("Reset All Settings")
+        self._reset_settings_button.clicked.connect(self._handle_reset_settings_clicked)
+
+        advanced_group_layout.addWidget(self._reset_settings_button)
+        advanced_group_layout.addStretch()
+
+        advanced_group_box.setLayout(advanced_group_layout)
+
         self.button_box = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok |
                                            QDialogButtonBox.StandardButton.Cancel |
                                            QDialogButtonBox.StandardButton.Apply)
@@ -103,6 +114,7 @@ class SettingsDialog(QDialog):
 
         main_layout.addWidget(general_group_box)
         main_layout.addWidget(editor_group_box)
+        main_layout.addWidget(advanced_group_box)
         main_layout.addWidget(self.button_box)
 
         main_layout.setSizeConstraint(QLayout.SizeConstraint.SetFixedSize)
@@ -122,6 +134,25 @@ class SettingsDialog(QDialog):
 
         if found_idx != -1:
             self.editor_theme_combobox.setCurrentIndex(found_idx)
+
+    def _handle_reset_settings_clicked(self):
+        confirm_prompt = QMessageBox.question(self, "Confirm Reset", "Are you sure you want to reset ALL settings?",
+                                              QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+                                              QMessageBox.StandardButton.No)
+
+        if confirm_prompt == QMessageBox.StandardButton.Yes:
+            IDESettings.reset_settings()
+            self._get_settings()
+
+    def _get_settings(self):
+        self.autoreload_last_checkbox.setChecked(IDESettings.get_autoload_last_game_check())
+        current_font = QFont(IDESettings.get_font_name(),
+                             IDESettings.get_font_size())
+        self.font_name_combobox.setCurrentFont(current_font)
+        self.icon_theme_combobox.setCurrentText(IDESettings.get_icon_theme())
+        self.font_size_spinbox.setValue(IDESettings.get_font_size())
+        self.bold_toggle_button.setChecked(IDESettings.get_font_boldness())
+
 
     def _handle_apply(self):
         current_font = self.font_name_combobox.currentFont()
