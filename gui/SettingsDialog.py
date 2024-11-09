@@ -1,5 +1,6 @@
 from PyQt6.QtWidgets import (QDialog, QGroupBox, QVBoxLayout, QHBoxLayout,
-                             QSpinBox, QDialogButtonBox, QLabel, QPushButton, QCheckBox, QFontComboBox, QComboBox)
+                             QSpinBox, QDialogButtonBox, QLabel, QPushButton, QCheckBox, QFontComboBox, QComboBox,
+                             QLayout)
 from PyQt6.QtCore import pyqtSignal
 from PyQt6.QtGui import QFont
 
@@ -21,8 +22,6 @@ class SettingsDialog(QDialog):
         # Maybe an autosave feature
         # Color themes (or at least a dark theme toggle)
         self.setWindowTitle("PyWright IDE Settings")
-
-        self.setFixedSize(375, 275)
 
         main_layout = QVBoxLayout()
 
@@ -105,6 +104,8 @@ class SettingsDialog(QDialog):
         main_layout.addWidget(general_group_box)
         main_layout.addWidget(editor_group_box)
         main_layout.addWidget(self.button_box)
+
+        main_layout.setSizeConstraint(QLayout.SizeConstraint.SetFixedSize)
 
         self.setLayout(main_layout)
 
