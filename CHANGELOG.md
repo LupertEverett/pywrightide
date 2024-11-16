@@ -1,5 +1,9 @@
 # PyWright IDE Changelog
 
+## Upcoming
+
+* Added the missing "hotkey=" keyword to Script Lexer (by in1tiate)
+
 ## Version 1.3 - 09.11.2024
 
 * Added basic autocompletion support (by Zetrypio)

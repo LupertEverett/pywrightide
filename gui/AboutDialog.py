@@ -27,6 +27,7 @@ _links_text = """<h3><a href="https://github.com/LupertEverett/pywrightide/">Pro
 
 _credits_text = """<h2>Thanks to:</h2>
 <p>Zetrypio: Basic autocompletion support.</p>
+<p>in1tiate: Script Lexer improvements.</p>
 <p>Everyone on the <a href="https://forums.court-records.net/viewtopic.php?f=36&t=33857">Court Records forums thread</a> who provided their feedback!</p>
 <h2>Special Thanks:</h2>
 <ul>
