@@ -4,8 +4,7 @@ from pygame import ver as pygame_ver
 
 from PyQt6.QtGui import QPixmap
 from PyQt6.QtWidgets import QWidget, QDialog, QDialogButtonBox, QVBoxLayout, QLayout, QLabel, QTabWidget, \
-    QHBoxLayout, QTextEdit
-
+    QHBoxLayout, QTextEdit, QTextBrowser
 
 from data import IDESettings
 
@@ -70,8 +69,9 @@ class AboutDialog(QDialog):
         self._about_page_widget.setLayout(about_page_layout)
 
         self._credits_page_widget = QWidget(self)
-        self._credits_page_textarea = QTextEdit(self)
+        self._credits_page_textarea = QTextBrowser(self)
         self._credits_page_textarea.setReadOnly(True)
+        self._credits_page_textarea.setOpenExternalLinks(True)
 
         with open("CREDITS.md", "r") as file:
             self._credits_page_textarea.setMarkdown(file.read())
