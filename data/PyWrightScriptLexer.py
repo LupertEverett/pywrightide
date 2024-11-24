@@ -18,7 +18,7 @@ commands = [
     "examine", "region",
 
     # "Various control commands"
-    "print", "include", "nt", "goto", "label", "penalty", "pause", "waitenter",
+    "print", "include", "nt", "goto", "label", "penalty", "pause", "timer", "waitenter",
     "mus", "sfx", "movie",
     "exit", "endscript", "casemenu", "script", "top",
     "cross", "endcross", "statement", "resume", "cross_restart", "clearcross",
@@ -27,7 +27,7 @@ commands = [
     # "Variables and flags to keep track of what happens"
     "setflag", "delflag", "flag", "noflag", "set",
     "setvar", "joinvar", "addvar", "subvar", "divvar", "mulvar", "absvar",
-    "random",
+    "random", "getvar",
     "is", "AND", "isnot", "isempty", "isnotempty", "isnumber",
     "exportvars", "importvars", "savegame", "loadgame", "deletegame",
 
@@ -83,7 +83,7 @@ special_variables = [
     "_profiles_enable", "_profiles_present", "_evidence_enable", "_evidence_present",
     "_cr_back_button", "_list_back_button", "_menu_fade_level", "_double_screen_list_fade",
     "_flash_sound", "_shake_sound", "_music_loop",
-
+    
     # "Used in intro.txt in the game folder to control menu"
     "_order_cases",
 
@@ -97,11 +97,12 @@ special_variables = [
 cases = ["_case_{}".format(num) for num in range(100)]
 
 # Just for that sweet, sweet startswith()
-named_parameters = ("start=", "end=", "e=", "x=", "y=", "z=", "name=", "speed=", "width=",
-                    "graphic=", "graphichigh=", "fail=", "nametag=", "result=", "mag=", "frames=")
+named_parameters = ("start=", "end=", "e=", "x=", "y=", "z=", "name=", "speed=", "width=", "height=", "rwidth=", "rheight=",
+                    "graphic=", "graphichigh=", "examine=", "talk=", "present=", "move=", "fail=", "nametag=", "result=", "label=",
+                    "mag=", "frames=","jumpto=","pause=","test=")
 
 parameters = ["stack", "nowait", "noclear", "hide", "fade", "true", "false", "noback", "sx", "sy",
-              "blink", "loop", "stop", "noauto", "password"]
+              "blink", "loop", "noloop", "b", "t", "stop", "noauto", "password", "all"]
 
 # Following might need some sort of regex for each
 # "{sound {str}}"
