@@ -83,7 +83,7 @@ special_variables = [
     "_profiles_enable", "_profiles_present", "_evidence_enable", "_evidence_present",
     "_cr_back_button", "_list_back_button", "_menu_fade_level", "_double_screen_list_fade",
     "_flash_sound", "_shake_sound", "_music_loop",
-    
+
     # "Used in intro.txt in the game folder to control menu"
     "_order_cases",
 
