@@ -1,5 +1,10 @@
 # PyWright IDE Changelog
 
+## Version 1.3.1 - 21.11.2024
+
+* Added the missing "hotkey=" keyword to Script Lexer (by in1tiate)
+* Make AboutDialog load the credits from CREDITS.md file instead.
+
 ## Version 1.3 - 09.11.2024
 
 * Added basic autocompletion support (by Zetrypio)

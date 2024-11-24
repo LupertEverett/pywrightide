@@ -24,21 +24,21 @@ Once the command finishes its job, the compiled program can be found in `/dist/p
 
 ## Screenshots
 
-![](https://i.imgur.com/ZOMY6HP.png)
+![](https://i.imgur.com/pngNrF6.png)
 
-![](https://i.imgur.com/BniCVT0.png)
+![](https://i.imgur.com/uAPfJ8i.png)
 
-![](https://i.imgur.com/A9Wx2Ie.png)
+![](https://i.imgur.com/VeXVzVs.png)
 
-![](https://i.imgur.com/Lv8cGeH.png)
+![](https://i.imgur.com/m2czWac.png)
 
-![](https://i.imgur.com/nMzfyJI.png)
+![](https://i.imgur.com/7eTWSBz.png)
 
-![](https://i.imgur.com/JGZRt1F.png)
+![](https://i.imgur.com/l80yQaK.png)
 
-![](https://i.imgur.com/iwvxCtj.png)
+![](https://i.imgur.com/7rAP2ku.png)
 
-![](https://i.imgur.com/9go62w2.png)
+![](https://i.imgur.com/McqYDQa.png)
 
 ## License
 

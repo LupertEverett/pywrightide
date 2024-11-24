@@ -99,7 +99,7 @@ cases = ["_case_{}".format(num) for num in range(100)]
 # Just for that sweet, sweet startswith()
 named_parameters = ("start=", "end=", "e=", "x=", "y=", "z=", "name=", "speed=", "width=", "height=", "rwidth=", "rheight=",
                     "graphic=", "graphichigh=", "examine=", "talk=", "present=", "move=", "fail=", "nametag=", "result=", "label=",
-                    "mag=", "frames=","jumpto=","pause=","test=")
+                    "mag=", "frames=", "hotkey=", "jumpto=","pause=","test=")
 
 parameters = ["stack", "nowait", "noclear", "hide", "fade", "true", "false", "noback", "sx", "sy",
               "blink", "loop", "noloop", "b", "t", "stop", "noauto", "password", "all"]

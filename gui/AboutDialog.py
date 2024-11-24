@@ -4,8 +4,7 @@ from pygame import ver as pygame_ver
 
 from PyQt6.QtGui import QPixmap
 from PyQt6.QtWidgets import QWidget, QDialog, QDialogButtonBox, QVBoxLayout, QLayout, QLabel, QTabWidget, \
-    QHBoxLayout, QTextEdit
-
+    QHBoxLayout, QTextEdit, QTextBrowser
 
 from data import IDESettings
 
@@ -23,17 +22,6 @@ _about_text = """<p>This program aims to make developing PyWright games easier.<
 
 _links_text = """<h3><a href="https://github.com/LupertEverett/pywrightide/">Project Homepage</a> 
 | <a href="https://forums.court-records.net/viewtopic.php?f=36&t=33857">Court Records Forums Thread</a></h3>
-"""
-
-_credits_text = """<h2>Thanks to:</h2>
-<p>Zetrypio: Basic autocompletion support.</p>
-<p>Everyone on the <a href="https://forums.court-records.net/viewtopic.php?f=36&t=33857">Court Records forums thread</a> who provided their feedback!</p>
-<h2>Special Thanks:</h2>
-<ul>
-<li>CAPCOM for the Ace Attorney franchise, which inspired PyWright.</li>
-<li>Saluk for creating <a href="https://pywright.dawnsoft.org/">PyWright</a> itself.</li>
-<li>BirbIsTheWord, for being the inspiration behind PyWright IDE, not to mention the countless amounts of testing and feedback.</li>
-</ul>
 """
 
 
@@ -70,9 +58,6 @@ class AboutDialog(QDialog):
         self._links_label.setText(_links_text)
         self._links_label.setOpenExternalLinks(True)
 
-        self._credits_label = QLabel(self)
-        self._credits_label.setText(_credits_text)
-
         self._about_page_widget = QWidget(self)
 
         about_page_layout = QVBoxLayout()
@@ -84,11 +69,17 @@ class AboutDialog(QDialog):
         self._about_page_widget.setLayout(about_page_layout)
 
         self._credits_page_widget = QWidget(self)
+        self._credits_page_textarea = QTextBrowser(self)
+        self._credits_page_textarea.setReadOnly(True)
+        self._credits_page_textarea.setOpenExternalLinks(True)
+
+        with open("CREDITS.md", "r") as file:
+            self._credits_page_textarea.setMarkdown(file.read())
 
         credits_page_layout = QVBoxLayout()
 
-        credits_page_layout.addWidget(self._credits_label)
-        credits_page_layout.addStretch()
+        credits_page_layout.addWidget(self._credits_page_textarea)
+        credits_page_layout.setContentsMargins(0, 0, 0, 0)
 
         self._credits_page_widget.setLayout(credits_page_layout)
 
