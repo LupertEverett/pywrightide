@@ -1,5 +1,9 @@
 # PyWright IDE Changelog
 
+## Unreleased
+
+* Added more missing keywords to the Script Lexer (by in1tiate)
+
 ## Version 1.3.1 - 21.11.2024
 
 * Added the missing "hotkey=" keyword to Script Lexer (by in1tiate)
