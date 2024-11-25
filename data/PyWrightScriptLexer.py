@@ -18,7 +18,7 @@ commands = [
     "examine", "region",
 
     # "Various control commands"
-    "print", "include", "nt", "goto", "label", "penalty", "pause", "waitenter",
+    "print", "include", "nt", "goto", "label", "penalty", "pause", "timer", "waitenter",
     "mus", "sfx", "movie",
     "exit", "endscript", "casemenu", "script", "top",
     "cross", "endcross", "statement", "resume", "cross_restart", "clearcross",
@@ -27,7 +27,7 @@ commands = [
     # "Variables and flags to keep track of what happens"
     "setflag", "delflag", "flag", "noflag", "set",
     "setvar", "joinvar", "addvar", "subvar", "divvar", "mulvar", "absvar",
-    "random",
+    "random", "getvar",
     "is", "AND", "isnot", "isempty", "isnotempty", "isnumber",
     "exportvars", "importvars", "savegame", "loadgame", "deletegame",
 
@@ -97,11 +97,12 @@ special_variables = [
 cases = ["_case_{}".format(num) for num in range(100)]
 
 # Just for that sweet, sweet startswith()
-named_parameters = ("start=", "end=", "e=", "x=", "y=", "z=", "name=", "speed=", "width=",
-                    "graphic=", "graphichigh=", "fail=", "nametag=", "result=", "mag=", "frames=", "hotkey=")
+named_parameters = ("start=", "end=", "e=", "x=", "y=", "z=", "name=", "speed=", "width=", "height=", "rwidth=", "rheight=",
+                    "graphic=", "graphichigh=", "examine=", "talk=", "present=", "move=", "fail=", "nametag=", "result=", "label=",
+                    "mag=", "frames=", "hotkey=", "jumpto=","pause=","test=")
 
 parameters = ["stack", "nowait", "noclear", "hide", "fade", "true", "false", "noback", "sx", "sy",
-              "blink", "loop", "stop", "noauto", "password"]
+              "blink", "loop", "noloop", "b", "t", "stop", "noauto", "password", "all"]
 
 # Following might need some sort of regex for each
 # "{sound {str}}"
