@@ -21,6 +21,8 @@ EDITOR_THEME_KEY = "editor/color_theme"
 RECENT_GAMES_KEY = "recent_games"
 LAST_OPEN_TABS_KEY = "last_open_tabs"
 LAST_OPEN_TAB_INDEX_KEY = "last_open_tab_index"
+ENABLE_AUTOCOMPLETION_KEY = "enable_autocompletion"
+AUTOCOMPLETION_THRESHOLD_KEY = "autocompletion_suggestions_threshold"
 
 # Functions
 
@@ -163,6 +165,22 @@ def set_last_open_tab_index(new_tab_index: int):
     __program_settings.setValue(LAST_OPEN_TAB_INDEX_KEY, new_tab_index)
 
 
+def get_enable_autocompletion_check() -> bool:
+    return __program_settings.value(ENABLE_AUTOCOMPLETION_KEY, True, bool)
+
+
+def set_enable_autocompletion_check(new_value: bool):
+    __program_settings.setValue(ENABLE_AUTOCOMPLETION_KEY, new_value)
+
+
+def get_autocompletion_trigger_threshold() -> int:
+    return __program_settings.value(AUTOCOMPLETION_THRESHOLD_KEY, 1, int)
+
+
+def set_autocompletion_trigger_threshold(new_threshold: int):
+    __program_settings.setValue(AUTOCOMPLETION_THRESHOLD_KEY, new_threshold)
+
+
 def all_keys() -> list[str]:
     return __program_settings.allKeys()
 
@@ -190,3 +208,5 @@ def reset_settings():
     __program_settings.setValue(ICON_THEME_KEY, "default")
     __program_settings.setValue(COLOR_THEME_KEY, "System Theme")
     __program_settings.setValue(EDITOR_THEME_KEY, "default")
+    __program_settings.setValue(ENABLE_AUTOCOMPLETION_KEY, True)
+    __program_settings.setValue(AUTOCOMPLETION_THRESHOLD_KEY, 1)

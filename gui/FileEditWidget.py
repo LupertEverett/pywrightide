@@ -13,6 +13,8 @@ import data.EditorThemes as EditorThemes
 from data.PyWrightScriptLexer import PyWrightScriptLexer
 from .FindReplaceDialog import FindType, ReplaceType, SearchScope
 
+from data import IDESettings
+
 
 class FileEditWidget(QWidget):
 
@@ -65,7 +67,8 @@ class FileEditWidget(QWidget):
 
     def setup_autocompletion(self):
         # The autocompletion should be used from an API source to have a custom list of proposals
-        self.sci.setAutoCompletionThreshold(1)
+        threshold = IDESettings.get_autocompletion_trigger_threshold() if IDESettings.get_enable_autocompletion_check() else 0
+        self.sci.setAutoCompletionThreshold(threshold)
         self.sci.setAutoCompletionSource(QsciScintilla.AutoCompletionSource.AcsAPIs)
 
     def fill_the_scintilla(self, selected_file):

@@ -317,6 +317,7 @@ class MainWindowCentralWidget(QWidget):
                                                     IDESettings.get_font_size(),
                                                     IDESettings.get_font_boldness())
                 tab.supply_editor_color_theme_to_lexer()
+                tab.setup_autocompletion()
 
     def handle_insert_into_cursor(self, command: str):
         # Don't do anything if there are no tabs open

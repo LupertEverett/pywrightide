@@ -3,6 +3,9 @@
 ## Unreleased
 
 * Added more missing keywords to the Script Lexer (by in1tiate)
+* Autocompletion suggestions can now be toggled off in the settings.
+* Autocompletion suggestions can now have a varying trigger threshold in between 1-10 characters
+  (i.e. if you set it to 5 then you'll have to type at least 5 characters to make it appear).
 
 ## Version 1.3.1 - 21.11.2024
 
