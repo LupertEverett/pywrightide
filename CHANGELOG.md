@@ -1,6 +1,6 @@
 # PyWright IDE Changelog
 
-## Unreleased
+## Version 1.3.2 - 22.12.2024
 
 * Added more missing keywords to the Script Lexer (by in1tiate)
 * Autocompletion suggestions can now be toggled off in the settings.
