@@ -1,13 +1,15 @@
-from PyQt6.QtCore import QModelIndex, QSize
+from PyQt6.QtCore import QModelIndex, QSize, Qt, QRect, QRectF
 from PyQt6.QtWidgets import QLabel, QDialog, QListView, QPushButton, QHBoxLayout, QVBoxLayout, QCheckBox, QFileDialog, \
-    QMessageBox
-from PyQt6.QtGui import QStandardItem, QStandardItemModel, QIcon, QCloseEvent, QPixmap
+    QMessageBox, QStyledItemDelegate, QStyleOption, QStyle, QStyleOptionViewItem, QApplication
+from PyQt6.QtGui import QStandardItem, QStandardItemModel, QIcon, QCloseEvent, QPixmap, QTextDocument, \
+    QAbstractTextDocumentLayout, QPalette, QImage, QImageReader
 
 from .OpenGameDialog import OpenGameDialog
 
 from data import IDESettings, IconThemes, PyWrightFolder
 
 from data.PyWrightGame import PyWrightGameInfo
+from data.PyWrightGamePathItem import PyWrightGamePathItem
 
 from pathlib import Path
 
@@ -34,6 +36,9 @@ class WelcomeDialog(QDialog):
                              if Path(path).exists() and Path(path).is_dir()]
 
         self._recent_docs_view = QListView()
+
+        self._recent_docs_view.setItemDelegate(RichTextDelegate(self))
+
         self._recent_docs_model = QStandardItemModel(self._recent_docs_view)
         self._recent_docs_view.clicked.connect(self._handle_list_view_clicked)
         self._recent_docs_view.doubleClicked.connect(self._handle_load_selected_clicked)
@@ -131,9 +136,7 @@ class WelcomeDialog(QDialog):
                 QMessageBox.critical(self, "Error", "Could not find a PyWright game!")
 
     def __add_item_to_model(self, text: str, icon_path: str):
-        item = QStandardItem(text)
-        item.setIcon(QIcon(icon_path))
-        item.setEditable(False)
+        item = PyWrightGamePathItem(text)
         self._recent_docs_model.appendRow(item)
 
     def _handle_load_selected_clicked(self):
@@ -143,7 +146,7 @@ class WelcomeDialog(QDialog):
             return
 
         idx = indexes[0]
-        self.__selected_folder_path = self._recent_docs_model.item(idx.row()).text()
+        self.__selected_folder_path = self._recent_docs_model.item(idx.row()).get_path_str()
         if self._always_autoload_checkbox.isChecked():
             IDESettings.set_autoload_last_game_path(self.__selected_folder_path)
             IDESettings.set_autoload_last_game_check(True)
@@ -157,3 +160,40 @@ class WelcomeDialog(QDialog):
     def closeEvent(self, event: QCloseEvent):
         IDESettings.set_recent_games(self._recent_docs)
         event.accept()
+
+
+"""A custom delegate to make HTML tags work in QStandardItems' text contents"""
+class RichTextDelegate(QStyledItemDelegate):
+    def __init__(self, parent):
+        super().__init__(parent)
+        self.doc = QTextDocument()
+
+    def paint(self, painter, option, index):
+        self.initStyleOption(option, index)
+        painter.save()
+        self.doc.setTextWidth(option.rect.width())
+        self.doc.setHtml(option.text)
+        self.doc.setDefaultFont(option.font)
+        option.text = ''
+        option.widget.style().drawControl(QStyle.ControlElement.CE_ItemViewItem, option, painter)
+
+        iconSize = option.icon.actualSize(option.rect.size())
+
+        painter.translate(option.rect.left() + iconSize.width() + 4, option.rect.top())
+        clip = QRectF(0, 0, option.rect.width() + iconSize.width() + 4, option.rect.height())
+        painter.setClipRect(clip)
+        ctx = QAbstractTextDocumentLayout.PaintContext()
+        ctx.clip = clip
+        self.doc.documentLayout().draw(painter, ctx)
+        painter.restore()
+
+    def sizeHint(self, option, index):
+        self.initStyleOption(option, index)
+
+        doc = QTextDocument()
+        doc.setHtml(option.text)
+        doc.setTextWidth(option.rect.width())
+
+        icon_size = option.icon.actualSize(option.rect.size())
+        # Use icon height instead to be more consistent
+        return QSize(int(doc.idealWidth()), icon_size.height() + 4)
