@@ -54,7 +54,7 @@ def load_current_color_theme() -> str:
     current_color_theme = IDESettings.get_color_theme()
 
     if current_color_theme == "System Theme":
-        return "" if sys.platform != "win32" else win32_style_overrides
+        return "" # if sys.platform != "win32" else win32_style_overrides
 
     result = ""
     with open(get_color_theme_path(), "r") as f:
