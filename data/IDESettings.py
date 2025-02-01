@@ -1,8 +1,8 @@
 # Mainly for storing the key names
 from PyQt6.QtCore import QSettings, QByteArray
 
-IDE_VERSION_STRING = "1.3.2"
-IDE_BUILD_STRING = "24.12.22"
+IDE_VERSION_STRING = "1.3.3"
+IDE_BUILD_STRING = "25.02.01"
 
 __program_settings = QSettings("PyWrightIDE", "PyWrightIDE")
 
