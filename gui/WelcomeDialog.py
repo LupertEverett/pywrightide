@@ -16,6 +16,10 @@ _welcome_label_text = """<h1>Welcome to PyWright IDE {}!</h1>
 <p>Please select a PyWright game folder below to start editing cases!</p>
 """.format(IDESettings.IDE_VERSION_STRING)
 
+_folder_does_not_exist_notice_text = """<p><b>Notice:</b> Last open game ({})'s folder has been either moved or deleted.</p>
+<p>Please select a different folder from below.</p>
+""".format(Path(IDESettings.get_autoload_last_game_path()).stem)
+
 
 class WelcomeDialog(QDialog):
 
@@ -38,6 +42,9 @@ class WelcomeDialog(QDialog):
         self.__selected_folder_path = ""
 
         pywright_icon_path = IconThemes.icon_path_from_theme(IconThemes.ICON_NAME_PYWRIGHT)
+
+        last_game_path = Path(IDESettings.get_autoload_last_game_path())
+        last_game_exists = last_game_path.exists() and last_game_path.is_dir()
 
         for doc_path in self._recent_docs:
             self.__add_item_to_model(doc_path, pywright_icon_path)
@@ -76,6 +83,8 @@ class WelcomeDialog(QDialog):
         main_layout = QVBoxLayout()
 
         main_layout.addLayout(welcome_label_layout)
+        if not last_game_exists:
+            main_layout.addWidget(QLabel(_folder_does_not_exist_notice_text))
         main_layout.addWidget(self._recent_docs_view)
         main_layout.addWidget(self._always_autoload_checkbox)
         main_layout.addLayout(button_layout)
