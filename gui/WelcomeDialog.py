@@ -1,8 +1,8 @@
-from PyQt6.QtCore import QModelIndex, QSize, Qt, QRect, QRectF
+from PyQt6.QtCore import QModelIndex, QSize, QRectF
 from PyQt6.QtWidgets import QLabel, QDialog, QListView, QPushButton, QHBoxLayout, QVBoxLayout, QCheckBox, QFileDialog, \
-    QMessageBox, QStyledItemDelegate, QStyleOption, QStyle, QStyleOptionViewItem, QApplication
-from PyQt6.QtGui import QStandardItem, QStandardItemModel, QIcon, QCloseEvent, QPixmap, QTextDocument, \
-    QAbstractTextDocumentLayout, QPalette, QImage, QImageReader
+    QMessageBox, QStyledItemDelegate, QStyle
+from PyQt6.QtGui import QStandardItemModel, QIcon, QCloseEvent, QPixmap, QTextDocument, \
+    QAbstractTextDocumentLayout
 
 from .OpenGameDialog import OpenGameDialog
 
