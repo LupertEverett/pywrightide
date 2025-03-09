@@ -77,7 +77,7 @@ class NewGameDialog(QDialog):
         author = self._game_data_widget.get_game_author()
         version = self._game_data_widget.get_game_version()
         try:
-            self._new_game = PyWrightGameInfo.create_new_game(root_path, folder, version, title, icon_path, author)
+            self._new_game = PyWrightGameInfo.create_new_game(root_path, folder, version, title, author, icon_path)
             self.accept()
         except ValueError as err:
             QMessageBox.critical(self, "Error", str(err))

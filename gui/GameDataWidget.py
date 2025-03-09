@@ -127,8 +127,8 @@ class GameDataWidget(QWidget):
     def get_game_title(self) -> str:
         return self._game_title_lineedit.text()
 
-    def get_game_icon_path(self) -> str:
-        return self._game_icon_lineedit.text()
+    def get_game_icon_path(self) -> Path:
+        return Path(self._game_icon_lineedit.text())
 
     def get_game_author(self) -> str:
         return self._game_author_lineedit.text()
