@@ -1,5 +1,14 @@
 # PyWright IDE Changelog
 
+## Version 1.3.4 - 09.03.2025
+
+* Fix the wrong ordering of parameters being given to create_new_game(), resulting in author and icon path info changing places.
+
+## Version 1.3.3 - 01.02.2025
+
+* IDE now opens the Welcome dialog if the last open game folder is missing for whatever reason, instead of refusing to open itself until the folder is back.
+* Similarly, the Welcome dialog now notifies the user about such an issue occuring.
+
 ## Version 1.3.2 - 22.12.2024
 
 * Added more missing keywords to the Script Lexer (by in1tiate)
