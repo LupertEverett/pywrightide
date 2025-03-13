@@ -1,5 +1,9 @@
 # PyWright IDE Changelog
 
+## Unreleased
+
+* Add separate coloring for {} tokens in strings (by Zetrypio)
+
 ## Version 1.3.4 - 09.03.2025
 
 * Fix the wrong ordering of parameters being given to create_new_game(), resulting in author and icon path info changing places.
