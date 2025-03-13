@@ -204,6 +204,8 @@ class PyWrightScriptLexer(QsciLexerCustom):
             return "builtin_macros_style"
         elif style == 8:
             return "game_macros_style"
+        elif style == 9:
+            return "stringtokens"
         else:
             return ""
 
@@ -241,7 +243,7 @@ class PyWrightScriptLexer(QsciLexerCustom):
         elif token[0].startswith("//") or token[0].startswith("#"):
             self.setStyling(token[1], 4)
         elif token[0].startswith("\"") and token[0].endswith("\""):
-            self.setStyling(token[1], 5)
+            self._set_styling_for_string_token(token[0])
         elif is_string_number(token[0]):
             self.setStyling(token[1], 6)
         elif token[0] in self.builtin_macros:
@@ -250,3 +252,42 @@ class PyWrightScriptLexer(QsciLexerCustom):
             self.setStyling(token[1], 8)
         else:
             self.setStyling(token[1], 0)
+
+    def _set_styling_for_string_token(self, text: str):
+        # Note: text should have a " at start and at end.
+        
+        # Loop while there is texxt to style
+        while len(text) > 0:
+
+            # Search for braces
+            openPos = text.find("{", 1)
+            closePos = text.find("}", 1)
+
+            # take the next found brace (need to take into account the fact that not found returns -1 and -1 is < 0)
+            if openPos < 0:
+                nextPos = closePos
+            elif closePos < 0:
+                nextPos = openPos
+            else:
+                nextPos = min(openPos, closePos)
+
+            # {} are not found: place only string
+            if openPos < 0 and closePos < 0:
+                self.setStyling(len(bytearray(text, "utf-8")), 5)
+                break
+
+            else:
+                # Split text
+                token = text[:nextPos]
+                text = text[nextPos:]
+                
+                # Apply style
+                # If token starts with { and text with }, put the } in the token and colorize it a different color
+                if token.startswith('{') and text.startswith('}'):
+                    token = token + text[0]
+                    text = text[1:]
+                    self.setStyling(len(bytearray(token, "utf-8")), 9)
+                else:
+                    self.setStyling(len(bytearray(token, "utf-8")), 5)
+
+

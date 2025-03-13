@@ -11,6 +11,7 @@
 # numbers: Self-explanatory
 # builtinmacros: Built-in Macros (that come with PyWright)
 # gamemacros: Game-specific Macros
+# stringtokens: String tokens ("{n}", "{c{number}}", ...)
 # editormargin: Scintilla's Margin section, all margins
 # editormarginborder: Special margin reserved for acting like a border between line number area and text area
 # caret: The vertical line on the text editing area that indicates the position, and also blinks.
@@ -44,13 +45,15 @@ class EditorColorTheme:
         self.numbers_color = EditorColor("#ff00a0a0", "#ffffffff", 6)
         self.builtin_macros_color = EditorColor("#ff0000dd", "#ffffffff", 7)
         self.game_macros_color = EditorColor("#ff4f00ff", "#ffffffff", 8)
+        self.string_tokens_color = EditorColor("#ff00af00", "#ffffffff", 9)
         self.editor_margin_color = EditorColor("#ff000000", "#ffffffff", 0)
         self.editor_margin_border_color = EditorColor("", "#ff303030", 0)
         self.caret_color = EditorColor("", "#ffffffff", 0)
 
         self.colors = [self.default_style_color, self.commands_color, self.special_variables_color,
                        self.parameters_color, self.line_comments_color, self.string_literals_color,
-                       self.numbers_color, self.builtin_macros_color, self.game_macros_color]
+                       self.numbers_color, self.builtin_macros_color, self.game_macros_color,
+                       self.string_tokens_color]
 
     def __load_from_file(self, file_path: Path):
         if not file_path.exists() or not file_path.is_file():
@@ -95,6 +98,9 @@ class EditorColorTheme:
                     case "gamemacros":
                         self.game_macros_color.text_color = values[0]
                         self.game_macros_color.paper_color = values[1]
+                    case "stringtokens":
+                        self.string_tokens_color.text_color = values[0]
+                        self.string_tokens_color.paper_color = values[1]
                     case "editormargin":
                         self.editor_margin_color.text_color = values[0]
                         self.editor_margin_color.paper_color = values[1]
