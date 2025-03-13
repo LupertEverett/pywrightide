@@ -256,14 +256,14 @@ class PyWrightScriptLexer(QsciLexerCustom):
     def _set_styling_for_string_token(self, text: str):
         # Note: text should have a " at start and at end.
         
-        # Loop while there is texxt to style
+        # Loop while there is text to style
         while len(text) > 0:
 
             # Search for braces
             openPos = text.find("{", 1)
             closePos = text.find("}", 1)
 
-            # take the next found brace (need to take into account the fact that not found returns -1 and -1 is < 0)
+            # Take the next found brace (need to take into account the fact that not found returns -1 and -1 is < 0)
             if openPos < 0:
                 nextPos = closePos
             elif closePos < 0:
