@@ -7,6 +7,7 @@ strings=#ff707000,#ffffffff
 numbers=#ff00a0a0,#ffffffff
 builtinmacros=#ff0000dd,#ffffffff
 gamemacros=#ff4f00ff,#ffffffff
+stringtokens=#ff009f00,#ffffffff
 editormargin=#ff000000,#ffa0a0a0
 editormarginborder=#fff0f0f0
 caret=#ff000000
