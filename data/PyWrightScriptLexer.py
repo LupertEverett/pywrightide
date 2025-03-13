@@ -162,7 +162,7 @@ class PyWrightScriptLexer(QsciLexerCustom):
     def set_font_properties(self, font_name: str, font_size: int, bold_font: bool):
         self.setDefaultFont(QFont(font_name, font_size))
         font_weight = QFont.Weight.Bold if bold_font else QFont.Weight.Normal
-        for i in range(0, 9):
+        for i in range(0, 10):
             self.setFont(QFont(font_name, font_size, weight=font_weight), i)
 
     def set_builtin_macros(self, new_list: list[str]):
