@@ -2,7 +2,8 @@
 
 ## Unreleased
 
-* Add separate coloring for {} tokens in strings (by Zetrypio)
+* Added separate coloring for {} tokens in strings (by Zetrypio)
+* Added a Color Editor dialog for editing text editor component themes.
 
 ## Version 1.3.4 - 09.03.2025
 

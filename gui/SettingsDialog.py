@@ -4,6 +4,8 @@ from PyQt6.QtWidgets import (QDialog, QGroupBox, QVBoxLayout, QHBoxLayout,
 from PyQt6.QtCore import pyqtSignal
 from PyQt6.QtGui import QFont
 
+from .ColorEditorDialog import ColorEditorDialog
+
 from data import IDESettings, ColorThemes, EditorThemes
 from data import IconThemes
 
@@ -48,10 +50,12 @@ class SettingsDialog(QDialog):
 
         editor_theme_selection_layout = QHBoxLayout()
         self.editor_theme_combobox = QComboBox()
-        self.editor_theme_combobox.addItems(EditorThemes.query_available_editor_themes())
-        self._set_editor_theme_in_editor_combobox()
+        self._query_available_editor_themes()
+        self.color_editor_dialog_button = QPushButton("Color Editor...")
+        self.color_editor_dialog_button.clicked.connect(self._handle_color_editor_clicked)
         editor_theme_selection_layout.addWidget(QLabel("Editor Color Theme:"))
         editor_theme_selection_layout.addWidget(self.editor_theme_combobox)
+        editor_theme_selection_layout.addWidget(self.color_editor_dialog_button)
 
         general_group_layout.addWidget(self.autoreload_last_checkbox)
         general_group_layout.addLayout(icon_theme_section_layout)
@@ -155,6 +159,16 @@ class SettingsDialog(QDialog):
 
         if found_idx != -1:
             self.editor_theme_combobox.setCurrentIndex(found_idx)
+
+    def _query_available_editor_themes(self):
+        self.editor_theme_combobox.clear()
+        self.editor_theme_combobox.addItems(EditorThemes.query_available_editor_themes())
+        self._set_editor_theme_in_editor_combobox()
+
+    def _handle_color_editor_clicked(self):
+        color_editor = ColorEditorDialog(self.editor_theme_combobox.currentText(), self)
+        color_editor.exec()
+        self._query_available_editor_themes()
 
     def _handle_reset_settings_clicked(self):
         confirm_prompt = QMessageBox.question(self, "Confirm Reset",
