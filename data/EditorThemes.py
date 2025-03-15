@@ -27,33 +27,41 @@ def query_available_editor_themes() -> list[str]:
 
 class EditorColor:
 
-    def __init__(self, text_color: str, paper_color: str, style_index: int):
-        self.text_color = text_color
-        self.paper_color = paper_color
-        self.style_index = style_index
+    def __init__(self, color_name: str, text_color: str, paper_color: str, style_index: int):
+        self.color_name = color_name     # Color's name, written to the .editortheme file
+        self.text_color = text_color     # Text color
+        self.paper_color = paper_color   # Background color
+        self.style_index = style_index   # Supplied to Lexer
+
+    def __str__(self):
+        if self.text_color == "":
+            return "{}={}".format(self.color_name, self.paper_color)
+        else:
+            return "{}={},{}".format(self.color_name, self.text_color, self.paper_color)
 
 
 class EditorColorTheme:
 
     def __init__(self):
-        self.default_style_color = EditorColor("#ff000000", "#ffffffff", 0)
-        self.commands_color = EditorColor("#ff00007f", "#ffffffff", 1)
-        self.special_variables_color = EditorColor("##ff007f00", "#ffffffff", 2)
-        self.parameters_color = EditorColor("#ff7f0000", "#ffffffff", 3)
-        self.line_comments_color = EditorColor("#ffa0a0a0", "#ffffffff", 4)
-        self.string_literals_color = EditorColor("#ff707000", "#ffffffff", 5)
-        self.numbers_color = EditorColor("#ff00a0a0", "#ffffffff", 6)
-        self.builtin_macros_color = EditorColor("#ff0000dd", "#ffffffff", 7)
-        self.game_macros_color = EditorColor("#ff4f00ff", "#ffffffff", 8)
-        self.string_tokens_color = EditorColor("#ff00af00", "#ffffffff", 9)
-        self.editor_margin_color = EditorColor("#ff000000", "#ffffffff", 0)
-        self.editor_margin_border_color = EditorColor("", "#ff303030", 0)
-        self.caret_color = EditorColor("", "#ffffffff", 0)
+        self.default_style_color = EditorColor("default",  "#ff000000", "#ffffffff", 0)
+        self.commands_color = EditorColor("commands",  "#ff00007f", "#ffffffff", 1)
+        self.special_variables_color = EditorColor("specialvars", "#ff007f00", "#ffffffff", 2)
+        self.parameters_color = EditorColor("parameters", "#ff7f0000", "#ffffffff", 3)
+        self.line_comments_color = EditorColor("comments", "#ffa0a0a0", "#ffffffff", 4)
+        self.string_literals_color = EditorColor("strings", "#ff707000", "#ffffffff", 5)
+        self.numbers_color = EditorColor("numbers", "#ff00a0a0", "#ffffffff", 6)
+        self.builtin_macros_color = EditorColor("builtinmacros", "#ff0000dd", "#ffffffff", 7)
+        self.game_macros_color = EditorColor("gamemacros", "#ff4f00ff", "#ffffffff", 8)
+        self.string_tokens_color = EditorColor("stringtokens", "#ff00af00", "#ffffffff", 9)
+        self.editor_margin_color = EditorColor("editormargin", "#ff000000", "#ffffffff", 0)
+        self.editor_margin_border_color = EditorColor("editormarginborder", "", "#ff303030", 0)
+        self.caret_color = EditorColor("caret", "", "#ffffffff", 0)
 
         self.colors = [self.default_style_color, self.commands_color, self.special_variables_color,
                        self.parameters_color, self.line_comments_color, self.string_literals_color,
                        self.numbers_color, self.builtin_macros_color, self.game_macros_color,
-                       self.string_tokens_color]
+                       self.string_tokens_color, self.editor_margin_color, self.editor_margin_border_color,
+                       self.caret_color]
 
     def __load_from_file(self, file_path: Path):
         if not file_path.exists() or not file_path.is_file():
@@ -114,6 +122,19 @@ class EditorColorTheme:
 
     def load_defaults(self):
         self.load_theme("default")
+
+    def save_to_file(self, theme_file_name: str):
+        with open("res/editorcolorthemes/{}.editortheme".format(theme_file_name), "w") as f:
+            for color in self.colors:
+                f.write(str(color) + "\n")
+
+
+    @staticmethod
+    def load_from_theme_name(theme_name: str):
+        result = EditorColorTheme()
+        result.load_theme(theme_name)
+
+        return result
 
 
 # Global editor theme variable
