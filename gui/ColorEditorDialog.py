@@ -72,7 +72,8 @@ class ColorEditorDialog(QDialog):
         ## Prepare the color buttons
         self.color_buttons = []
 
-        for row in range(len(self.selected_theme_colors.colors)):
+        # Add the double-color elements
+        for row in range(len(self.selected_theme_colors.colors) - 2):
             color_button_row = []
 
             for col in range(2):
@@ -85,6 +86,18 @@ class ColorEditorDialog(QDialog):
                 theme_colors_layout.addWidget(color_button, row+1, col+1)
 
             self.color_buttons.append(color_button_row)
+
+        # Add the single-color elements
+        self.line_column_border_color_button = ColorButton()
+        self.line_column_border_color_button.pressed.connect(lambda r=11, c=1: self._handle_color_button_pressed(r, c))
+        theme_colors_layout.addWidget(self.line_column_border_color_button, 12, 2)
+
+        self.caret_color_button = ColorButton()
+        self.caret_color_button.pressed.connect(lambda r=12, c=1: self._handle_color_button_pressed(r, c))
+        theme_colors_layout.addWidget(self.caret_color_button, 13, 2)
+
+        self.color_buttons.append([None, self.line_column_border_color_button])
+        self.color_buttons.append([None, self.caret_color_button])
 
         self._colorize_buttons_from_selected_theme()
 
@@ -230,12 +243,18 @@ class ColorEditorDialog(QDialog):
         self.save_as_button.setEnabled(self._current_theme_modified)
 
     def _colorize_buttons_from_selected_theme(self):
-        for row in range(len(self.selected_theme_colors.colors)):
+        for row in range(len(self.selected_theme_colors.colors) - 2):
             text_color = QColor.fromString(self.selected_theme_colors.colors[row].text_color)
             paper_color = QColor.fromString(self.selected_theme_colors.colors[row].paper_color)
 
             self.color_buttons[row][0].set_button_color(text_color)
             self.color_buttons[row][1].set_button_color(paper_color)
+
+        line_column_border_color = QColor.fromString(self.selected_theme_colors.editor_margin_border_color.paper_color)
+        caret_color = QColor.fromString(self.selected_theme_colors.caret_color.paper_color)
+
+        self.line_column_border_color_button.set_button_color(line_column_border_color)
+        self.caret_color_button.set_button_color(caret_color)
 
 
 class ColorButton(QPushButton):
@@ -247,4 +266,7 @@ class ColorButton(QPushButton):
 
     def set_button_color(self, button_color: QColor):
         self.button_color = button_color
-        self.setStyleSheet("background-color: {}".format(self.button_color.name(QColor.NameFormat.HexArgb)))
+        self.setStyleSheet("""background-color: {}; 
+                           border: 1px solid gray;
+                           border-radius: 4px"""
+                           .format(self.button_color.name(QColor.NameFormat.HexArgb)))
