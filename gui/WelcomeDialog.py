@@ -52,7 +52,7 @@ class WelcomeDialog(QDialog):
         last_game_exists = last_game_path.exists() and last_game_path.is_dir()
 
         for doc_path in self._recent_docs:
-            self.__add_item_to_model(doc_path, pywright_icon_path)
+            self.__add_item_to_model(doc_path)
 
         self._recent_docs_view.setModel(self._recent_docs_model)
 
@@ -114,8 +114,7 @@ class WelcomeDialog(QDialog):
                     QMessageBox.information(self, "Notice", "Selected folder is already in the list!")
                     return
 
-                self.__add_item_to_model(str(picker),
-                                         IconThemes.icon_path_from_theme(IconThemes.ICON_NAME_PYWRIGHT))
+                self.__add_item_to_model(str(picker))
                 self._recent_docs.append(str(picker))
             elif PyWrightFolder.is_valid_pywright_folder(str(picker)):
                 open_game_dialog = OpenGameDialog(str(picker), self)
@@ -129,13 +128,12 @@ class WelcomeDialog(QDialog):
                         QMessageBox.information(self, "Notice", "Selected folder is already in the list!")
                         return
 
-                    self.__add_item_to_model(str(final_path),
-                                             IconThemes.icon_path_from_theme(IconThemes.ICON_NAME_PYWRIGHT))
+                    self.__add_item_to_model(str(final_path))
                     self._recent_docs.append(str(final_path))
             else:
                 QMessageBox.critical(self, "Error", "Could not find a PyWright game!")
 
-    def __add_item_to_model(self, text: str, icon_path: str):
+    def __add_item_to_model(self, text: str):
         item = PyWrightGamePathItem(text)
         self._recent_docs_model.appendRow(item)
 
