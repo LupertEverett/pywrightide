@@ -4,6 +4,7 @@
 
 * Added separate coloring for {} tokens in strings (by Zetrypio)
 * Added a Color Editor dialog for editing text editor component themes.
+* Welcome dialog now shows the game's icon and the author info, if the relevant fields are provided in data.txt
 
 ## Version 1.3.4 - 09.03.2025
 
