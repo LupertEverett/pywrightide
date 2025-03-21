@@ -92,6 +92,23 @@ class PyWrightGameInfo:
         # Return the created game info
         return game_info
 
+    # Returns the info from data.txt in a manner the Welcome Dialog can use
+    @staticmethod
+    def get_game_data_info(game_folder_path: Path):
+        game_title, game_author, game_version, game_icon_path = PyWrightGameInfo._load_data_txt(game_folder_path)
+
+        game_icon_full_path = game_folder_path / game_icon_path
+        if not game_icon_full_path.exists() or not game_icon_full_path.is_file():
+            # Try the global folder
+            pywright_path = game_folder_path.parent.parent
+            game_icon_full_path = pywright_path / game_icon_path
+
+            if not game_icon_full_path.exists() or not game_icon_full_path.is_file():
+                # Not in the global folder either, bail out
+                game_icon_full_path = ""
+
+        return game_title, game_author, game_version, game_icon_full_path
+
     @staticmethod
     def _load_data_txt(game_folder_path: Path):
         file_path = game_folder_path / "data.txt"
