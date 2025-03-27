@@ -28,7 +28,7 @@ commands = [
     "setflag", "delflag", "flag", "noflag", "set",
     "setvar", "joinvar", "addvar", "subvar", "divvar", "mulvar", "absvar",
     "random", "getvar",
-    "is", "AND", "isnot", "isempty", "isnotempty", "isnumber",
+    "is", "isnot", "isempty", "isnotempty", "isnumber",
     "exportvars", "importvars", "savegame", "loadgame", "deletegame",
 
     # "Working with evidence"
@@ -102,7 +102,7 @@ named_parameters = ("start=", "end=", "e=", "x=", "y=", "z=", "name=", "speed=",
                     "mag=", "frames=", "hotkey=", "jumpto=","pause=","test=")
 
 parameters = ["stack", "nowait", "noclear", "hide", "fade", "true", "false", "noback", "sx", "sy",
-              "blink", "loop", "noloop", "b", "t", "stop", "noauto", "password", "all"]
+              "blink", "loop", "noloop", "b", "t", "stop", "noauto", "password", "all", "suppress"]
 
 # Following might need some sort of regex for each
 # "{sound {str}}"
@@ -112,6 +112,9 @@ parameters = ["stack", "nowait", "noclear", "hide", "fade", "true", "false", "no
 # "{sfx {str}}
 # "{s {str}}"
 string_tokens = ["{n}", "{next}", "{f}", "{center}"]
+
+# Logical operators
+logic_operators = ["==", "<=", ">=", "<", ">", "NOT", "AND"]
 
 
 def is_string_number(string: str) -> bool:
@@ -152,7 +155,7 @@ class PyWrightScriptLexer(QsciLexerCustom):
         api = QsciAPIs(self)
 
         # Add autocompletion strings
-        for l in (commands, special_variables, named_parameters, parameters, string_tokens, self.builtin_macros, self.game_macros):
+        for l in (commands, special_variables, named_parameters, parameters, string_tokens, logic_operators, self.builtin_macros, self.game_macros):
             for c in l:
                 api.add(c)
 
@@ -214,7 +217,7 @@ class PyWrightScriptLexer(QsciLexerCustom):
 
         text = bytearray(self.parent().text(), "utf-8")[start:end].decode("utf-8")
 
-        p = re.compile(r"//+[^\r\n]*|#+[^\r\n]*|\"[^\r\n]*\"|\S+|\s+")
+        p = re.compile(r"//+[^\r\n]*|#+[^\r\n]*|\{[^\r\n]*\}|\"[^\r\n]*\"|\S+|\s+")
 
         token_list = [(token, len(bytearray(token, "utf-8"))) for token in p.findall(text)]
 
@@ -224,10 +227,13 @@ class PyWrightScriptLexer(QsciLexerCustom):
     def _set_styling_for_token(self, token: tuple[str, int]):
         if token[0] in commands:
             self.setStyling(token[1], 1)
+        elif token[0] in logic_operators:
+            self.setStyling(token[1], 2)
         elif token[0] in special_variables or token[0] in cases:
             self.setStyling(token[1], 2)
         elif token[0].startswith("$") and (token[0][1:] in special_variables
-                                           or token[0][1:] in parameters):
+                                           or token[0][1:] in parameters 
+                                           or token[0][1:].isdigit()): # e.g. $1, $2, engine-level, used for accessing macro args
             self.setStyling(token[1], 2)
         elif token[0].startswith(named_parameters):
             # Divide the = section and then colorize that instead
@@ -236,9 +242,35 @@ class PyWrightScriptLexer(QsciLexerCustom):
             self.setStyling(param_0_len, 3)
             param_1_token = (param_name[1], len(param_name[1]))
             self._set_styling_for_token(param_1_token)
+        elif token[0].endswith("?") and len(token[0]) > 1:
+            # end of a ? conditional, don't consider the ?
+            token_split = token[0].split("?", maxsplit=1)
+            token_0_len = len(token_split[0])
+            # process the token sans ?
+            self._set_styling_for_token((token_split[0], token_0_len))
+            # then the ? on its own
+            self._set_styling_for_token(("?",1))
         elif token[0] in parameters:
             self.setStyling(token[1], 3)
-        elif token[0].startswith("{") and token[0].endswith("}"):
+        elif token[0].startswith("{") and token[0].endswith("}") and ' ' in token[0]:
+            # macro call with a parameter
+            token_split = token[0].split(' ')
+            for tokenpiece in token_split:
+                # first token is always the macro
+                if tokenpiece == token_split[0]:
+                    self.setStyling(len(token_split[0]) + 1, 3)
+                    continue
+                #last token needs special handling for the closing bracket
+                elif tokenpiece.endswith("}"):
+                    tokenpiece_split = tokenpiece.split("}", maxsplit=1)
+                    # process the last token sans bracket
+                    self._set_styling_for_token((tokenpiece_split[0], len(tokenpiece_split[0])))
+                    # then the bracket by itself
+                    self._set_styling_for_token(("}", 1))
+                    break
+                # middle tokens get processed normally
+                self._set_styling_for_token((tokenpiece, len(tokenpiece) + 1))
+        elif token[0] == "}" or token[0].startswith("{") and token[0].endswith("}"):
             self.setStyling(token[1], 3)
         elif token[0].startswith("//") or token[0].startswith("#"):
             self.setStyling(token[1], 4)
