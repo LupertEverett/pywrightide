@@ -22,6 +22,7 @@ class PyWrightGameInfo:
         self.game_icon_path: Path = game_icon_path
         self.game_cases: list[str] = game_cases
         self.game_path: Path = game_path
+        self.builtin_macros: list[str] = []
         self.game_macros: list[str] = []
         self.pywright_folder_path: Path = Path("")
 
@@ -51,6 +52,7 @@ class PyWrightGameInfo:
         game_cases = PyWrightGameInfo._load_intro_txt(folder_path)
 
         game_info = PyWrightGameInfo(game_title, game_version, game_author, game_icon_path, game_cases, folder_path)
+        game_info.parse_builtin_macros()
         game_info.parse_game_macros()
 
         return game_info
@@ -243,13 +245,15 @@ class PyWrightGameInfo:
         except ValueError:
             pass
 
-    def parse_game_macros(self):
-        if not (self.game_path.exists() and self.game_path.is_dir()):
-            raise FileNotFoundError("Selected game doesn't exist!")
+    @staticmethod
+    def _parse_macros_in_folder(folder_path: Path) -> list[str]:
+        """Parses all .mcro files in a given folder path"""
+        if not (folder_path.exists() and folder_path.is_dir()):
+            raise FileNotFoundError("Selected folder doesn't exist!")
 
-        macro_files_list = self.game_path.glob("*.mcro")
+        macro_files_list = folder_path.glob("*.mcro")
 
-        self.game_macros.clear()
+        macros_list = []
 
         for macro_file_name in macro_files_list:
             with open(macro_file_name, "r", encoding="UTF-8") as f:
@@ -258,7 +262,15 @@ class PyWrightGameInfo:
                 for line in lines:
                     if line.startswith("macro "):
                         splitted_lines = line.split(maxsplit=1)
-                        self.game_macros.append(splitted_lines[1])
+                        macros_list.append(splitted_lines[1].strip("\n"))
+
+        return macros_list
+
+    def parse_builtin_macros(self):
+        self.builtin_macros = PyWrightGameInfo._parse_macros_in_folder(self.pywright_folder_path)
+
+    def parse_game_macros(self):
+        self.game_macros = PyWrightGameInfo._parse_macros_in_folder(self.game_path)
 
     def get_game_name(self):
         return self.game_path.name
@@ -275,4 +287,5 @@ class PyWrightGameInfo:
     def clear(self):
         self.clear_data_txt_fields()
         self.clear_case_list()
+        self.builtin_macros.clear()
         self.game_macros.clear()

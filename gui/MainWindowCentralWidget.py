@@ -30,14 +30,8 @@ class MainWindowCentralWidget(QWidget):
 
         EditorThemes.current_editor_theme.load_theme(IDESettings.get_editor_color_theme())
 
-        # Macros tracking
-        self._pywright_builtin_macros: list[str] = []
-
         self.pywright_installation_path: str = ""
         self.selected_game_info: PyWrightGameInfo | None = None
-
-    def load_builtin_macros(self, macros_list: list[str]):
-        self._pywright_builtin_macros = macros_list
 
     def set_selected_game(self, selected_game_info: PyWrightGameInfo):
         self.selected_game_info = selected_game_info
@@ -75,8 +69,8 @@ class MainWindowCentralWidget(QWidget):
         file_edit_widget = FileEditWidget(self.pywright_installation_path, file_path)
         file_edit_widget.file_name_changed.connect(self.handle_rename_tab)
         file_edit_widget.file_modified.connect(self._update_save_button_and_current_tab)
-        file_edit_widget.supply_builtin_macros_to_lexer(self._pywright_builtin_macros)
         if self.selected_game_info is not None:
+            file_edit_widget.supply_builtin_macros_to_lexer(self.selected_game_info.builtin_macros)
             file_edit_widget.supply_game_macros_to_lexer(self.selected_game_info.game_macros)
         file_edit_widget.supply_editor_color_theme_to_lexer()
         file_edit_widget.move_to_tab_requested.connect(self._handle_move_to_tab)

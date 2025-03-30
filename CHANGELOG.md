@@ -9,10 +9,12 @@
   * Added handling for engine-level macro argument access variables (by in1tiate)
   * Fixed question mark operators at the end of conditionals breaking highlighting for the last operand (by in1tiate)
   * Fixed inline macro calls with arguments not being highlighted (by in1tiate)
-    * Arguments to inline macro calls will now be highlighted as normal.
-  * Added missing keywords "suppress" and "OR" (by in1tiate)
+    * Arguments to inline macro calls will now be highlighted as normal. (by in1tiate)
+  * Added missing keywords "suppress" (by in1tiate) and "OR"
+  * Fixed built-in and game macros' names not being highlighted.
 * Added a Color Editor dialog for editing text editor component themes.
 * Added requirements.txt for a more convenient way to download the required dependencies (by in1tiate)
+* Moved built-in macro handling to PyWrightGameInfo class (less code duplication)
 
 ## Version 1.3.4 - 09.03.2025
 

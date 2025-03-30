@@ -93,9 +93,6 @@ class IDEMainWindow(QMainWindow):
 
         self.setStatusBar(self.status_bar)
 
-        # Macros tracking
-        self._pywright_builtin_macros: list[str] = []
-
         # Try to load the last open game here, if the option is enabled, and the game folder still exists.
         if selected_game_path != "":
             self.pick_game_folder_and_open_game_properties_tab(Path(selected_game_path))
@@ -132,9 +129,7 @@ class IDEMainWindow(QMainWindow):
             self.installation_path_label.setText(self.selected_pywright_installation)
 
             self.pywright_executable_name = PyWrightFolder.pick_pywright_executable(self.selected_pywright_installation)
-            self._parse_builtin_macros(self.selected_pywright_installation)
             self.central_widget.set_selected_game(self.selected_game_info)
-            self.central_widget.load_builtin_macros(self._pywright_builtin_macros)
             self._add_folder_to_recent(str(game_folder_path))
             self._top_toolbar.update_run_pywright_status_tip(self.pywright_executable_name)
             self._top_toolbar.update_toolbar_buttons(self.selected_pywright_installation != "",
@@ -228,25 +223,6 @@ class IDEMainWindow(QMainWindow):
 
     def _apply_new_color_theme(self):
         self.setStyleSheet(ColorThemes.load_current_color_theme())
-
-    def _parse_builtin_macros(self, pywright_install_dir: str):
-        core_macros_dir = Path("{}/core/macros".format(pywright_install_dir))
-        if not (core_macros_dir.exists() and core_macros_dir.is_dir()):
-            raise FileNotFoundError("core/macros dir does not exist!")
-
-        # Get a list of the .mcro files
-        macro_files_list = list(core_macros_dir.glob("*.mcro"))
-
-        self._pywright_builtin_macros.clear()
-
-        for macro_file_name in macro_files_list:
-            with open(macro_file_name, "r", encoding="UTF-8") as f:
-                lines = f.readlines()
-
-                for line in lines:
-                    if line.startswith("macro "):
-                        splitted_lines = line.split(maxsplit=1)
-                        self._pywright_builtin_macros.append(splitted_lines[1])
 
     def attempt_closing_unsaved_tabs(self) -> bool:
         return self.central_widget.attempt_closing_unsaved_tabs()
