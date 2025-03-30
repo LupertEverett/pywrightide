@@ -8,6 +8,11 @@ This project is a simple IDE written in Python and PyQt, that aims to make devel
 * PyQt6 and PyQt6-QScintilla
 * pygame (only for playing sounds)
 
+> [!NOTE]
+> To easily install the dependencies, run this command below on the folder PyWright IDE is in:
+> 
+> `pip install -r requirements.txt`
+
 ## Usage
 
 For the source code version: Have all the dependencies installed, and then run PyWrightIDE.py
