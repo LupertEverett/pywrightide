@@ -2,9 +2,17 @@
 
 ## Unreleased
 
-* Added separate coloring for {} tokens in strings (by Zetrypio)
-* Added a Color Editor dialog for editing text editor component themes.
 * Welcome dialog now shows the game's icon and the author info, if the relevant fields are provided in data.txt
+* Lots of Lexer improvements:
+  * Added separate coloring for {} tokens in strings (by Zetrypio)
+  * Added handling for logical operators (==, >=, AND, OR, etc) (by in1tiate)
+  * Added handling for engine-level macro argument access variables (by in1tiate)
+  * Fixed question mark operators at the end of conditionals breaking highlighting for the last operand (by in1tiate)
+  * Fixed inline macro calls with arguments not being highlighted (by in1tiate)
+    * Arguments to inline macro calls will now be highlighted as normal.
+  * Added missing keywords "suppress" and "OR" (by in1tiate)
+* Added a Color Editor dialog for editing text editor component themes.
+* Added requirements.txt for a more convenient way to download the required dependencies (by in1tiate)
 
 ## Version 1.3.4 - 09.03.2025
 
