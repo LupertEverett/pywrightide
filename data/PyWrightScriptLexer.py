@@ -244,7 +244,7 @@ class PyWrightScriptLexer(QsciLexerCustom):
             self._set_styling_for_token(param_1_token)
         elif token[0].endswith("?") and len(token[0]) > 1:
             # end of a ? conditional, don't consider the ?
-            token_split = token[0].split("?", maxsplit=1)
+            token_split = token[0].rsplit("?", 1)
             token_0_len = len(token_split[0])
             # process the token sans ?
             self._set_styling_for_token((token_split[0], token_0_len))
