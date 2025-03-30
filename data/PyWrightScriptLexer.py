@@ -116,6 +116,13 @@ string_tokens = ["{n}", "{next}", "{f}", "{center}"]
 # Logical operators
 logic_operators = ["==", "<=", ">=", "<", ">", "NOT", "AND"]
 
+# Compiled regular expressions
+# This regex also includes whitespace characters, due to how Scintilla's styling system works
+# It only cares about the "word length" and the style it is gonna use.
+_TOKEN_REGEX = re.compile(r"//+[^\r\n]*|#+[^\r\n]*|\{[^\r\n]*}|\"[^\r\n]*\"|\S+|\s+")
+
+# This regex finds all the ? characters in a given string
+_QUESTION_MARK_REGEX = re.compile(r"\?+")
 
 def is_string_number(string: str) -> bool:
     if string.startswith("-"):
@@ -217,14 +224,29 @@ class PyWrightScriptLexer(QsciLexerCustom):
 
         text = bytearray(self.parent().text(), "utf-8")[start:end].decode("utf-8")
 
-        p = re.compile(r"//+[^\r\n]*|#+[^\r\n]*|\{[^\r\n]*\}|\"[^\r\n]*\"|\S+|\s+")
-
-        token_list = [(token, len(bytearray(token, "utf-8"))) for token in p.findall(text)]
+        token_list = [(token, len(bytearray(token, "utf-8"))) for token in _TOKEN_REGEX.findall(text)]
 
         for i, token in enumerate(token_list):
             self._set_styling_for_token(token)
 
     def _set_styling_for_token(self, token: tuple[str, int]):
+        # Handle tokens ending with ?
+        if token[0].endswith("?") and len(token[0]) > 1:
+            # Check if there are multiple question marks first
+
+            question_marks = _QUESTION_MARK_REGEX.findall(token[0])
+
+            if len(question_marks[0]) == 1:
+                # end of a ? conditional, don't consider the ?
+                token_split = token[0].rsplit("?", maxsplit=1)
+                token_0_len = len(bytearray(token_split[0], "utf-8"))
+                # process the token sans ?
+                self._set_styling_for_token((token_split[0], token_0_len))
+                # then the ? on its own
+                self.setStyling(1, 2)
+                return
+
+        # Proceed through the tokens normally
         if token[0] in commands:
             self.setStyling(token[1], 1)
         elif token[0] in logic_operators:
@@ -242,14 +264,6 @@ class PyWrightScriptLexer(QsciLexerCustom):
             self.setStyling(param_0_len, 3)
             param_1_token = (param_name[1], len(param_name[1]))
             self._set_styling_for_token(param_1_token)
-        elif token[0].endswith("?") and len(token[0]) > 1:
-            # end of a ? conditional, don't consider the ?
-            token_split = token[0].rsplit("?", 1)
-            token_0_len = len(token_split[0])
-            # process the token sans ?
-            self._set_styling_for_token((token_split[0], token_0_len))
-            # then the ? on its own
-            self._set_styling_for_token(("?",1))
         elif token[0] in parameters:
             self.setStyling(token[1], 3)
         elif token[0].startswith("{") and token[0].endswith("}") and ' ' in token[0]:
