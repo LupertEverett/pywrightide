@@ -114,7 +114,7 @@ parameters = ["stack", "nowait", "noclear", "hide", "fade", "true", "false", "no
 string_tokens = ["{n}", "{next}", "{f}", "{center}"]
 
 # Logical operators
-logic_operators = ["==", "<=", ">=", "<", ">", "NOT", "AND"]
+logic_operators = ["==", "<=", ">=", "<", ">", "NOT", "AND", "OR"]
 
 # Compiled regular expressions
 # This regex also includes whitespace characters, due to how Scintilla's styling system works
