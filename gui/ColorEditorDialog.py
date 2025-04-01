@@ -148,6 +148,7 @@ class ColorEditorDialog(QDialog):
     def _handle_save_as_pressed(self):
         if self._try_to_save_as():
             self._query_available_editor_themes()
+            self._set_editor_theme_in_editor_combobox(self._previous_selected_theme)
             self._switch_to_another_theme(self._previous_selected_theme)
 
     def _try_to_save_as(self) -> bool:
