@@ -1,19 +1,17 @@
 # A dialog that allows displaying and editing of Editor Themes
 
-from data import IDESettings, EditorThemes
+from data import EditorThemes
 
 from PyQt6.QtWidgets import QDialog, QPushButton, QColorDialog, QComboBox, QVBoxLayout, QHBoxLayout, QLabel, QGroupBox, \
     QGridLayout, QInputDialog, QLineEdit, QMessageBox
 from PyQt6.QtGui import QColor
-
-from data.ColorThemes import load_current_color_theme
 
 PROTECTED_EDITOR_THEMES = ("default", "darkmode")
 
 
 class ColorEditorDialog(QDialog):
 
-    def __init__(self, selected_theme:str = "", parent=None):
+    def __init__(self, selected_theme: str = "", parent=None):
         super().__init__(parent)
 
         self.setWindowTitle("Color Editor")
@@ -198,6 +196,11 @@ class ColorEditorDialog(QDialog):
             self._set_save_buttons_states()
 
     def _handle_selected_theme_combobox_current_changed(self):
+        # Do not attempt anything if the combobox is empty
+        # This can happen if this function is called during a clear() operation
+        if self.selected_theme_combobox.count() == 0:
+            return
+
         # Ask if the user would like to save their changes first
         if not self._current_theme_modified:
             self._switch_to_another_theme(self.selected_theme_combobox.currentText())
