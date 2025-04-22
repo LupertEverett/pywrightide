@@ -196,7 +196,7 @@ class IDEMainWindow(QMainWindow):
         string_to_find = ""
         if self.central_widget.tab_widget.count() > 0 and not self.central_widget._is_game_properties_tab(self.central_widget.tab_widget.currentIndex()):
             file_edit_widget: FileEditWidget = self.central_widget.tab_widget.currentWidget()
-            string_to_find = file_edit_widget.sci.wordAtLineIndex(file_edit_widget.sci.getCursorPosition()[0], file_edit_widget.sci.getCursorPosition()[1])
+            string_to_find = file_edit_widget.sci.selectedText()
         self.find_replace_dialog = FindReplaceDialog(string_to_find, self)
         self.find_replace_dialog.find_requested.connect(self.central_widget.handle_find_signals)
         self.find_replace_dialog.replace_requested.connect(self.central_widget.handle_replace_signals)
