@@ -31,7 +31,7 @@ class FindReplaceDialog(QDialog):
     find_requested = pyqtSignal(str, FindType, SearchScope)
     replace_requested = pyqtSignal(str, str, ReplaceType, SearchScope)
 
-    def __init__(self, parent=None):
+    def __init__(self, str_to_find, parent=None):
         super().__init__(parent)
 
         self.setWindowTitle("Find/Replace")
@@ -39,6 +39,7 @@ class FindReplaceDialog(QDialog):
 
         self._find_line_edit = QLineEdit()
         self._find_line_edit.setMaximumWidth(500)
+        self._find_line_edit.setText(str_to_find)
         self._replace_line_edit = QLineEdit()
         self._replace_line_edit.setMaximumWidth(500)
 
@@ -46,6 +47,7 @@ class FindReplaceDialog(QDialog):
         self._find_previous_button.pressed.connect(self._handle_find_previous)
         self._find_next_button = QPushButton("Find Next")
         self._find_next_button.pressed.connect(self._handle_find_next)
+        self._find_next_button.setDefault(True)
         # self._find_all_button = QPushButton("Find All")
 
         self._replace_next_button = QPushButton("Replace Next")
