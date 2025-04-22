@@ -16,6 +16,7 @@ from .PyWrightLoggerWidget import PyWrightLoggerWidget
 from .SettingsDialog import SettingsDialog
 from .FindReplaceDialog import FindReplaceDialog
 from .AssetBrowserRootWidget import AssetBrowserRootWidget
+from .FileEditWidget import FileEditWidget
 
 from data import IDESettings, ColorThemes, PyWrightFolder
 from data.PyWrightGame import PyWrightGameInfo
@@ -192,7 +193,11 @@ class IDEMainWindow(QMainWindow):
             self.central_widget.open_new_editing_tab(open_dialog[0])
 
     def _handle_find_replace(self):
-        self.find_replace_dialog = FindReplaceDialog(self)
+        string_to_find = ""
+        if self.central_widget.tab_widget.count() > 0 and not self.central_widget._is_game_properties_tab(self.central_widget.tab_widget.currentIndex()):
+            file_edit_widget: FileEditWidget = self.central_widget.tab_widget.currentWidget()
+            string_to_find = file_edit_widget.sci.wordAtLineIndex(file_edit_widget.sci.getCursorPosition()[0], file_edit_widget.sci.getCursorPosition()[1])
+        self.find_replace_dialog = FindReplaceDialog(string_to_find, self)
         self.find_replace_dialog.find_requested.connect(self.central_widget.handle_find_signals)
         self.find_replace_dialog.replace_requested.connect(self.central_widget.handle_replace_signals)
         self.find_replace_dialog.show()
