@@ -23,7 +23,9 @@ A compiled build for Windows is also available. Just download, extract and run P
 
 Alongside the dependencies above, have `pyinstaller` installed via pip. Then run this command in the source code's root folder:
 
-* pyinstaller PyWrightIDE.spec
+* pyinstaller PyWrightIDE-[Platform].spec
+
+Where [Platform] can be either Windows or Linux
 
 Once the command finishes its job, the compiled program can be found in `/dist/pywrightide/`
 

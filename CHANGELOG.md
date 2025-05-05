@@ -18,6 +18,7 @@
 * Find/Replace Dialog:
   * "Find" field will be filled with highlighted text on the active tab (if there is any) on startup. (by in1tiate)
   * "Find Next" button is now highlighted by default. (by in1tiate)
+* PyWright IDE can now be buildable on Linux.
 
 ## Version 1.3.4 - 09.03.2025
 
