@@ -1,6 +1,6 @@
 # PyWright IDE Changelog
 
-## Unreleased
+## Version 1.4 - 06.05.2025
 
 * Welcome dialog now shows the game's icon and the author info, if the relevant fields are provided in data.txt
 * Lots of Lexer improvements:
