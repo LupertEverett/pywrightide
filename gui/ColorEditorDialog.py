@@ -3,7 +3,7 @@
 from data import EditorThemes
 
 from PyQt6.QtWidgets import QDialog, QPushButton, QColorDialog, QComboBox, QVBoxLayout, QHBoxLayout, QLabel, QGroupBox, \
-    QGridLayout, QInputDialog, QLineEdit, QMessageBox
+    QGridLayout, QInputDialog, QLineEdit, QMessageBox, QLayout
 from PyQt6.QtGui import QColor
 
 PROTECTED_EDITOR_THEMES = ("default", "darkmode")
@@ -117,6 +117,8 @@ class ColorEditorDialog(QDialog):
         main_layout.addLayout(selected_theme_combobox_layout)
         main_layout.addWidget(theme_color_group_box)
         main_layout.addLayout(bottom_button_layout)
+
+        main_layout.setSizeConstraint(QLayout.SizeConstraint.SetFixedSize)
 
         self._set_bottom_buttons_states()
 
