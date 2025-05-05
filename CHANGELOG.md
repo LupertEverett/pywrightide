@@ -19,6 +19,8 @@
   * "Find" field will be filled with highlighted text on the active tab (if there is any) on startup. (by in1tiate)
   * "Find Next" button is now highlighted by default. (by in1tiate)
 * PyWright IDE can now be buildable on Linux.
+* Compiled versions of PyWright IDE are now bundled with PyQt 6.9.0
+  * Mainly so that the IDE can show its own icon when it is run under Linux/Wayland
 
 ## Version 1.3.4 - 09.03.2025
 
