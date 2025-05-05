@@ -38,10 +38,12 @@ class ColorEditorDialog(QDialog):
 
         self.save_button = QPushButton("Save")
         self.save_as_button = QPushButton("Save As")
+        self.reset_button = QPushButton("Reset")
         self.close_button = QPushButton("Close")
 
         self.save_button.pressed.connect(self._handle_save_pressed)
         self.save_as_button.pressed.connect(self._handle_save_as_pressed)
+        self.reset_button.pressed.connect(self._handle_reset_pressed)
         self.close_button.pressed.connect(self.accept)
 
         # Prepare the grid area
@@ -107,6 +109,7 @@ class ColorEditorDialog(QDialog):
 
         bottom_button_layout.addWidget(self.save_button)
         bottom_button_layout.addWidget(self.save_as_button)
+        bottom_button_layout.addWidget(self.reset_button)
         bottom_button_layout.addWidget(self.close_button)
 
         main_layout = QVBoxLayout()
@@ -115,7 +118,7 @@ class ColorEditorDialog(QDialog):
         main_layout.addWidget(theme_color_group_box)
         main_layout.addLayout(bottom_button_layout)
 
-        self._set_save_buttons_states()
+        self._set_bottom_buttons_states()
 
         self.setLayout(main_layout)
 
@@ -140,7 +143,7 @@ class ColorEditorDialog(QDialog):
             else:
                 self.selected_theme_colors.colors[row].paper_color = color_picker_dialog.currentColor().name(QColor.NameFormat.HexArgb)
             self._current_theme_modified = True
-            self._set_save_buttons_states()
+            self._set_bottom_buttons_states()
 
     def _handle_save_pressed(self):
         self._save_theme_to_file(self.selected_theme_combobox.currentText())
@@ -150,6 +153,15 @@ class ColorEditorDialog(QDialog):
             self._query_available_editor_themes()
             self._set_editor_theme_in_editor_combobox(self._previous_selected_theme)
             self._switch_to_another_theme(self._previous_selected_theme)
+
+    def _handle_reset_pressed(self):
+        choice = QMessageBox.question(self,
+                                      "Question",
+                                      "Are you sure you want to discard your changes?",
+                                      QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
+
+        if choice == QMessageBox.StandardButton.Yes:
+            self._switch_to_another_theme(self.selected_theme_combobox.currentText())
 
     def _try_to_save_as(self) -> bool:
         available_themes = EditorThemes.query_available_editor_themes()
@@ -194,7 +206,7 @@ class ColorEditorDialog(QDialog):
         if theme_name not in PROTECTED_EDITOR_THEMES:
             self.selected_theme_colors.save_to_file(theme_name)
             self._current_theme_modified = False
-            self._set_save_buttons_states()
+            self._set_bottom_buttons_states()
 
     def _handle_selected_theme_combobox_current_changed(self):
         # Do not attempt anything if the combobox is empty
@@ -239,12 +251,13 @@ class ColorEditorDialog(QDialog):
 
         self._current_theme_modified = False # Switching themes resets this
         self._colorize_buttons_from_selected_theme()
-        self._set_save_buttons_states()
+        self._set_bottom_buttons_states()
 
-    def _set_save_buttons_states(self):
+    def _set_bottom_buttons_states(self):
         self.save_button.setEnabled(self._current_theme_modified
                                     and self.selected_theme_combobox.currentText() not in PROTECTED_EDITOR_THEMES)
         self.save_as_button.setEnabled(self._current_theme_modified)
+        self.reset_button.setEnabled(self._current_theme_modified)
 
     def _colorize_buttons_from_selected_theme(self):
         for row in range(len(self.selected_theme_colors.colors) - 2):
