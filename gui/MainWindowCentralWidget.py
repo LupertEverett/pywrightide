@@ -66,7 +66,10 @@ class MainWindowCentralWidget(QWidget):
                 self.tab_widget.setCurrentIndex(i)
                 return
         # Create a new FileEditWidget, and add it to the tab widget
-        file_edit_widget = FileEditWidget(self.pywright_installation_path, file_path)
+        try:
+            file_edit_widget = FileEditWidget(self.pywright_installation_path, file_path)
+        except FileNotFoundError:
+            return
         file_edit_widget.file_name_changed.connect(self.handle_rename_tab)
         file_edit_widget.file_modified.connect(self._update_save_button_and_current_tab)
         if self.selected_game_info is not None:
