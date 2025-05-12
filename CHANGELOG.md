@@ -1,5 +1,9 @@
 # PyWright IDE Changelog
 
+## Unreleased
+
+* Fix the crash caused by tab(s) being unable to be restored due to file(s) no longer existing (by in1tiate)
+
 ## Version 1.4 - 06.05.2025
 
 * Welcome dialog now shows the game's icon and the author info, if the relevant fields are provided in data.txt
