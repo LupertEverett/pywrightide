@@ -17,6 +17,7 @@ from .SettingsDialog import SettingsDialog
 from .FindReplaceDialog import FindReplaceDialog
 from .AssetBrowserRootWidget import AssetBrowserRootWidget
 from .FileEditWidget import FileEditWidget
+from .MissingFilesDialog import MissingFilesDialog
 
 from data import IDESettings, ColorThemes, PyWrightFolder
 from data.PyWrightGame import PyWrightGameInfo
@@ -43,8 +44,6 @@ class IDEMainWindow(QMainWindow):
         self.setMinimumSize(720, 540)
         if IDESettings.window_geometry_data_exists():
             self.restoreGeometry(IDESettings.get_window_geometry())
-
-        self.game_properties_widget = None  # Will be created later, when a PyWright root folder is selected
 
         self.directory_view = DirectoryViewWidget(self)
         self.asset_manager_widget = AssetBrowserRootWidget(self)
@@ -75,7 +74,7 @@ class IDEMainWindow(QMainWindow):
 
         self.directory_view.open_new_tab.connect(self.central_widget.open_new_editing_tab)
         self.directory_view.open_game_properties_tab.connect(
-            lambda: self.central_widget.open_game_properties_tab(self.game_properties_widget)
+            lambda: self.central_widget.open_game_properties_tab()
         )
 
         # Toolbar and the central widget
@@ -106,8 +105,11 @@ class IDEMainWindow(QMainWindow):
                 open_tabs = IDESettings.get_last_open_tabs()
                 if len(open_tabs) > 0:
                     last_tab_index = IDESettings.get_last_open_tab_index()
-                    self.restore_last_open_tabs(open_tabs)
-                    self.central_widget.set_current_tab_index(last_tab_index)
+                    missing_files = self.central_widget.restore_last_open_tabs(open_tabs, last_tab_index)
+
+                    if len(missing_files) > 0:
+                        missing_files_dialog = MissingFilesDialog(self, missing_files)
+                        missing_files_dialog.exec()
 
         # Try loading the window state (docks positions, visibility, etc.)
         if IDESettings.window_state_data_exists():
@@ -120,8 +122,6 @@ class IDEMainWindow(QMainWindow):
         if self.central_widget.attempt_closing_unsaved_tabs():
             self.selected_game_info = PyWrightGameInfo.load_from_folder(game_folder_path)
             self.selected_pywright_installation = str(self.selected_game_info.pywright_folder_path)
-
-            self.game_properties_widget = GamePropertiesWidget(self.selected_game_info)
 
             self.directory_view.clear_directory_view()
             if self.central_widget.tabs_count() > 0:
@@ -137,7 +137,7 @@ class IDEMainWindow(QMainWindow):
                                                      self.selected_game_info.get_game_name() != "")
             self.asset_manager_widget.update_assets(self.selected_game_info)
 
-            self.game_properties_widget.load_game(self.selected_game_info)
+            # self.game_properties_widget.load_game(self.selected_game_info)
 
             self.directory_view.update_directory_view(self.selected_game_info)
 
@@ -147,7 +147,6 @@ class IDEMainWindow(QMainWindow):
 
     def pick_game_folder_and_open_game_properties_tab(self, game_path: Path):
         self.pick_game_folder(game_path)
-        self.central_widget.open_game_properties_tab(self.game_properties_widget)
 
     def _handle_new_game(self):
         new_game_dialog = NewGameDialog(self.selected_pywright_installation, self)
@@ -194,7 +193,7 @@ class IDEMainWindow(QMainWindow):
 
     def _handle_find_replace(self):
         string_to_find = ""
-        if self.central_widget.tab_widget.count() > 0 and not self.central_widget._is_game_properties_tab(self.central_widget.tab_widget.currentIndex()):
+        if self.central_widget.tab_widget.count() > 0 and not self.central_widget.is_game_properties_tab(self.central_widget.tab_widget.currentIndex()):
             file_edit_widget: FileEditWidget = self.central_widget.tab_widget.currentWidget()
             string_to_find = file_edit_widget.sci.selectedText()
         self.find_replace_dialog = FindReplaceDialog(string_to_find, self)
@@ -237,13 +236,6 @@ class IDEMainWindow(QMainWindow):
 
     def update_toolbar_toggle_buttons(self):
         self._top_toolbar.update_toolbar_toggle_buttons()
-
-    def restore_last_open_tabs(self, open_tabs: list[str]):
-        for tab_path in open_tabs:
-            if tab_path == "Game Properties":
-                self.central_widget.open_game_properties_tab(self.game_properties_widget)
-            else:
-                self.central_widget.open_new_editing_tab(tab_path)
 
     def closeEvent(self, event: QCloseEvent):
         if not self.central_widget.attempt_closing_unsaved_tabs():
