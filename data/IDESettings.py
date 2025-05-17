@@ -160,8 +160,6 @@ def get_last_open_tab_index() -> int:
 
 
 def set_last_open_tab_index(new_tab_index: int):
-    if new_tab_index < 0:
-        raise ValueError("New Tab Index cannot be negative!")
     __program_settings.setValue(LAST_OPEN_TAB_INDEX_KEY, new_tab_index)
 
 
