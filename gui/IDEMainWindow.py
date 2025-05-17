@@ -50,16 +50,16 @@ class IDEMainWindow(QMainWindow):
         self.logger_view = PyWrightLoggerWidget()
         self.logger_view.hide()
 
+        self.central_widget = MainWindowCentralWidget(self)
+
         self.asset_manager_widget.texture_browser\
             .command_insert_at_cursor_requested.connect(self._handle_insert_into_cursor)
         self.asset_manager_widget.texture_browser\
-            .game_icon_change_requested.connect(self._handle_game_icon_change_request)
+            .game_icon_change_requested.connect(self.central_widget.handle_game_icon_change_request)
         self.asset_manager_widget.music_browser\
             .command_insert_at_cursor_requested.connect(self._handle_insert_into_cursor)
         self.asset_manager_widget.sfx_browser \
             .command_insert_at_cursor_requested.connect(self._handle_insert_into_cursor)
-
-        self.central_widget = MainWindowCentralWidget(self)
 
         self._top_toolbar = MainWindowTopToolbar(self)
         self._top_toolbar.new_pywright_game_action.triggered.connect(self._handle_new_game)
@@ -137,8 +137,6 @@ class IDEMainWindow(QMainWindow):
                                                      self.selected_game_info.get_game_name() != "")
             self.asset_manager_widget.update_assets(self.selected_game_info)
 
-            # self.game_properties_widget.load_game(self.selected_game_info)
-
             self.directory_view.update_directory_view(self.selected_game_info)
 
             self.asset_manager_widget.update_assets(self.selected_game_info)
@@ -147,6 +145,7 @@ class IDEMainWindow(QMainWindow):
 
     def pick_game_folder_and_open_game_properties_tab(self, game_path: Path):
         self.pick_game_folder(game_path)
+        self.central_widget.open_game_properties_tab()
 
     def _handle_new_game(self):
         new_game_dialog = NewGameDialog(self.selected_pywright_installation, self)
@@ -200,14 +199,6 @@ class IDEMainWindow(QMainWindow):
         self.find_replace_dialog.find_requested.connect(self.central_widget.handle_find_signals)
         self.find_replace_dialog.replace_requested.connect(self.central_widget.handle_replace_signals)
         self.find_replace_dialog.show()
-
-    def _handle_game_icon_change_request(self, icon_path: str):
-        # Don't do anything if there is no game selected
-        if self.selected_game_info is None:
-            QMessageBox.critical(self, "Error", "No game is selected!")
-            return
-
-        self.game_properties_widget.set_game_icon_path(icon_path)
 
     def _handle_insert_into_cursor(self, command: str):
         self.central_widget.handle_insert_into_cursor(command)

@@ -362,6 +362,15 @@ class MainWindowCentralWidget(QWidget):
 
         file_edit_widget.insert_at_cursor_position(command)
 
+    def handle_game_icon_change_request(self, icon_path: str):
+        # Don't do anything if there is no game selected
+        if self.selected_game_info is None:
+            QMessageBox.critical(self, "Error", "No game is selected!")
+            return
+
+        if self._game_properties_widget is not None:
+            self._game_properties_widget.set_game_icon_path(icon_path)
+
     def _get_modified_files_tab_indexes(self) -> list[int]:
         result = []
 
