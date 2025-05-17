@@ -1,8 +1,8 @@
 from PyQt6.QtCore import QSize
-from PyQt6.QtGui import QIcon
-from PyQt6.QtWidgets import QDialog, QWidget, QDialogButtonBox, QListWidget, QVBoxLayout, QLabel, QStyle, QHBoxLayout
+from PyQt6.QtWidgets import QDialog, QWidget, QDialogButtonBox, QListWidget, QVBoxLayout, QLabel, QStyle, QHBoxLayout, \
+    QLayout
 
-MISSING_FILES_TEXT = """PyWright IDE has detected that these file(s) below went missing (either moved or deleted) since the IDE last closed.<br>
+MISSING_FILES_TEXT = """PyWright IDE has detected that the file(s) listed below are no longer available.<br>
 Because of that the IDE couldn't restore some of the tabs.
 """
 
@@ -43,5 +43,7 @@ class MissingFilesDialog(QDialog):
         main_layout.addLayout(info_label_layout)
         main_layout.addWidget(self._missing_files_list_widget)
         main_layout.addWidget(self._dialog_box)
+
+        main_layout.setSizeConstraint(QLayout.SizeConstraint.SetFixedSize)
 
         self.setLayout(main_layout)
