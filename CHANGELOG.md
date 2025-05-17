@@ -1,6 +1,6 @@
 # PyWright IDE Changelog
 
-## Unreleased
+## Version 1.4.1 - 17.05.2025
 
 * Fixed the crash caused by tab(s) being unable to be restored due to file(s) no longer existing (by in1tiate)
 * PyWright IDE now informs the user in the case of some tabs being unable to be restored due to missing files.
