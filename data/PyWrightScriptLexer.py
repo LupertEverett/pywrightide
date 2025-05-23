@@ -266,8 +266,17 @@ class PyWrightScriptLexer(QsciLexerCustom):
             self._set_styling_for_token(param_1_token)
         elif token[0] in parameters:
             self.setStyling(token[1], 3)
-        elif token[0].startswith("{") and token[0].endswith("}") and ' ' in token[0]:
+        elif token[0].startswith("{") and "}" in token[0] and ' ' in token[0]:
             # macro call with a parameter
+
+            #split token to make sure there is not more than one macro call
+            tokens = re.findall('[^}]+}|[^}]+', token[0])
+            if (len(tokens) > 1):
+                # process all tokens separately
+                for subtoken in tokens:
+                    self._set_styling_for_token((subtoken, len(subtoken)))
+                return
+            
             token_split = token[0].split(' ')
             for tokenpiece in token_split:
                 # first token is always the macro
