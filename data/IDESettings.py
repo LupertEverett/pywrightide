@@ -23,6 +23,8 @@ LAST_OPEN_TABS_KEY = "last_open_tabs"
 LAST_OPEN_TAB_INDEX_KEY = "last_open_tab_index"
 ENABLE_AUTOCOMPLETION_KEY = "enable_autocompletion"
 AUTOCOMPLETION_THRESHOLD_KEY = "autocompletion_suggestions_threshold"
+HIGHLIGHT_MATCHING_TEXT_KEY = "editor/highlight_matching_text"
+HIGHLIGHT_FILL_RECT_KEY = "editor/highlight_fill_rect"
 
 # Functions
 
@@ -179,6 +181,22 @@ def set_autocompletion_trigger_threshold(new_threshold: int):
     __program_settings.setValue(AUTOCOMPLETION_THRESHOLD_KEY, new_threshold)
 
 
+def get_highlight_matching_text() -> bool:
+    return __program_settings.value(HIGHLIGHT_MATCHING_TEXT_KEY, True, bool)
+
+
+def set_hightlight_matching_text(new_value: bool):
+    __program_settings.setValue(HIGHLIGHT_MATCHING_TEXT_KEY, new_value)
+
+
+def get_highlight_fill_rect() -> bool:
+    return __program_settings.value(HIGHLIGHT_FILL_RECT_KEY, True, bool)
+
+
+def set_highlight_fill_rect(new_value: bool):
+    __program_settings.setValue(HIGHLIGHT_FILL_RECT_KEY, new_value)
+
+
 def all_keys() -> list[str]:
     return __program_settings.allKeys()
 
@@ -208,3 +226,5 @@ def reset_settings():
     __program_settings.setValue(EDITOR_THEME_KEY, "default")
     __program_settings.setValue(ENABLE_AUTOCOMPLETION_KEY, True)
     __program_settings.setValue(AUTOCOMPLETION_THRESHOLD_KEY, 1)
+    __program_settings.setValue(HIGHLIGHT_MATCHING_TEXT_KEY, True)
+    __program_settings.setValue(HIGHLIGHT_FILL_RECT_KEY, True)

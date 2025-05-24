@@ -16,6 +16,9 @@ from .FindReplaceDialog import FindType, ReplaceType, SearchScope
 from data import IDESettings
 
 
+_HIGHLIGHT_INDICATOR_ID = 30
+
+
 class FileEditWidget(QWidget):
 
     file_name_changed = pyqtSignal(str)
@@ -25,6 +28,9 @@ class FileEditWidget(QWidget):
     move_to_tab_requested = pyqtSignal(str, FindType)
     # This one only goes forwards
     replace_next_in_next_tabs_requested = pyqtSignal(str, str)
+
+    _highlight_in_progress = False
+    """Ensures _highlight_all_occurences() runs only once"""
 
     def __init__(self, pywright_dir, selected_file=""):
         super().__init__()
@@ -54,6 +60,11 @@ class FileEditWidget(QWidget):
 
         self.layout.setContentsMargins(0, 0, 0, 0)
 
+        self.set_highlight_style(IDESettings.get_highlight_fill_rect())
+        self.sci.setIndicatorDrawUnder(True, _HIGHLIGHT_INDICATOR_ID)
+
+        self.sci.selectionChanged.connect(self._highlight_all_occurrences)
+
         self.setLayout(self.layout)
 
         self.file_path = selected_file
@@ -73,7 +84,7 @@ class FileEditWidget(QWidget):
 
     def fill_the_scintilla(self, selected_file):
         """Fills the text area with the contents loaded from the selected file.
-            :param selected_file: Path to the file to read the contents of.
+            :param selected_file: Path to the file to read the contents of
             :return: None"""
         # The IDE will try to open files assuming UTF-8 encoding, if it fails, it will fall back to ANSI
         # But it will ALWAYS save the files in UTF-8
@@ -116,6 +127,10 @@ class FileEditWidget(QWidget):
         self.sci.setMarginBackgroundColor(1, QColor(EditorThemes.current_editor_theme.
                                                     editor_margin_border_color.paper_color))
         self.sci.setCaretForegroundColor(QColor(EditorThemes.current_editor_theme.caret_color.paper_color))
+        self.sci.setIndicatorForegroundColor(QColor(EditorThemes.current_editor_theme.match_highlight_color.paper_color),
+                                            _HIGHLIGHT_INDICATOR_ID)
+        self.sci.setIndicatorOutlineColor(QColor(EditorThemes.current_editor_theme.match_highlight_color.paper_color),
+                                          _HIGHLIGHT_INDICATOR_ID)
 
     def save_to_file(self):
         if not self._is_a_new_file:
@@ -224,3 +239,54 @@ class FileEditWidget(QWidget):
 
             self.sci.SendScintilla(QsciScintilla.SCI_REPLACESEL, 0, text_to_replace.encode("utf-8"))
             pos = self.find_next_in_file(text_to_find, SearchScope.SINGLE_FILE, from_top=False)
+
+    def set_highlight_style(self, fill: bool):
+        style = QsciScintilla.IndicatorStyle.FullBoxIndicator if fill else QsciScintilla.IndicatorStyle.BoxIndicator
+        self.sci.indicatorDefine(style, _HIGHLIGHT_INDICATOR_ID)
+
+    def _highlight_all_occurrences(self):
+        """Highlights all occurrences of the selected text.
+        :return: None"""
+        # Don't highlight anything if the setting is not enabled.
+        if not IDESettings.get_highlight_matching_text():
+            self._clear_all_highlights()
+            return
+
+        if self._highlight_in_progress:
+            return
+
+        self._highlight_in_progress = True
+
+        # Clear previous highlights (if there's any)
+        self._clear_all_highlights()
+
+        # Obtain the text from selection
+        (sel_start_line, sel_start_index, sel_end_line, sel_end_index) = self.sci.getSelection()
+        start_pos = self.sci.positionFromLineIndex(sel_start_line, sel_start_index)
+        end_pos = self.sci.positionFromLineIndex(sel_end_line, sel_end_index)
+        text_to_highlight = self.sci.text(start_pos, end_pos)
+
+        text = self.sci.text()
+
+        # We cannot use findFirst() and findNext() here as they will make the text area jump all over the place
+        # All we need here is to only highlight the matching text
+
+        if text_to_highlight != "" and not text_to_highlight.isspace():
+            pos = text.find(text_to_highlight, 0)
+
+            while pos != -1:
+                (start_line, start_index) = self.sci.lineIndexFromPosition(pos)
+                (end_line, end_index) = self.sci.lineIndexFromPosition(pos + len(text_to_highlight))
+                # Skip the selected text
+                if not (sel_start_line == start_line and sel_start_index == start_index):
+                    self.sci.fillIndicatorRange(start_line, start_index, end_line, end_index, _HIGHLIGHT_INDICATOR_ID)
+                pos = text.find(text_to_highlight, pos + 1)
+        else:
+            self._clear_all_highlights()
+
+        self._highlight_in_progress = False
+
+    def _clear_all_highlights(self):
+        last_line = self.sci.lines() - 1
+        last_index = self.sci.lineLength(last_line) - 1
+        self.sci.clearIndicatorRange(0, 0, last_line, last_index, _HIGHLIGHT_INDICATOR_ID)

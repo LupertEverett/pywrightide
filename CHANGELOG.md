@@ -4,6 +4,11 @@
 
 * Fixed syntax highlighting for consecutive inline macros (by in1tiate)
 * Fixed Find/Replace dialog needing the user to position the cursor before it can search text.
+* Added the ability to highlight the other occurrences of the selected text.
+  * This can be toggled off in the settings.
+  * There are two highlight styles to choose from: "Hollow" and "Filled"
+  * Note that if you're using a custom editor color theme, you might need to update it to account for the highlight color.
+* Slightly tidied up the Settings dialog.
 
 ## Version 1.4.1 - 17.05.2025
 

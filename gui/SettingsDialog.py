@@ -54,8 +54,16 @@ class SettingsDialog(QDialog):
         self.color_editor_dialog_button = QPushButton("Color Editor...")
         self.color_editor_dialog_button.clicked.connect(self._handle_color_editor_clicked)
         editor_theme_selection_layout.addWidget(QLabel("Editor Color Theme:"))
+        editor_theme_selection_layout.addStretch()
         editor_theme_selection_layout.addWidget(self.editor_theme_combobox)
         editor_theme_selection_layout.addWidget(self.color_editor_dialog_button)
+
+        self.highlight_matching_text_checkbox = QCheckBox("Highlight other occurrences of the selected text")
+        self.highlight_matching_text_checkbox.setChecked(IDESettings.get_highlight_matching_text())
+
+        self.highlight_style_combobox = QComboBox()
+        self.highlight_style_combobox.addItems(["Hollow", "Filled"])
+        self.highlight_style_combobox.setCurrentIndex(IDESettings.get_highlight_fill_rect())
 
         general_group_layout.addWidget(self.autoreload_last_checkbox)
         general_group_layout.addLayout(icon_theme_section_layout)
@@ -79,17 +87,14 @@ class SettingsDialog(QDialog):
         self.enable_autocompletion_checkbox.checkStateChanged.connect(self._handle_autosuggestions_checkbox_state_changed)
 
         autocompletion_threshold_layout.addWidget(QLabel("Suggestions dialog trigger threshold:"))
+        autocompletion_threshold_layout.addStretch()
         autocompletion_threshold_layout.addWidget(self.autocompletion_threshold_spinbox)
         autocompletion_threshold_layout.addWidget(QLabel("character(s)"))
 
-        font_name_layout = QHBoxLayout()
         self.font_name_combobox = QFontComboBox()
         current_font = QFont(IDESettings.get_font_name(),
                              IDESettings.get_font_size())
         self.font_name_combobox.setCurrentFont(current_font)
-
-        font_name_layout.addWidget(QLabel("Font:"))
-        font_name_layout.addStretch()
 
         self.font_size_spinbox = QSpinBox()
         self.font_size_spinbox.setValue(IDESettings.get_font_size())
@@ -104,14 +109,24 @@ class SettingsDialog(QDialog):
         self.bold_toggle_button.setFixedWidth(30)
         self.bold_toggle_button.setToolTip("Bold")
 
+        font_name_layout = QHBoxLayout()
+        font_name_layout.addWidget(QLabel("Font:"))
+        font_name_layout.addStretch()
         font_name_layout.addWidget(self.font_name_combobox)
         font_name_layout.addWidget(self.font_size_spinbox)
         font_name_layout.addWidget(self.bold_toggle_button)
+
+        highlight_style_layout = QHBoxLayout()
+        highlight_style_layout.addWidget(QLabel("Matching text highlight style:"))
+        highlight_style_layout.addStretch()
+        highlight_style_layout.addWidget(self.highlight_style_combobox)
 
         editor_group_layout.addWidget(self.enable_autocompletion_checkbox)
         editor_group_layout.addLayout(autocompletion_threshold_layout)
         editor_group_layout.addLayout(font_name_layout)
         editor_group_layout.addLayout(editor_theme_selection_layout)
+        editor_group_layout.addWidget(self.highlight_matching_text_checkbox)
+        editor_group_layout.addLayout(highlight_style_layout)
         editor_group_box.setLayout(editor_group_layout)
 
         advanced_group_box = QGroupBox("Advanced")
@@ -191,6 +206,8 @@ class SettingsDialog(QDialog):
         self.bold_toggle_button.setChecked(IDESettings.get_font_boldness())
         self.enable_autocompletion_checkbox.setChecked(IDESettings.get_enable_autocompletion_check())
         self.autocompletion_threshold_spinbox.setValue(IDESettings.get_autocompletion_trigger_threshold())
+        self.highlight_matching_text_checkbox.setChecked(IDESettings.get_highlight_matching_text())
+        self.highlight_style_combobox.setCurrentIndex(IDESettings.get_highlight_fill_rect())
 
 
     def _handle_apply(self):
@@ -204,6 +221,8 @@ class SettingsDialog(QDialog):
         IDESettings.set_editor_color_theme(self.editor_theme_combobox.currentText())
         IDESettings.set_enable_autocompletion_check(self.enable_autocompletion_checkbox.isChecked())
         IDESettings.set_autocompletion_trigger_threshold(self.autocompletion_threshold_spinbox.value())
+        IDESettings.set_hightlight_matching_text(self.highlight_matching_text_checkbox.isChecked())
+        IDESettings.set_highlight_fill_rect(self.highlight_style_combobox.currentIndex())
         self.settings_changed.emit()
 
     def _handle_accept(self):

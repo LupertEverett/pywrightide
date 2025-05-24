@@ -8,6 +8,7 @@ from PyQt6.QtGui import QColor
 
 PROTECTED_EDITOR_THEMES = ("default", "darkmode")
 
+SINGLE_COLORS_COUNT = 3
 
 class ColorEditorDialog(QDialog):
 
@@ -68,12 +69,13 @@ class ColorEditorDialog(QDialog):
         theme_colors_layout.addWidget(QLabel("Line Column:"), 11, 0)
         theme_colors_layout.addWidget(QLabel("Line Column Border:"), 12, 0)
         theme_colors_layout.addWidget(QLabel("Caret:"), 13, 0)
+        theme_colors_layout.addWidget(QLabel("Matching Text Highlight:"), 14, 0)
 
         ## Prepare the color buttons
         self.color_buttons = []
 
         # Add the double-color elements
-        for row in range(len(self.selected_theme_colors.colors) - 2):
+        for row in range(len(self.selected_theme_colors.colors) - SINGLE_COLORS_COUNT):
             color_button_row = []
 
             for col in range(2):
@@ -96,8 +98,13 @@ class ColorEditorDialog(QDialog):
         self.caret_color_button.pressed.connect(lambda r=12, c=1: self._handle_color_button_pressed(r, c))
         theme_colors_layout.addWidget(self.caret_color_button, 13, 2)
 
+        self.matching_text_button = ColorButton()
+        self.matching_text_button.pressed.connect(lambda r=13, c=1: self._handle_color_button_pressed(r, c))
+        theme_colors_layout.addWidget(self.matching_text_button, 14, 2)
+
         self.color_buttons.append([None, self.line_column_border_color_button])
         self.color_buttons.append([None, self.caret_color_button])
+        self.color_buttons.append([None, self.matching_text_button])
 
         self._colorize_buttons_from_selected_theme()
 
@@ -262,7 +269,7 @@ class ColorEditorDialog(QDialog):
         self.reset_button.setEnabled(self._current_theme_modified)
 
     def _colorize_buttons_from_selected_theme(self):
-        for row in range(len(self.selected_theme_colors.colors) - 2):
+        for row in range(len(self.selected_theme_colors.colors) - SINGLE_COLORS_COUNT):
             text_color = QColor.fromString(self.selected_theme_colors.colors[row].text_color)
             paper_color = QColor.fromString(self.selected_theme_colors.colors[row].paper_color)
 
@@ -271,9 +278,11 @@ class ColorEditorDialog(QDialog):
 
         line_column_border_color = QColor.fromString(self.selected_theme_colors.editor_margin_border_color.paper_color)
         caret_color = QColor.fromString(self.selected_theme_colors.caret_color.paper_color)
+        matching_text_color = QColor.fromString(self.selected_theme_colors.match_highlight_color.paper_color)
 
         self.line_column_border_color_button.set_button_color(line_column_border_color)
         self.caret_color_button.set_button_color(caret_color)
+        self.matching_text_button.set_button_color(matching_text_color)
 
 
 class ColorButton(QPushButton):

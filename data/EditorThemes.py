@@ -15,6 +15,7 @@
 # editormargin: Scintilla's Margin section, all margins
 # editormarginborder: Special margin reserved for acting like a border between line number area and text area
 # caret: The vertical line on the text editing area that indicates the position, and also blinks.
+# matchingtext: Highlight color on matching text occurrences.
 #
 # Lines follow the format: "[Text Color],[Paper (Background) Color]", where each color is formatted as "#aarrggbb"
 
@@ -56,12 +57,13 @@ class EditorColorTheme:
         self.editor_margin_color = EditorColor("editormargin", "#ff000000", "#ffffffff", 0)
         self.editor_margin_border_color = EditorColor("editormarginborder", "", "#ff303030", 0)
         self.caret_color = EditorColor("caret", "", "#ffffffff", 0)
+        self.match_highlight_color = EditorColor("matchingtext", "", "#ff3ee2e8",0)
 
         self.colors = [self.default_style_color, self.commands_color, self.special_variables_color,
                        self.parameters_color, self.line_comments_color, self.string_literals_color,
                        self.numbers_color, self.builtin_macros_color, self.game_macros_color,
                        self.string_tokens_color, self.editor_margin_color, self.editor_margin_border_color,
-                       self.caret_color]
+                       self.caret_color, self.match_highlight_color]
 
     def __load_from_file(self, file_path: Path):
         if not file_path.exists() or not file_path.is_file():
@@ -116,6 +118,8 @@ class EditorColorTheme:
                         self.editor_margin_border_color.paper_color = values[0]
                     case "caret":
                         self.caret_color.paper_color = values[0]
+                    case "matchingtext":
+                        self.match_highlight_color.paper_color = values[0]
 
     def load_theme(self, theme_name: str):
         self.__load_from_file(Path("res/editorcolorthemes/{}.editortheme".format(theme_name)))
