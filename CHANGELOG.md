@@ -1,5 +1,9 @@
 # PyWright IDE Changelog
 
+## Unreleased
+
+* Fixed syntax highlighting for consecutive inline macros (by in1tiate)
+
 ## Version 1.4.1 - 17.05.2025
 
 * Fixed the crash caused by tab(s) being unable to be restored due to file(s) no longer existing (by in1tiate)
