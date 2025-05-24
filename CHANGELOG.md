@@ -3,6 +3,7 @@
 ## Unreleased
 
 * Fixed syntax highlighting for consecutive inline macros (by in1tiate)
+* Fixed Find/Replace dialog needing the user to position the cursor before it can search text.
 
 ## Version 1.4.1 - 17.05.2025
 

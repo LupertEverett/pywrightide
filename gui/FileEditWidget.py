@@ -72,6 +72,9 @@ class FileEditWidget(QWidget):
         self.sci.setAutoCompletionSource(QsciScintilla.AutoCompletionSource.AcsAPIs)
 
     def fill_the_scintilla(self, selected_file):
+        """Fills the text area with the contents loaded from the selected file.
+            :param selected_file: Path to the file to read the contents of.
+            :return: None"""
         # The IDE will try to open files assuming UTF-8 encoding, if it fails, it will fall back to ANSI
         # But it will ALWAYS save the files in UTF-8
         # Text encoding detection using libs like chardet may be used if the need arises
@@ -80,6 +83,8 @@ class FileEditWidget(QWidget):
         self.sci.setText(text)
         # Common sense: Newly opened files aren't modified.
         self.sci.setModified(False)
+        # Set the cursor at the beginning of file so that searching works without the user having to place it first
+        self.sci.setCursorPosition(0, 0)
 
     def _try_read_lines(self, selected_file) -> list[str]:
         # newline="" so the IDE does not mess with the EOL chars, fixes the gaps in new lines bug
