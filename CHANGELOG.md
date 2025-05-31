@@ -1,6 +1,6 @@
 # PyWright IDE Changelog
 
-## Unreleased
+## Version 1.4.2 - 31.05.2025
 
 * Fixed syntax highlighting for consecutive inline macros (by in1tiate)
 * Fixed Find/Replace dialog needing the user to position the cursor before it can search text.
