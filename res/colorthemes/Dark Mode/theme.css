@@ -61,10 +61,6 @@ QStatusBar {
     border-top: 0px solid #857777;
 }
 
-QStatusBar QFrame {
-    color: #FFF;
-}
-
 QStatusBar QLabel {
     color: #000;
 }
