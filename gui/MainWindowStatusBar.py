@@ -14,6 +14,10 @@ class MainWindowStatusBar(QStatusBar):
         self._line_col_info_label = QLabel()
         self._installation_path_label = QLabel("No PyWright folder selected")
 
+        self._selection_length_info_label.setContentsMargins(4, 0, 4, 0)
+        self._line_col_info_label.setContentsMargins(4, 0, 4, 0)
+        self._installation_path_label.setContentsMargins(4, 0, 4, 0)
+
         self.addPermanentWidget(self._selection_length_info_label)
         self.addPermanentWidget(self._line_col_info_label)
         self.addPermanentWidget(self._installation_path_label)
