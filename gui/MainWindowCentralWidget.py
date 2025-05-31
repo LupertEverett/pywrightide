@@ -12,6 +12,8 @@ from .GamePropertiesWidget import GamePropertiesWidget
 
 class MainWindowCentralWidget(QWidget):
     update_save_button_requested = pyqtSignal(bool)
+    current_tab_cursor_position_changed = pyqtSignal(int, int)
+    selection_length_changed = pyqtSignal(int)
 
     def __init__(self, parent=None):
         """Central widget for the main window. Handles the open tabs.
@@ -84,6 +86,8 @@ class MainWindowCentralWidget(QWidget):
         file_edit_widget.supply_editor_color_theme_to_lexer()
         file_edit_widget.move_to_tab_requested.connect(self._handle_move_to_tab)
         file_edit_widget.replace_next_in_next_tabs_requested.connect(self.replace_next_in_next_tabs)
+        file_edit_widget.cursor_position_changed.connect(self._update_line_and_col)
+        file_edit_widget.selected_text_changed.connect(self._handle_text_selection_changed)
         file_name = Path(file_path).name
         self.open_new_tab(file_edit_widget, file_name if file_name != "" else "New File")
 
@@ -94,6 +98,24 @@ class MainWindowCentralWidget(QWidget):
                     self.tab_widget.currentWidget().is_file_modified()
 
         self.update_save_button_requested.emit(condition)
+        self._update_line_and_col()
+        self._handle_text_selection_changed()
+
+    def _update_line_and_col(self):
+        if self.tabs_count() == 0:
+            self.current_tab_cursor_position_changed.emit(-1, -1)
+        elif not self.is_game_properties_tab(self.tab_widget.currentIndex()):
+            (line, col) = self.tab_widget.widget(self.tab_widget.currentIndex()).get_current_cursor_position()
+            self.current_tab_cursor_position_changed.emit(line + 1, col + 1)
+        else:
+            self.current_tab_cursor_position_changed.emit(-1, -1)
+
+    def _handle_text_selection_changed(self):
+        if self.tabs_count() == 0 or self.is_game_properties_tab(self.tab_widget.currentIndex()):
+            self.selection_length_changed.emit(-1)
+        else:
+            selection_length = self.tab_widget.widget(self.tab_widget.currentIndex()).get_selection_length()
+            self.selection_length_changed.emit(selection_length)
 
     def is_game_properties_tab(self, index: int):
         return isinstance(self.tab_widget.widget(index), GamePropertiesWidget)

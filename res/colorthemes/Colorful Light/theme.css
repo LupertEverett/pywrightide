@@ -28,6 +28,10 @@ QStatusBar QLabel {
     color: #FFF;
 }
 
+QStatusBar QFrame {
+    color: #FFF;
+}
+
 QTabWidget::pane {
     border: 0;
     background: #69BBFF;

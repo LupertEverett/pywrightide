@@ -29,6 +29,12 @@ class FileEditWidget(QWidget):
     # This one only goes forwards
     replace_next_in_next_tabs_requested = pyqtSignal(str, str)
 
+    selected_text_changed = pyqtSignal()
+
+    cursor_position_changed = pyqtSignal()
+    """This just signals that the cursor position changed, without giving any info about line and column;
+    since that will be MainWindowCentralWidget's responsibility instead."""
+
     _highlight_in_progress = False
     """Ensures _highlight_all_occurences() runs only once"""
 
@@ -50,6 +56,8 @@ class FileEditWidget(QWidget):
         self.sci.setMarginWidth(1, 1)
         self.sci.modificationChanged.connect(self._emit_file_modified)
 
+        self.sci.cursorPositionChanged.connect(self._handle_cursor_position_changed)
+
         self._lexer = PyWrightScriptLexer(self.sci)
         self.setup_autocompletion()
         self.sci.setLexer(self._lexer)
@@ -63,7 +71,7 @@ class FileEditWidget(QWidget):
         self.set_highlight_style(IDESettings.get_highlight_fill_rect())
         self.sci.setIndicatorDrawUnder(True, _HIGHLIGHT_INDICATOR_ID)
 
-        self.sci.selectionChanged.connect(self._highlight_all_occurrences)
+        self.sci.selectionChanged.connect(self._handle_selection_changed)
 
         self.setLayout(self.layout)
 
@@ -240,9 +248,26 @@ class FileEditWidget(QWidget):
             self.sci.SendScintilla(QsciScintilla.SCI_REPLACESEL, 0, text_to_replace.encode("utf-8"))
             pos = self.find_next_in_file(text_to_find, SearchScope.SINGLE_FILE, from_top=False)
 
+    def get_selection_length(self):
+        # Obtain the text from selection
+        (sel_start_line, sel_start_index, sel_end_line, sel_end_index) = self.sci.getSelection()
+        start_pos = self.sci.positionFromLineIndex(sel_start_line, sel_start_index)
+        end_pos = self.sci.positionFromLineIndex(sel_end_line, sel_end_index)
+        return len(self.sci.text(start_pos, end_pos))
+
+    def get_current_cursor_position(self) -> (int, int):
+        return self.sci.getCursorPosition()[0], self.sci.getCursorPosition()[1]
+
+    def _handle_cursor_position_changed(self, line, column):
+        self.cursor_position_changed.emit()
+
     def set_highlight_style(self, fill: bool):
         style = QsciScintilla.IndicatorStyle.FullBoxIndicator if fill else QsciScintilla.IndicatorStyle.BoxIndicator
         self.sci.indicatorDefine(style, _HIGHLIGHT_INDICATOR_ID)
+
+    def _handle_selection_changed(self):
+        self._highlight_all_occurrences()
+        self.selected_text_changed.emit()
 
     def _highlight_all_occurrences(self):
         """Highlights all occurrences of the selected text.

@@ -8,9 +8,9 @@ from PyQt6.QtCore import Qt
 
 from .MainWindowTopToolbar import MainWindowTopToolbar
 from .MainWindowCentralWidget import MainWindowCentralWidget
+from .MainWindowStatusBar import MainWindowStatusBar
 from .NewGameDialog import NewGameDialog
 from .OpenGameDialog import OpenGameDialog
-from .GamePropertiesWidget import GamePropertiesWidget
 from .DirectoryViewWidget import DirectoryViewWidget
 from .PyWrightLoggerWidget import PyWrightLoggerWidget
 from .SettingsDialog import SettingsDialog
@@ -70,7 +70,13 @@ class IDEMainWindow(QMainWindow):
         self._top_toolbar.find_replace_dialog_action.triggered.connect(self._handle_find_replace)
         self._top_toolbar.settings_action.triggered.connect(self._handle_settings)
 
+        # Status bar
+        self.status_bar = MainWindowStatusBar(self)
+        self.setStatusBar(self.status_bar)
+
         self.central_widget.update_save_button_requested.connect(self._top_toolbar.update_save_button)
+        self.central_widget.current_tab_cursor_position_changed.connect(self.status_bar.set_cursor_position_info)
+        self.central_widget.selection_length_changed.connect(self.status_bar.set_selection_length_info)
 
         self.directory_view.open_new_tab.connect(self.central_widget.open_new_editing_tab)
         self.directory_view.open_game_properties_tab.connect(
@@ -83,15 +89,6 @@ class IDEMainWindow(QMainWindow):
         self.addDockWidget(Qt.DockWidgetArea.LeftDockWidgetArea, self.directory_view)
         self.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, self.asset_manager_widget)
         self.addDockWidget(Qt.DockWidgetArea.BottomDockWidgetArea, self.logger_view)
-
-        # Status bar
-        self.status_bar = QStatusBar()
-        self.status_bar.setSizeGripEnabled(False)
-        self.installation_path_label = QLabel("No PyWright folder selected")
-        self.installation_path_label.setContentsMargins(0, 4, 12, 4)
-        self.status_bar.addPermanentWidget(self.installation_path_label)
-
-        self.setStatusBar(self.status_bar)
 
         # Try to load the last open game here, if the option is enabled, and the game folder still exists.
         if selected_game_path != "":
@@ -127,7 +124,7 @@ class IDEMainWindow(QMainWindow):
             if self.central_widget.tabs_count() > 0:
                 self.central_widget.clear_tabs()
 
-            self.installation_path_label.setText(self.selected_pywright_installation)
+            self.status_bar.set_installation_path_info(self.selected_pywright_installation)
 
             self.pywright_executable_name = PyWrightFolder.pick_pywright_executable(self.selected_pywright_installation)
             self.central_widget.set_selected_game(self.selected_game_info)

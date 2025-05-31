@@ -9,6 +9,7 @@
   * There are two highlight styles to choose from: "Hollow" and "Filled"
   * Note that if you're using a custom editor color theme, you might need to update it to account for the highlight color.
 * Slightly tidied up the Settings dialog.
+* Cursor position (line and column) and the amount of selected characters are now shown in the status bar.
 
 ## Version 1.4.1 - 17.05.2025
 
