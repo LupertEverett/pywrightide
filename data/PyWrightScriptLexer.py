@@ -238,7 +238,7 @@ class PyWrightScriptLexer(QsciLexerCustom):
         wasNewLine = True
         for i, token in enumerate(token_list):
             self._set_styling_for_token(token, wasNewLine)
-            wasNewLine = "\n" in token[0].replace('\r', '\n')
+            wasNewLine = '\n' in token[0].replace('\r', '\n') or (wasNewLine and not token[0].strip())
 
     def _set_styling_for_token(self, token: tuple[str, int], isFirstOfLine:bool = False):
         # Handle tokens ending with ?
