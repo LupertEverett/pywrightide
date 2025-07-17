@@ -53,6 +53,13 @@ commands = [
     # Not mentioned in doc.txt, but somewhere else
     "zoom", "char", "delete", "shake", "is_ex", "setvar_ex",
 
+    # Not mentioned in doc.txt but in docs/index.html
+    "filewrite", "screenshot", "bemo", "clear", "textblock", "textbox",
+    "locked_cases", "addcase", "wincase", "resetcase", "examine3d", "localmenu", "region3d",
+    "game", "controlanim", "globaldelay", "gamemenu", "getprop", "setprop", "debug",
+    "fade", # this is also a parameter so coloration might be wrong in some place
+    "grey", "invert", "tint", 
+
     # Misc. stuff (some might be custom macros, or stuff that wasn't in 0.9880)
     "in", "out", "obj"
 ]
