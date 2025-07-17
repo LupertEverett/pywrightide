@@ -106,10 +106,13 @@ cases = ["_case_{}".format(num) for num in range(100)]
 # Just for that sweet, sweet startswith()
 named_parameters = ("start=", "end=", "e=", "x=", "y=", "z=", "name=", "speed=", "width=", "height=", "rwidth=", "rheight=",
                     "graphic=", "graphichigh=", "examine=", "talk=", "present=", "move=", "fail=", "nametag=", "result=", "label=",
-                    "mag=", "frames=", "hotkey=", "jumpto=","pause=","test=")
+                    "mag=", "frames=", "hotkey=", "jumpto=","pause=","test=", "loops=", "rotz=", "be=", "pri=", "variable=", "threat=",
+                    "delay=", "color=", "run=", "priority=", "prop=", "value=", "degrees=", "axis=", "filter=", "after=")
 
 parameters = ["stack", "nowait", "noclear", "hide", "fade", "true", "false", "noback", "sx", "sy",
-              "blink", "loop", "noloop", "b", "t", "stop", "noauto", "password", "all", "suppress"]
+              "blink", "loop", "noloop", "b", "t", "stop", "noauto", "password", "all", "suppress", "flipx", "wait", "hold", "try_bottom",
+              "script", # This is also a command, so coloring might be wrong
+              "last", "both"]
 
 # Following might need some sort of regex for each
 # "{sound {str}}"
