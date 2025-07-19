@@ -53,6 +53,12 @@ commands = [
     # Not mentioned in doc.txt, but somewhere else
     "zoom", "char", "delete", "shake", "is_ex", "setvar_ex",
 
+    # Not mentioned in doc.txt but in docs/index.html
+    "filewrite", "screenshot", "bemo", "clear", "textblock", "textbox",
+    "locked_cases", "addcase", "wincase", "resetcase", "examine3d", "localmenu", "region3d",
+    "game", "controlanim", "globaldelay", "gamemenu", "getprop", "setprop", "debug",
+    "fade", "grey", "invert", "tint", 
+
     # Misc. stuff (some might be custom macros, or stuff that wasn't in 0.9880)
     "in", "out", "obj"
 ]
@@ -99,10 +105,12 @@ cases = ["_case_{}".format(num) for num in range(100)]
 # Just for that sweet, sweet startswith()
 named_parameters = ("start=", "end=", "e=", "x=", "y=", "z=", "name=", "speed=", "width=", "height=", "rwidth=", "rheight=",
                     "graphic=", "graphichigh=", "examine=", "talk=", "present=", "move=", "fail=", "nametag=", "result=", "label=",
-                    "mag=", "frames=", "hotkey=", "jumpto=","pause=","test=")
+                    "mag=", "frames=", "hotkey=", "jumpto=","pause=","test=", "loops=", "rotz=", "be=", "pri=", "variable=", "threat=",
+                    "delay=", "color=", "run=", "priority=", "prop=", "value=", "degrees=", "axis=", "filter=", "after=")
 
 parameters = ["stack", "nowait", "noclear", "hide", "fade", "true", "false", "noback", "sx", "sy",
-              "blink", "loop", "noloop", "b", "t", "stop", "noauto", "password", "all", "suppress"]
+              "blink", "loop", "noloop", "b", "t", "stop", "noauto", "password", "all", "suppress", "flipx", "wait", "hold", "try_bottom",
+              "script", "last", "both"]
 
 # Following might need some sort of regex for each
 # "{sound {str}}"
@@ -226,10 +234,13 @@ class PyWrightScriptLexer(QsciLexerCustom):
 
         token_list = [(token, len(bytearray(token, "utf-8"))) for token in _TOKEN_REGEX.findall(text)]
 
+        # Keep track if a token is a newline, to distinguish commands and parameters on the next token for the ones such as "fade" and "script":
+        wasNewLine = True
         for i, token in enumerate(token_list):
-            self._set_styling_for_token(token)
+            self._set_styling_for_token(token, wasNewLine)
+            wasNewLine = '\n' in token[0].replace('\r', '\n') or (wasNewLine and not token[0].strip())
 
-    def _set_styling_for_token(self, token: tuple[str, int]):
+    def _set_styling_for_token(self, token: tuple[str, int], isFirstOfLine:bool = False):
         # Handle tokens ending with ?
         if token[0].endswith("?") and len(token[0]) > 1:
             # Check if there are multiple question marks first
@@ -248,6 +259,11 @@ class PyWrightScriptLexer(QsciLexerCustom):
 
         # Proceed through the tokens normally
         if token[0] in commands:
+            # If a command token can also be a parameter (such as "fade" and "script"),
+            # check if it is a the start of a line to know which coloration to perform:
+            if token[0] in parameters and not isFirstOfLine:
+                self.setStyling(token[1], 3)
+                return
             self.setStyling(token[1], 1)
         elif token[0] in logic_operators:
             self.setStyling(token[1], 2)
