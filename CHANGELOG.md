@@ -1,5 +1,11 @@
 # PyWright IDE Changelog
 
+## Unreleased
+
+* Lexer improvements:
+  * Add more parameters from docs/index.html (by Zetrypio)
+  * Add distinction for "fade" and "script" depending on where they are used, which can be both a command or a parameter (by Zetrypio)
+
 ## Version 1.4.2 - 31.05.2025
 
 * Fixed syntax highlighting for consecutive inline macros (by in1tiate)
