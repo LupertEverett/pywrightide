@@ -241,8 +241,8 @@ class PyWrightScriptLexer(QsciLexerCustom):
             wasNewLine = '\n' in token[0].replace('\r', '\n') or (wasNewLine and not token[0].strip())
 
     def _set_styling_for_token(self, token: tuple[str, int], isFirstOfLine:bool = False):
-        # Handle tokens ending with ?
-        if token[0].endswith("?") and len(token[0]) > 1:
+        # Handle tokens ending with ?, except comments
+        if token[0].endswith("?") and len(token[0]) > 1 and not (token[0].startswith("//") or token[0].startswith("#")):
             # Check if there are multiple question marks first
 
             question_marks = _QUESTION_MARK_REGEX.findall(token[0])
