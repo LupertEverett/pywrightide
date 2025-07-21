@@ -5,6 +5,7 @@
 * Lexer improvements:
   * Add more parameters from docs/index.html (by Zetrypio)
   * Add distinction for "fade" and "script" depending on where they are used, which can be both a command or a parameter (by Zetrypio)
+  * Don't style question marks at the end of comments. (by in1tiate)
 
 ## Version 1.4.2 - 31.05.2025
 
