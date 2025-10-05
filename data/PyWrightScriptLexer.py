@@ -147,6 +147,40 @@ def is_string_float(string: str) -> bool:
         return False
 
 
+class CustomQsciAPIs(QsciAPIs):
+    
+    def __init__(self, lexer:'QsciLexer')->None:
+        super().__init__(lexer)
+ 
+    def updateAutoCompletionList(self, context:[str], list:[str])->[str]:
+        line, index = self.lexer().parent().getCursorPosition()
+        text = self.lexer().parent().text(line).strip()
+
+        # Comments:
+        if text.startswith("#") or text.startswith("//"):
+            return []
+
+        # Strings:
+        if text.startswith('"'):
+            return string_tokens
+
+        # Test whether we are in command area or in parameters area
+        split = text.split(" ")
+
+        # Commands:
+        if len(split) == 1:
+            for l in (commands, self.lexer().builtin_macros, self.lexer().game_macros):
+                list += l
+
+        # Parameters:
+        # TODO for the future: make the parameter list dependent on the command name
+        else:
+            for l in (special_variables, named_parameters, parameters, logic_operators):
+                list += l
+
+        return list
+
+
 class PyWrightScriptLexer(QsciLexerCustom):
 
     def __init__(self, parent: QsciScintilla):
@@ -166,19 +200,12 @@ class PyWrightScriptLexer(QsciLexerCustom):
         self.setup_autocompletion()
 
     def setup_autocompletion(self):
-        # Create an API for us to populate with our autocomplete terms
-        api = QsciAPIs(self)
-
-        # Add autocompletion strings
-        for l in (commands, special_variables, named_parameters, parameters, string_tokens, logic_operators, self.builtin_macros, self.game_macros):
-            for c in l:
-                api.add(c)
-
-        # Compile the api for use in the lexer
+        # Create a custom API for us to populate with our autocomplete terms
+        api = CustomQsciAPIs(self)
         api.prepare()
 
     def wordCharacters(self)->str:
-        # The important thing in this string, is to add the {} near the end.
+        # The important thing in this string, is to be sure to have the {} in it.
         # That way, {} tokens in string can have their autocompletion.
         return "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789{}"
 
