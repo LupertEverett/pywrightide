@@ -113,13 +113,7 @@ parameters = ["stack", "nowait", "noclear", "hide", "fade", "true", "false", "no
               "script", "last", "both"]
 
 # Following might need some sort of regex for each
-# "{sound {str}}"
-# "{c{number}}
-# "{p{number}}
-# "{delay {number}}
-# "{sfx {str}}
-# "{s {str}}"
-string_tokens = ["{n}", "{next}", "{f}", "{center}"]
+string_tokens = ["{n}", "{next}", "{f}", "{center}", "{sound /}", "{c}", "{p}", "{delay 1}", "{sfx /}", "{s }", "{spd}", "{e}"]
 
 # Logical operators
 logic_operators = ["==", "<=", ">=", "<", ">", "NOT", "AND", "OR"]
