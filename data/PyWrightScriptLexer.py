@@ -177,6 +177,11 @@ class PyWrightScriptLexer(QsciLexerCustom):
         # Compile the api for use in the lexer
         api.prepare()
 
+    def wordCharacters(self)->str:
+        # The important thing in this string, is to add the {} near the end.
+        # That way, {} tokens in string can have their autocompletion.
+        return "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789{}"
+
     def set_font_properties(self, font_name: str, font_size: int, bold_font: bool):
         self.setDefaultFont(QFont(font_name, font_size))
         font_weight = QFont.Weight.Bold if bold_font else QFont.Weight.Normal
