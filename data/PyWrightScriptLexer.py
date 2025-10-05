@@ -148,7 +148,7 @@ class CustomQsciAPIs(QsciAPIs):
  
     def updateAutoCompletionList(self, context:[str], list:[str])->[str]:
         line, index = self.lexer().parent().getCursorPosition()
-        text = self.lexer().parent().text(line).strip()
+        text = self.lexer().parent().text(line).lstrip()
 
         # Comments:
         if text.startswith("#") or text.startswith("//"):
