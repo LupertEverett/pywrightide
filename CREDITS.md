@@ -2,7 +2,7 @@
 
 ## Thanks to:
 
-* Zetrypio: Basic autocompletion support, {} tokens colorization in strings.
+* Zetrypio: Autocompletion support, {} tokens colorization in strings.
 * in1tiate: Big improvements to the Script Lexer, plus improvements to Find/Replace dialog.
 * Everyone on the [Court Records forums thread](https://forums.court-records.net/viewtopic.php?f=36&t=33857) who provided their feedback!
 
