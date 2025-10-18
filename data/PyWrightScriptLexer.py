@@ -121,7 +121,7 @@ logic_operators = ["==", "<=", ">=", "<", ">", "NOT", "AND", "OR"]
 # Compiled regular expressions
 # This regex also includes whitespace characters, due to how Scintilla's styling system works
 # It only cares about the "word length" and the style it is gonna use.
-_TOKEN_REGEX = re.compile(r"//+[^\r\n]*|#+[^\r\n]*|\{[^\r\n]*}|\"[^\r\n]*\"|\S+|\s+")
+_TOKEN_REGEX = re.compile(r"//[^\r\n]*|#[^\r\n]*|\{[^\r\n]*}|[\"“][^\r\n]*|\S+|\s+")
 
 # This regex finds all the ? characters in a given string
 _QUESTION_MARK_REGEX = re.compile(r"\?+")
@@ -155,7 +155,7 @@ class CustomQsciAPIs(QsciAPIs):
             return []
 
         # Strings:
-        if text.startswith('"'):
+        if text.startswith('"') or text.startswith('“'):
             return string_tokens
 
         # Test whether we are in command area or in parameters area
@@ -339,7 +339,7 @@ class PyWrightScriptLexer(QsciLexerCustom):
             self.setStyling(token[1], 3)
         elif token[0].startswith("//") or token[0].startswith("#"):
             self.setStyling(token[1], 4)
-        elif token[0].startswith("\"") and token[0].endswith("\""):
+        elif (token[0].startswith("\"") or token[0].startswith('“')):
             self._set_styling_for_string_token(token[0])
         elif is_string_number(token[0]):
             self.setStyling(token[1], 6)
