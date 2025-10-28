@@ -148,7 +148,7 @@ class CustomQsciAPIs(QsciAPIs):
  
     def updateAutoCompletionList(self, context:[str], list:[str])->[str]:
         line, index = self.lexer().parent().getCursorPosition()
-        text = self.lexer().parent().text(line).lstrip()
+        text:str = self.lexer().parent().text(line)[:index].lstrip()
 
         # Comments:
         if text.startswith("#") or text.startswith("//"):
@@ -156,23 +156,31 @@ class CustomQsciAPIs(QsciAPIs):
 
         # Strings:
         if text.startswith('"') or text.startswith('“'):
+            if text.rfind("{$") > text.rfind("}"):
+                return formatCompletions("{$%s}", special_variables)
             return string_tokens
 
         # Test whether we are in command area or in parameters area
         split = text.split(" ")
 
-        # Commands:
+        # Commands or macros:
         if len(split) == 1:
-            for l in (commands, self.lexer().builtin_macros, self.lexer().game_macros):
-                list += l
+            macros = self.lexer().builtin_macros + self.lexer().game_macros
+            if split[0].startswith("{"):
+                return formatCompletions("{%s}", macros)
+            return commands + macros
 
         # Parameters:
         # TODO for the future: make the parameter list dependent on the command name
-        else:
-            for l in (special_variables, named_parameters, parameters, logic_operators):
-                list += l
+        return (
+            formatCompletions("$%s", special_variables)
+          + named_parameters
+          + parameters
+          + logic_operators
+        )
 
-        return list
+def formatCompletions(pattern: str, list: list):
+    return [pattern % element for element in list]
 
 
 class PyWrightScriptLexer(QsciLexerCustom):
@@ -198,7 +206,7 @@ class PyWrightScriptLexer(QsciLexerCustom):
     def wordCharacters(self)->str:
         # The important thing in this string, is to be sure to have the {} in it.
         # That way, {} tokens in string can have their autocompletion.
-        return "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789{}"
+        return "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_{}$"
 
     def set_font_properties(self, font_name: str, font_size: int, bold_font: bool):
         self.setDefaultFont(QFont(font_name, font_size))
