@@ -190,11 +190,8 @@ class PyWrightScriptLexer(QsciLexerCustom):
 
         self.builtin_macros: list[str] = []
         self.game_macros: list[str] = []
-        
-        self.setup_autocompletion()
 
-    def setup_autocompletion(self):
-        # Create a custom API for us to populate with our autocomplete terms
+        # Create a custom API to manage custom autocompletion
         api = CustomQsciAPIs(self)
         api.prepare()
 
@@ -211,11 +208,9 @@ class PyWrightScriptLexer(QsciLexerCustom):
 
     def set_builtin_macros(self, new_list: list[str]):
         self.builtin_macros = new_list
-        self.setup_autocompletion()
 
     def set_game_macros(self, new_list: list[str]):
         self.game_macros = new_list
-        self.setup_autocompletion()
 
     def set_editor_color_theme(self):
         # Default Text Settings
