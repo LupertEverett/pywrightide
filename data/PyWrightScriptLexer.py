@@ -139,7 +139,7 @@ parameters = ["stack", "nowait", "noclear", "hide", "fade", "true", "false", "no
 # $variable      (none)                   Value of variable. {$lb} can replace {, and {$rb} can replace }.
 string_tokens = ["{sfx /%path/to/sound%}", "{sound %blipping sound%}", "{delay %delay:int%}", "{spd %speed:float%}", "{_fullspeed}", "{_endfullspeed}",
                  "{wait manual}", "{wait auto}", "{center}", "{type}", "{next}", "{e %emotion%}", "{f %frames:int% %color%}",
-                 "{s %frames% %power%}", "{p %frame%}", "{c}", "{c %color%}", "{tbon}", "{tboff}", "{n}", "{$", "{$lb}", "{$rb}"]
+                 "{s %frames% %power%}", "{p %frame%}", "{c}", "{c %color%}", "{tbon}", "{tboff}", "{n}", "{$"]
 
 # Logical operators
 logic_operators = ["==", "<=", ">=", "<", ">", "NOT", "AND", "OR"]
@@ -249,6 +249,7 @@ class CustomQsciAPIs(QsciAPIs):
         to fill with custom proposals depending on the context.
         @return the list of custom completions computed on the context.
         """
+        
         sci: QsciScintilla = self.lexer().parent()
         line, index = sci.getCursorPosition()
         text:str = sci.text(line)[:index].lstrip()
@@ -268,19 +269,19 @@ class CustomQsciAPIs(QsciAPIs):
 
         # Commands or macros:
         if len(split) == 1:
-            macros = self.lexer().builtin_macros + self.lexer().game_macros
+            macros = [*self.lexer().builtin_macros, *self.lexer().game_macros]
             if split[0].startswith("{"):
                 return formatCompletions("{%s}", macros)
             return commands + macros
 
         # Parameters:
         # TODO for the future: make the parameter list dependent on the command name
-        return (
-            formatCompletions("$%s", special_variables)
-          + named_parameters
-          + parameters
-          + logic_operators
-        )
+        return [
+            *formatCompletions("$%s", special_variables),
+            *named_parameters,
+            *parameters,
+            *logic_operators
+        ]
 
 def formatCompletions(pattern: str, list: list):
     """
