@@ -112,8 +112,34 @@ parameters = ["stack", "nowait", "noclear", "hide", "fade", "true", "false", "no
               "blink", "loop", "noloop", "b", "t", "stop", "noauto", "password", "all", "suppress", "flipx", "wait", "hold", "try_bottom",
               "script", "last", "both"]
 
-# Following might need some sort of regex for each
-string_tokens = ["{n}", "{next}", "{f}", "{center}", "{sound /}", "{c}", "{p}", "{delay 1}", "{sfx /}", "{s }", "{spd}", "{e}"]
+# Following are string tokens with pattern for autocompletion
+# Notes: {c} is reset color, {c} is also allowed to have args immediatly after the c
+# {n} is a newline
+# {$variable} introduces a variable
+# others are either special commands, or macros.
+# All commands + args + description:
+# sfx            str:sound                Play a sound effect.
+# sound          str:clicksound           Change blipping sound.
+# delay          int:multiplier           Changes the delay mutliplier per character (aka relative speed), and also does {wait manual}.    
+# spd            float:speed              Change speed of dialogue. Also bypasses {_fullspeed} and {_endfullspeed}, not present in the documentation.
+# _fullspeed     (none) (automatic)       Begin instant text. Unofficially supported, internal used when returning from a macro, not present in the documentation.
+# _endfullspeed  (none) (automatic)       Restore previous speed after instant text. Unofficially supported, internal used when returning from a macro, not present in the documentation.
+# wait           str: "manual" or "auto"  Change the waiting mode to specified arguments.
+# center         (none) (preparsed)       Centers the text.
+# type           (none)                   Change blipping sound to typewriter.ogg, set delay to 2 (according to code, but 5 according to doc) and wait mode to "manual".
+# next           (none)                   Automatically goes to the next 3 lines of text.
+# e              str:emotion              Set the current character's emotion.
+# f              int:duration str:color   Flashes the screen to a specific duration & color. Both arguments are optional.
+# s              int:duration int:power   Shakes the screen. Both arguments are optional.
+# p              int:next_char            Pauses for a number of frames (game runs at 60 fps, so 1 frame is 1/60 seconds)
+# c              hex:color                Changes the color. Color can be 3 hex-digits RGB, or 6 hex-digits RRGGBB or last part of the name of a variable named "color_something", or nothing to reset the color. 
+# tbon           (none)                   Forces Testimony Blink On.
+# tboff          (none)                   Forces Testimony Blink Off.
+# n              (none) (preparsed)       New line character.
+# $variable      (none)                   Value of variable. {$lb} can replace {, and {$rb} can replace }.
+string_tokens = ["{sfx /%path/to/sound%}", "{sound %blipping sound%}", "{delay %delay:int%}", "{spd %speed:float%}", "{_fullspeed}", "{_endfullspeed}",
+                 "{wait manual}", "{wait auto}", "{center}", "{type}", "{next}", "{e %emotion%}", "{f %frames:int% %color%}",
+                 "{s %frames% %power%}", "{p %frame%}", "{c}", "{c %color%}", "{tbon}", "{tboff}", "{n}", "{$", "{$lb}", "{$rb}"]
 
 # Logical operators
 logic_operators = ["==", "<=", ">=", "<", ">", "NOT", "AND", "OR"]
@@ -145,8 +171,72 @@ class CustomQsciAPIs(QsciAPIs):
     
     def __init__(self, lexer:'QsciLexer')->None:
         super().__init__(lexer)
- 
+
+        self._has_just_inserted = 0                 # counter for _after_change_testing()
+        self._completion_selected :str|None = None  # Either the text to insert or None if no such text
+        
+        # Connect events
+        sci: QsciScintilla = self.lexer().parent()
+        sci.selectionChanged.connect(self._after_change_testing)
+
+    def _after_change_testing(self):
+        # This ensures that only the relevant invocations are used.
+        # We can only continue in this method if self._has_just_inserted is exactly 1.
+        # This counts the number of times this method as been triggered after the autoCompletionSelected() method has inserted its text.
+        # This is a bit a hacky solution, but QScintilla will not let me do simpler.
+        if self._has_just_inserted <= 0:
+            return
+        self._has_just_inserted -= 1
+
+        if self._has_just_inserted != 1 or self._completion_selected is None:
+            return
+
+        # Here we know that we are on the correct invocation, therefore make sure it will not be triggered again before the next completion
+        self._has_just_inserted = 0
+        
+        # Get cursor position
+        sci: QsciScintilla = self.lexer().parent()
+        line, index = sci.getCursorPosition()
+
+        # Move cursor: if there are a pair of %, then select it, otherwise move the cursor right before the }.
+        if self._completion_selected.count("%") >= 2:
+            indexA = index + self._completion_selected.find("%")
+            indexB = index + self._completion_selected.rfind("%")+1 # +1 because we need the selection to go after the % sign
+            sci.setSelection(line, indexA, line, indexB)
+        else:
+            index += len(self._completion_selected) - 1 # before the }
+            sci.setCursorPosition(line, index)
+
+        # Finalization
+        self._completion_selected = None
+
+    def autoCompletionSelected(self, selection:str)->None:
+        super().autoCompletionSelected(selection)
+
+        # Search for a space. If there is a space, QScintilla will not want to insert what is after the space,
+        # so we have to do it ourselves. However, we cannot move the cursor in this method after inserted the text
+        # because of the order of events. This is what the _after_change_testing() will be doing.
+        space = selection.find(" ")
+
+        if space >= 0:
+
+            textToInsert = selection[space:]
+
+            sci: QsciScintilla = self.lexer().parent()
+            line, index = sci.getCursorPosition()
+            
+            # Insert text
+            sci.insert(textToInsert)
+            
+            # Only after insertion, set the flags to tell _after_change_testing() that it is now ok to count the events and handle cursor positionning.
+            self._completion_selected = textToInsert
+            self._has_just_inserted = 2
+
     def updateAutoCompletionList(self, context:[str], list:[str])->[str]:
+        """
+        Triggered when the autocompletion list is about to pop-up,
+        to fill with custom proposals depending on the context.
+        """
         line, index = self.lexer().parent().getCursorPosition()
         text:str = self.lexer().parent().text(line)[:index].lstrip()
 
