@@ -168,18 +168,22 @@ def is_string_float(string: str) -> bool:
 
 
 class CustomQsciAPIs(QsciAPIs):
+    """This class allows us to do custom behaviour on autocompletion."""
     
     def __init__(self, lexer:'QsciLexer')->None:
         super().__init__(lexer)
 
-        self._has_just_inserted = 0                 # counter for _after_change_testing()
+        self._has_just_inserted = 0                 # counter for _after_completion_is_applied()
         self._completion_selected :str|None = None  # Either the text to insert or None if no such text
         
         # Connect events
         sci: QsciScintilla = self.lexer().parent()
-        sci.selectionChanged.connect(self._after_change_testing)
+        sci.selectionChanged.connect(self._after_completion_is_applied)
 
-    def _after_change_testing(self):
+    def _after_completion_is_applied(self):
+        """
+        Triggered on change of selection on scintilla, but only used when it is as a late part execution of autoCompletionSelected().
+        """
         # This ensures that only the relevant invocations are used.
         # We can only continue in this method if self._has_just_inserted is exactly 1.
         # This counts the number of times this method as been triggered after the autoCompletionSelected() method has inserted its text.
@@ -198,24 +202,31 @@ class CustomQsciAPIs(QsciAPIs):
         sci: QsciScintilla = self.lexer().parent()
         line, index = sci.getCursorPosition()
 
-        # Move cursor: if there are a pair of %, then select it, otherwise move the cursor right before the }.
+        # Move cursor: if there are a pair of %, then select it, otherwise move the cursor right before the } if it is only that, otherwise move it after.
         if self._completion_selected.count("%") >= 2:
             indexA = index + self._completion_selected.find("%")
             indexB = index + self._completion_selected.rfind("%")+1 # +1 because we need the selection to go after the % sign
             sci.setSelection(line, indexA, line, indexB)
-        else:
+        elif self._completion_selected == "}":
             index += len(self._completion_selected) - 1 # before the }
+            sci.setCursorPosition(line, index)
+        else:
+            index += len(self._completion_selected)
             sci.setCursorPosition(line, index)
 
         # Finalization
         self._completion_selected = None
 
     def autoCompletionSelected(self, selection:str)->None:
+        """
+        Triggered when the user selects an autocompletion, but before it is actually applied on the document.
+        @param selection: the completion the user selected.
+        """
         super().autoCompletionSelected(selection)
 
         # Search for a space. If there is a space, QScintilla will not want to insert what is after the space,
         # so we have to do it ourselves. However, we cannot move the cursor in this method after inserted the text
-        # because of the order of events. This is what the _after_change_testing() will be doing.
+        # because of the order of events. This is what the _after_completion_is_applied() will be doing.
         space = selection.find(" ")
 
         if space >= 0:
@@ -228,7 +239,7 @@ class CustomQsciAPIs(QsciAPIs):
             # Insert text
             sci.insert(textToInsert)
             
-            # Only after insertion, set the flags to tell _after_change_testing() that it is now ok to count the events and handle cursor positionning.
+            # Only after insertion, set the flags to tell _after_completion_is_applied() that it is now ok to count the events and handle cursor positionning.
             self._completion_selected = textToInsert
             self._has_just_inserted = 2
 
@@ -236,9 +247,11 @@ class CustomQsciAPIs(QsciAPIs):
         """
         Triggered when the autocompletion list is about to pop-up,
         to fill with custom proposals depending on the context.
+        @return the list of custom completions computed on the context.
         """
-        line, index = self.lexer().parent().getCursorPosition()
-        text:str = self.lexer().parent().text(line)[:index].lstrip()
+        sci: QsciScintilla = self.lexer().parent()
+        line, index = sci.getCursorPosition()
+        text:str = sci.text(line)[:index].lstrip()
 
         # Comments:
         if text.startswith("#") or text.startswith("//"):
@@ -270,6 +283,9 @@ class CustomQsciAPIs(QsciAPIs):
         )
 
 def formatCompletions(pattern: str, list: list):
+    """
+    Utility function to apply a formatting on all elements of a list of strings.
+    """
     return [pattern % element for element in list]
 
 
