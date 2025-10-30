@@ -7,6 +7,8 @@
   * Add distinction for "fade" and "script" depending on where they are used, which can be both a command or a parameter (by Zetrypio)
   * Don't style question marks at the end of comments. (by in1tiate)
   * Make Autocompletion more contextual (by Zetrypio)
+    * String `{}` token completions are with parameter selection after insertion.
+  * Better quote support: support for `“` and missing end quote support (by Zetrypio),
 
 ## Version 1.4.2 - 31.05.2025
 
