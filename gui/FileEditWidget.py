@@ -1,22 +1,14 @@
 # Widget that deals with a single file
 # Used with the tabs
-
 from pathlib import Path
 
 from PyQt6.QtWidgets import QWidget, QVBoxLayout, QFileDialog, QMessageBox
 from PyQt6.QtCore import pyqtSignal
-from PyQt6.QtGui import QColor
 
 from PyQt6.Qsci import *
 
-import data.EditorThemes as EditorThemes
-from data.PyWrightScriptLexer import PyWrightScriptLexer
+from gui.IDEScintillaWidget import IDEScintillaWidget
 from .FindReplaceDialog import FindType, ReplaceType, SearchScope
-
-from data import IDESettings
-
-
-_HIGHLIGHT_INDICATOR_ID = 30
 
 
 class FileEditWidget(QWidget):
@@ -35,41 +27,22 @@ class FileEditWidget(QWidget):
     """This just signals that the cursor position changed, without giving any info about line and column;
     since that will be MainWindowCentralWidget's responsibility instead."""
 
-    _highlight_in_progress = False
-    """Ensures _highlight_all_occurences() runs only once"""
-
     def __init__(self, pywright_dir, selected_file=""):
         super().__init__()
 
         self.layout = QVBoxLayout()
 
-        self.sci = QsciScintilla()
-        self.sci.setUtf8(True)
+        self.sci = IDEScintillaWidget()
 
-        # Enable word wrapping
-        self.sci.setWrapMode(QsciScintilla.WrapMode.WrapWord)
-
-        # First margin is the line number margin by default. We set a preset width value to it here.
-        self.sci.setMargins(2)
-        self.sci.setMarginType(1, QsciScintilla.MarginType.SymbolMarginColor)
-        self.sci.setMarginWidth(0, 50)
-        self.sci.setMarginWidth(1, 1)
         self.sci.modificationChanged.connect(self._emit_file_modified)
 
         self.sci.cursorPositionChanged.connect(self._handle_cursor_position_changed)
-
-        self._lexer = PyWrightScriptLexer(self.sci)
-        self.setup_autocompletion()
-        self.sci.setLexer(self._lexer)
 
         self.pywright_working_dir = pywright_dir
 
         self.layout.addWidget(self.sci)
 
         self.layout.setContentsMargins(0, 0, 0, 0)
-
-        self.set_highlight_style(IDESettings.get_highlight_fill_rect())
-        self.sci.setIndicatorDrawUnder(True, _HIGHLIGHT_INDICATOR_ID)
 
         self.sci.selectionChanged.connect(self._handle_selection_changed)
 
@@ -85,10 +58,7 @@ class FileEditWidget(QWidget):
             self.fill_the_scintilla(self.file_path)
 
     def setup_autocompletion(self):
-        # The autocompletion should be used from an API source to have a custom list of proposals
-        threshold = IDESettings.get_autocompletion_trigger_threshold() if IDESettings.get_enable_autocompletion_check() else 0
-        self.sci.setAutoCompletionThreshold(threshold)
-        self.sci.setAutoCompletionSource(QsciScintilla.AutoCompletionSource.AcsAPIs)
+        self.sci.setup_autocompletion()
 
     def fill_the_scintilla(self, selected_file):
         """Fills the text area with the contents loaded from the selected file.
@@ -120,25 +90,16 @@ class FileEditWidget(QWidget):
         return result
 
     def supply_builtin_macros_to_lexer(self, builtin_macros: list[str]):
-        self._lexer.set_builtin_macros(builtin_macros)
+        self.sci.supply_builtin_macros_to_lexer(builtin_macros)
 
     def supply_game_macros_to_lexer(self, game_macros: list[str]):
-        self._lexer.set_game_macros(game_macros)
+        self.sci.supply_game_macros_to_lexer(game_macros)
 
     def supply_font_properties_to_lexer(self, font_name: str, font_size: int, bold_font: bool):
-        self._lexer.set_font_properties(font_name, font_size, bold_font)
+        self.sci.supply_font_properties_to_lexer(font_name, font_size, bold_font)
 
     def supply_editor_color_theme_to_lexer(self):
-        self._lexer.set_editor_color_theme()
-        self.sci.setMarginsBackgroundColor(QColor(EditorThemes.current_editor_theme.editor_margin_color.paper_color))
-        self.sci.setMarginsForegroundColor(QColor(EditorThemes.current_editor_theme.editor_margin_color.text_color))
-        self.sci.setMarginBackgroundColor(1, QColor(EditorThemes.current_editor_theme.
-                                                    editor_margin_border_color.paper_color))
-        self.sci.setCaretForegroundColor(QColor(EditorThemes.current_editor_theme.caret_color.paper_color))
-        self.sci.setIndicatorForegroundColor(QColor(EditorThemes.current_editor_theme.match_highlight_color.paper_color),
-                                            _HIGHLIGHT_INDICATOR_ID)
-        self.sci.setIndicatorOutlineColor(QColor(EditorThemes.current_editor_theme.match_highlight_color.paper_color),
-                                          _HIGHLIGHT_INDICATOR_ID)
+        self.sci.supply_editor_color_theme_to_lexer()
 
     def save_to_file(self):
         if not self._is_a_new_file:
@@ -255,63 +216,12 @@ class FileEditWidget(QWidget):
         end_pos = self.sci.positionFromLineIndex(sel_end_line, sel_end_index)
         return len(self.sci.text(start_pos, end_pos))
 
-    def get_current_cursor_position(self) -> (int, int):
+    def get_current_cursor_position(self) -> tuple[int, int]:
         return self.sci.getCursorPosition()[0], self.sci.getCursorPosition()[1]
 
     def _handle_cursor_position_changed(self, line, column):
         self.cursor_position_changed.emit()
 
-    def set_highlight_style(self, fill: bool):
-        style = QsciScintilla.IndicatorStyle.FullBoxIndicator if fill else QsciScintilla.IndicatorStyle.BoxIndicator
-        self.sci.indicatorDefine(style, _HIGHLIGHT_INDICATOR_ID)
-
     def _handle_selection_changed(self):
-        self._highlight_all_occurrences()
+        self.sci.highlight_all_occurrences()
         self.selected_text_changed.emit()
-
-    def _highlight_all_occurrences(self):
-        """Highlights all occurrences of the selected text.
-        :return: None"""
-        # Don't highlight anything if the setting is not enabled.
-        if not IDESettings.get_highlight_matching_text():
-            self._clear_all_highlights()
-            return
-
-        if self._highlight_in_progress:
-            return
-
-        self._highlight_in_progress = True
-
-        # Clear previous highlights (if there's any)
-        self._clear_all_highlights()
-
-        # Obtain the text from selection
-        (sel_start_line, sel_start_index, sel_end_line, sel_end_index) = self.sci.getSelection()
-        start_pos = self.sci.positionFromLineIndex(sel_start_line, sel_start_index)
-        end_pos = self.sci.positionFromLineIndex(sel_end_line, sel_end_index)
-        text_to_highlight = self.sci.text(start_pos, end_pos)
-
-        text = self.sci.text()
-
-        # We cannot use findFirst() and findNext() here as they will make the text area jump all over the place
-        # All we need here is to only highlight the matching text
-
-        if text_to_highlight != "" and not text_to_highlight.isspace():
-            pos = text.find(text_to_highlight, 0)
-
-            while pos != -1:
-                (start_line, start_index) = self.sci.lineIndexFromPosition(pos)
-                (end_line, end_index) = self.sci.lineIndexFromPosition(pos + len(text_to_highlight))
-                # Skip the selected text
-                if not (sel_start_line == start_line and sel_start_index == start_index):
-                    self.sci.fillIndicatorRange(start_line, start_index, end_line, end_index, _HIGHLIGHT_INDICATOR_ID)
-                pos = text.find(text_to_highlight, pos + 1)
-        else:
-            self._clear_all_highlights()
-
-        self._highlight_in_progress = False
-
-    def _clear_all_highlights(self):
-        last_line = self.sci.lines() - 1
-        last_index = self.sci.lineLength(last_line) - 1
-        self.sci.clearIndicatorRange(0, 0, last_line, last_index, _HIGHLIGHT_INDICATOR_ID)
