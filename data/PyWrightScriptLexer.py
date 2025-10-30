@@ -112,8 +112,34 @@ parameters = ["stack", "nowait", "noclear", "hide", "fade", "true", "false", "no
               "blink", "loop", "noloop", "b", "t", "stop", "noauto", "password", "all", "suppress", "flipx", "wait", "hold", "try_bottom",
               "script", "last", "both"]
 
-# Following might need some sort of regex for each
-string_tokens = ["{n}", "{next}", "{f}", "{center}", "{sound /}", "{c}", "{p}", "{delay 1}", "{sfx /}", "{s }", "{spd}", "{e}"]
+# Following are string tokens with pattern for autocompletion
+# Notes: {c} is reset color, {c} is also allowed to have args immediatly after the c
+# {n} is a newline
+# {$variable} introduces a variable
+# others are either special commands, or macros.
+# All commands + args + description:
+# sfx            str:sound                Play a sound effect.
+# sound          str:clicksound           Change blipping sound.
+# delay          int:multiplier           Changes the delay mutliplier per character (aka relative speed), and also does {wait manual}.    
+# spd            float:speed              Change speed of dialogue. Also bypasses {_fullspeed} and {_endfullspeed}, not present in the documentation.
+# _fullspeed     (none) (automatic)       Begin instant text. Unofficially supported, internal used when returning from a macro, not present in the documentation.
+# _endfullspeed  (none) (automatic)       Restore previous speed after instant text. Unofficially supported, internal used when returning from a macro, not present in the documentation.
+# wait           str: "manual" or "auto"  Change the waiting mode to specified arguments.
+# center         (none) (preparsed)       Centers the text.
+# type           (none)                   Change blipping sound to typewriter.ogg, set delay to 2 (according to code, but 5 according to doc) and wait mode to "manual".
+# next           (none)                   Automatically goes to the next 3 lines of text.
+# e              str:emotion              Set the current character's emotion.
+# f              int:duration str:color   Flashes the screen to a specific duration & color. Both arguments are optional.
+# s              int:duration int:power   Shakes the screen. Both arguments are optional.
+# p              int:next_char            Pauses for a number of frames (game runs at 60 fps, so 1 frame is 1/60 seconds)
+# c              hex:color                Changes the color. Color can be 3 hex-digits RGB, or 6 hex-digits RRGGBB or last part of the name of a variable named "color_something", or nothing to reset the color. 
+# tbon           (none)                   Forces Testimony Blink On.
+# tboff          (none)                   Forces Testimony Blink Off.
+# n              (none) (preparsed)       New line character.
+# $variable      (none)                   Value of variable.
+string_tokens = ["{sfx /%path/to/sound%}", "{sound %blipping sound%}", "{delay %delay:int%}", "{spd %speed:float%}", "{_fullspeed}", "{_endfullspeed}",
+                 "{wait manual}", "{wait auto}", "{center}", "{type}", "{next}", "{e %emotion%}", "{f %frames:int% %color%}",
+                 "{s %frames% %power%}", "{p %frame%}", "{c}", "{c %color%}", "{tbon}", "{tboff}", "{n}", "{$"]
 
 # Logical operators
 logic_operators = ["==", "<=", ">=", "<", ">", "NOT", "AND", "OR"]
@@ -121,7 +147,7 @@ logic_operators = ["==", "<=", ">=", "<", ">", "NOT", "AND", "OR"]
 # Compiled regular expressions
 # This regex also includes whitespace characters, due to how Scintilla's styling system works
 # It only cares about the "word length" and the style it is gonna use.
-_TOKEN_REGEX = re.compile(r"//+[^\r\n]*|#+[^\r\n]*|\{[^\r\n]*}|\"[^\r\n]*\"|\S+|\s+")
+_TOKEN_REGEX = re.compile(r"//[^\r\n]*|#[^\r\n]*|\{[^\r\n]*}|[\"“][^\r\n]*|\S+|\s+")
 
 # This regex finds all the ? characters in a given string
 _QUESTION_MARK_REGEX = re.compile(r"\?+")
@@ -142,37 +168,126 @@ def is_string_float(string: str) -> bool:
 
 
 class CustomQsciAPIs(QsciAPIs):
+    """This class allows us to do custom behaviour on autocompletion."""
     
     def __init__(self, lexer:'QsciLexer')->None:
         super().__init__(lexer)
- 
+
+        self._has_just_inserted = 0                 # counter for _after_completion_is_applied()
+        self._completion_selected :str|None = None  # Either the text to insert or None if no such text
+        
+        # Connect events
+        sci: QsciScintilla = self.lexer().parent()
+        sci.selectionChanged.connect(self._after_completion_is_applied)
+
+    def _after_completion_is_applied(self):
+        """
+        Triggered on change of selection on scintilla, but only used when it is as a late part execution of autoCompletionSelected().
+        """
+        # This ensures that only the relevant invocations are used.
+        # We can only continue in this method if self._has_just_inserted is exactly 1.
+        # This counts the number of times this method as been triggered after the autoCompletionSelected() method has inserted its text.
+        # This is a bit a hacky solution, but QScintilla will not let me do simpler.
+        if self._has_just_inserted <= 0:
+            return
+        self._has_just_inserted -= 1
+
+        if self._has_just_inserted != 1 or self._completion_selected is None:
+            return
+
+        # Here we know that we are on the correct invocation, therefore make sure it will not be triggered again before the next completion
+        self._has_just_inserted = 0
+        
+        # Get cursor position
+        sci: QsciScintilla = self.lexer().parent()
+        line, index = sci.getCursorPosition()
+
+        # Move cursor: if there are a pair of %, then select it, otherwise move the cursor right before the } if it is only that, otherwise move it after.
+        if self._completion_selected.count("%") >= 2:
+            indexA = index + self._completion_selected.find("%")
+            indexB = index + self._completion_selected.rfind("%")+1 # +1 because we need the selection to go after the % sign
+            sci.setSelection(line, indexA, line, indexB)
+        elif self._completion_selected == "}":
+            index += len(self._completion_selected) - 1 # before the }
+            sci.setCursorPosition(line, index)
+        else:
+            index += len(self._completion_selected)
+            sci.setCursorPosition(line, index)
+
+        # Finalization
+        self._completion_selected = None
+
+    def autoCompletionSelected(self, selection:str)->None:
+        """
+        Triggered when the user selects an autocompletion, but before it is actually applied on the document.
+        @param selection: the completion the user selected.
+        """
+        super().autoCompletionSelected(selection)
+
+        # Search for a space. If there is a space, QScintilla will not want to insert what is after the space,
+        # so we have to do it ourselves. However, we cannot move the cursor in this method after inserted the text
+        # because of the order of events. This is what the _after_completion_is_applied() will be doing.
+        space = selection.find(" ")
+
+        if space >= 0:
+
+            textToInsert = selection[space:]
+
+            sci: QsciScintilla = self.lexer().parent()
+            line, index = sci.getCursorPosition()
+            
+            # Insert text
+            sci.insert(textToInsert)
+            
+            # Only after insertion, set the flags to tell _after_completion_is_applied() that it is now ok to count the events and handle cursor positionning.
+            self._completion_selected = textToInsert
+            self._has_just_inserted = 2
+
     def updateAutoCompletionList(self, context:[str], list:[str])->[str]:
-        line, index = self.lexer().parent().getCursorPosition()
-        text = self.lexer().parent().text(line).lstrip()
+        """
+        Triggered when the autocompletion list is about to pop-up,
+        to fill with custom proposals depending on the context.
+        @return the list of custom completions computed on the context.
+        """
+        
+        sci: QsciScintilla = self.lexer().parent()
+        line, index = sci.getCursorPosition()
+        text:str = sci.text(line)[:index].lstrip()
 
         # Comments:
         if text.startswith("#") or text.startswith("//"):
             return []
 
         # Strings:
-        if text.startswith('"'):
+        if text.startswith('"') or text.startswith('“'):
+            if text.rfind("{$") > text.rfind("}"):
+                return formatCompletions("{$%s}", special_variables)
             return string_tokens
 
         # Test whether we are in command area or in parameters area
         split = text.split(" ")
 
-        # Commands:
+        # Commands or macros:
         if len(split) == 1:
-            for l in (commands, self.lexer().builtin_macros, self.lexer().game_macros):
-                list += l
+            macros = [*self.lexer().builtin_macros, *self.lexer().game_macros]
+            if split[0].startswith("{"):
+                return formatCompletions("{%s}", macros)
+            return commands + macros
 
         # Parameters:
         # TODO for the future: make the parameter list dependent on the command name
-        else:
-            for l in (special_variables, named_parameters, parameters, logic_operators):
-                list += l
+        return [
+            *formatCompletions("$%s", special_variables),
+            *named_parameters,
+            *parameters,
+            *logic_operators
+        ]
 
-        return list
+def formatCompletions(pattern: str, list: list):
+    """
+    Utility function to apply a formatting on all elements of a list of strings.
+    """
+    return [pattern % element for element in list]
 
 
 class PyWrightScriptLexer(QsciLexerCustom):
@@ -190,18 +305,15 @@ class PyWrightScriptLexer(QsciLexerCustom):
 
         self.builtin_macros: list[str] = []
         self.game_macros: list[str] = []
-        
-        self.setup_autocompletion()
 
-    def setup_autocompletion(self):
-        # Create a custom API for us to populate with our autocomplete terms
+        # Create a custom API to manage custom autocompletion
         api = CustomQsciAPIs(self)
         api.prepare()
 
     def wordCharacters(self)->str:
         # The important thing in this string, is to be sure to have the {} in it.
         # That way, {} tokens in string can have their autocompletion.
-        return "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789{}"
+        return "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_{}$"
 
     def set_font_properties(self, font_name: str, font_size: int, bold_font: bool):
         self.setDefaultFont(QFont(font_name, font_size))
@@ -211,11 +323,9 @@ class PyWrightScriptLexer(QsciLexerCustom):
 
     def set_builtin_macros(self, new_list: list[str]):
         self.builtin_macros = new_list
-        self.setup_autocompletion()
 
     def set_game_macros(self, new_list: list[str]):
         self.game_macros = new_list
-        self.setup_autocompletion()
 
     def set_editor_color_theme(self):
         # Default Text Settings
@@ -339,7 +449,7 @@ class PyWrightScriptLexer(QsciLexerCustom):
             self.setStyling(token[1], 3)
         elif token[0].startswith("//") or token[0].startswith("#"):
             self.setStyling(token[1], 4)
-        elif token[0].startswith("\"") and token[0].endswith("\""):
+        elif (token[0].startswith("\"") or token[0].startswith('“')):
             self._set_styling_for_string_token(token[0])
         elif is_string_number(token[0]):
             self.setStyling(token[1], 6)
