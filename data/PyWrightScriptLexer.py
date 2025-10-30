@@ -136,7 +136,7 @@ parameters = ["stack", "nowait", "noclear", "hide", "fade", "true", "false", "no
 # tbon           (none)                   Forces Testimony Blink On.
 # tboff          (none)                   Forces Testimony Blink Off.
 # n              (none) (preparsed)       New line character.
-# $variable      (none)                   Value of variable. {$lb} can replace {, and {$rb} can replace }.
+# $variable      (none)                   Value of variable.
 string_tokens = ["{sfx /%path/to/sound%}", "{sound %blipping sound%}", "{delay %delay:int%}", "{spd %speed:float%}", "{_fullspeed}", "{_endfullspeed}",
                  "{wait manual}", "{wait auto}", "{center}", "{type}", "{next}", "{e %emotion%}", "{f %frames:int% %color%}",
                  "{s %frames% %power%}", "{p %frame%}", "{c}", "{c %color%}", "{tbon}", "{tboff}", "{n}", "{$"]
