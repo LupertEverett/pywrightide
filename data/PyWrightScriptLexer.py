@@ -200,13 +200,17 @@ class CustomQsciAPIs(QsciAPIs):
         
         # Get cursor position
         sci: QsciScintilla = self.lexer().parent()
+        lexer: PyWrightScriptLexer = self.lexer()
         line, index = sci.getCursorPosition()
 
         # Move cursor: if there are a pair of %, then select it, otherwise move the cursor right before the } if it is only that, otherwise move it after.
         if self._completion_selected.count("%") >= 2:
-            indexA = index + self._completion_selected.find("%")
-            indexB = index + self._completion_selected.rfind("%")+1 # +1 because we need the selection to go after the % sign
+            indexes = [m.start() for m in re.finditer("%", self._completion_selected)]
+
+            indexA = index + indexes[0]
+            indexB = index + indexes[1] + 1 # +1 because we need the selection to go after the % sign
             sci.setSelection(line, indexA, line, indexB)
+            lexer.parameter_amount = (len(indexes) - 2) // 2
         elif self._completion_selected == "}":
             index += len(self._completion_selected) - 1 # before the }
             sci.setCursorPosition(line, index)
@@ -305,6 +309,8 @@ class PyWrightScriptLexer(QsciLexerCustom):
 
         self.builtin_macros: list[str] = []
         self.game_macros: list[str] = []
+
+        self.parameter_amount: int = 0 # Amount of parameters coming from autocompletion
 
         # Create a custom API to manage custom autocompletion
         api = CustomQsciAPIs(self)
