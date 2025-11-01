@@ -175,7 +175,7 @@ class CustomQsciAPIs(QsciAPIs):
 
         self._has_just_inserted = 0                 # counter for _after_completion_is_applied()
         self._completion_selected :str|None = None  # Either the text to insert or None if no such text
-        
+
         # Connect events
         sci: QsciScintilla = self.lexer().parent()
         sci.selectionChanged.connect(self._after_completion_is_applied)
@@ -197,7 +197,7 @@ class CustomQsciAPIs(QsciAPIs):
 
         # Here we know that we are on the correct invocation, therefore make sure it will not be triggered again before the next completion
         self._has_just_inserted = 0
-        
+
         # Get cursor position
         lexer: PyWrightScriptLexer = self.lexer()
         sci: QsciScintilla = lexer.parent()
@@ -207,6 +207,13 @@ class CustomQsciAPIs(QsciAPIs):
         if self._completion_selected.count("%") >= 2:
             try:
                 indices = [index + m.start() for m in re.finditer("%", self._completion_selected)]
+                lineText = sci.text(line).lstrip()
+                
+                # When completing in a quote line, it must be from a {} token, therefore add a tab position after the }
+                if lineText.startswith('"') or lineText.startswith('“'):
+                    tabPosition = index + len(self._completion_selected)
+                    indices.append(tabPosition)
+
                 sci.startParameterInsertion(line, indices, (len(indices) - 2) // 2)
             except Exception as e:
                 print(e)

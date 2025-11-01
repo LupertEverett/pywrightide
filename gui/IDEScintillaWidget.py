@@ -12,6 +12,118 @@ _HIGHLIGHT_INDICATOR_ID = 30
 _PARAM_HILIGHT_INDICATOR_ID = 31 # why do we start at 30?
 
 
+class ParameterBoxManager:
+    def __init__(self, parent: "IDEScintillaWidget"):
+        self.parameter_position_pairs: list[(int, int)] = []    # empty if no parameters
+        self.parameter_line: int = -1
+        self.parameter_line_text: str|None = None
+        self.parent = parent
+        parent.indicatorDefine(QsciScintilla.IndicatorStyle.BoxIndicator, _PARAM_HILIGHT_INDICATOR_ID)
+        parent.textChanged.connect(self.textInserted)
+
+    def startParameterInsertion(self, line: int, indices:list[int], parameter_amount: int):
+        pairs = list((i, j+1) for i, j in zip(indices[::2], indices[1::2]))
+        if len(indices)%2 == 1:
+            pairs.append((indices[-1], indices[-1]))
+
+        self.parameter_position_pairs = pairs
+        self.parameter_line = line
+        self.parameter_line_text = self.parent.text(line)
+
+        # Draw the boxes TODO : Make it better
+        for start, end in pairs:
+            self.parent.fillIndicatorRange(line, start, line, end, _PARAM_HILIGHT_INDICATOR_ID)
+        
+        # Select the first occurence
+        indexA = indices[0]
+        indexB = indices[1] + 1 # +1 because we need the selection to go after the % sign
+        self.parent.setSelection(line, indexA, line, indexB)
+
+    def textInserted(self):
+        if not self.isActive():
+            return
+
+        line, index = self.parent.getCursorPosition()
+        # Not on the same line?
+        if line != self.parameter_line:
+            self.endParameterInsertion()
+            return
+
+        new_line_text = self.parent.text(line)
+        delta = len(new_line_text) - len(self.parameter_line_text)
+        self.parameter_line_text = new_line_text
+
+        # Update
+        for k, (i, j) in enumerate(self.parameter_position_pairs):
+            if index < i:
+                self.parameter_position_pairs[k] = (i+delta, j+delta)
+            elif index <= j:
+                if j+delta < 0 or j+delta < i:
+                    self.endParameterInsertion()
+                    return
+                self.parameter_position_pairs[k] = (i, j+delta)
+                # Update the box area so that it wraps written text
+                self.parent.fillIndicatorRange(line, i, line, j+delta, _PARAM_HILIGHT_INDICATOR_ID)
+
+
+    def endParameterInsertion(self):
+        self.parameter_line = -1
+        self.parameter_position_pairs = []
+        self.parent._clear_all_highlights(_PARAM_HILIGHT_INDICATOR_ID)
+
+    def moveSelection(self, goBackward: bool = False):
+        if self.isActive():
+            line, index = self.parent.getCursorPosition()
+            
+            # Not on the same line?
+            if line != self.parameter_line:
+                self.endParameterInsertion()
+                return
+
+            # Find the current box, previous and next:
+            previousPair = None
+            currentPair = None
+            nextPair = None
+            nextIsLast = False
+            for k, (i, j) in enumerate(self.parameter_position_pairs):
+                if currentPair is not None:
+                    nextPair = (i, j)
+                    if k == len(self.parameter_position_pairs) - 1:
+                        nextIsLast = True
+                    break
+                if i <= index and index <= j:
+                    currentPair = (i, j)
+                    previousPair = self.parameter_position_pairs[k-1] if k > 0 else None
+
+            # Was not in parameter selection box? (ie user moved it before pressing tab again)
+            if currentPair is None:
+                self.endParameterInsertion()
+                return
+
+            pairToSelect = previousPair if goBackward else nextPair
+
+            if pairToSelect is None:
+                if goBackward:
+                    return
+                else:
+                    self.parent.setCursorPosition(line, currentPair[1])
+                    self.endParameterInsertion()
+                    return
+
+            # Select the next pair or previous pair
+            self.parent.setSelection(line, pairToSelect[0], line, pairToSelect[1])
+
+            # If the next is actually a singular position, and is the last one
+            if not goBackward and nextIsLast and nextPair[0] == nextPair[1]:
+                self.parent.setCursorPosition(line, nextPair[0])
+                self.endParameterInsertion()
+                return
+
+    def isActive(self):
+        return len(self.parameter_position_pairs) > 0
+
+
+
 class IDEScintillaWidget(QsciScintilla):
     """Custom Scintilla component with jumping to next parameter with tab support"""
 
@@ -36,123 +148,29 @@ class IDEScintillaWidget(QsciScintilla):
         self.setIndicatorDrawUnder(True, _HIGHLIGHT_INDICATOR_ID)
 
         # For parameter autocompletion with tab:
-        #self.parameter_amount: int = 0 # Amount of parameters coming from autocompletion DEPRECATED
-        self.parameter_position_pairs: list[(int, int)] = []    # empty if no parameters
-        self.parameter_line: int = -1
-        self.parameter_line_text: str|None = None
-        self.indicatorDefine(QsciScintilla.IndicatorStyle.BoxIndicator, _PARAM_HILIGHT_INDICATOR_ID)
-        self.textChanged.connect(self.textInserted)
+        self.parameter_manager = ParameterBoxManager(self)
 
         self._lexer = PyWrightScriptLexer(self)
         self.setup_autocompletion()
         self.setLexer(self._lexer)
 
     def startParameterInsertion(self, line: int, indices:list[int], parameter_amount: int):
-        print("<> startParameterInsertion()")
-        pairs = list((i, j+1) for i, j in zip(indices[::2], indices[1::2]))
-        if len(indices)%2 == 1:
-            pairs += (indices[-1], indices[-1])
-
-        self.parameter_position_pairs = pairs
-        self.parameter_line = line
-        self.parameter_line_text = self.text(self.positionFromLineIndex(line, 0), self.positionFromLineIndex(line+1, 0))
-
-        # Draw the boxes TODO : Make it better
-        for start, end in pairs:
-            self.fillIndicatorRange(line, start, line, end, _PARAM_HILIGHT_INDICATOR_ID)
-        
-        # Select the first occurence
-        indexA = indices[0]
-        indexB = indices[1] + 1 # +1 because we need the selection to go after the % sign
-        self.setSelection(line, indexA, line, indexB)
-        #self.parameter_amount = parameter_amount
-
-    def textInserted(self):
-        print("<> textInserted()")
-        if not len(self.parameter_position_pairs) > 0:
-            return
-
-        line, index = self.getCursorPosition()
-        # Not on the same line?
-        if line != self.parameter_line:
-            self.endParameterInsertion()
-            return
-
-        new_line_text = self.text(self.positionFromLineIndex(line, 0), self.positionFromLineIndex(line+1, 0))
-        delta = len(new_line_text) - len(self.parameter_line_text)
-        self.parameter_line_text = new_line_text
-
-        # Update
-        for k, (i, j) in enumerate(self.parameter_position_pairs):
-            if index < i:
-                self.parameter_position_pairs[k] = (i+delta, j+delta)
-            elif index <= j:
-                if j+delta < 0 or j+delta < i:
-                    self.endParameterInsertion()
-                    return
-                self.parameter_position_pairs[k] = (i, j+delta)
-                # Update the box area so that it wraps written text
-                self.fillIndicatorRange(line, i, line, j+delta, _PARAM_HILIGHT_INDICATOR_ID)
-
+        self.parameter_manager.startParameterInsertion(line, indices, parameter_amount)
 
     def endParameterInsertion(self):
-        print("<> endParameterInsertion()")
-        self.parameter_line = -1
-        self.parameter_position_pairs = []
-        self._clear_all_highlights(_PARAM_HILIGHT_INDICATOR_ID)
+        self.parameter_manager.endParameterInsertion()
 
     def keyPressEvent(self, event: QKeyEvent):
-        if event.key() == Qt.Key.Key_Escape and len(self.parameter_position_pairs) > 0:
+        if event.key() == Qt.Key.Key_Escape and self.parameter_manager.isActive():
             self.endParameterInsertion()
             return
 
-        if event.key() in (Qt.Key.Key_Tab, Qt.Key.Key_Backtab) and len(self.parameter_position_pairs) > 0:
-            line, index = self.getCursorPosition()
-            
-            # Not on the same line?
-            if line != self.parameter_line:
-                self.endParameterInsertion()
-                return
-
-            # Find the current box, previous and next:
-            previousPair = None
-            currentPair = None
-            nextPair = None
-            nextIsLast = False
-            for k, (i, j) in enumerate(self.parameter_position_pairs):
-                if currentPair is not None:
-                    nextPair = (i, j)
-                    if k == len(self.parameter_position_pairs) - 1:
-                        nextIsLast = True
-                    break
-                if i <= index and index <= j:
-                    currentPair = (i, j)
-            previousPair = self.parameter_position_pairs[k-1] if k > 0 else None
-
-            # Was not in parameter selection box? (ie user moved it before pressing tab again)
-            if currentPair is None:
-                self.endParameterInsertion()
-                return
-
-            goBackward: bool = (event.modifiers() & Qt.KeyboardModifier.ShiftModifier).value != 0
-            pairToSelect = previousPair if goBackward else nextPair
-
-            if pairToSelect is None:
-                if goBackward:
-                    return
-                else:
-                    self.setCursorPosition(line, currentPair[1])
-                    self.endParameterInsertion()
-                    return
-
-            # Select the next pair or previous pair
-            self.setSelection(line, pairToSelect[0], line, pairToSelect[1])
-
-            # If the next is actually a singular position, and is the last one
-            if not goBackward and nextIsLast and nextPair[0] == nextPair[1]:
-                self.setCursorPosition(line, nextPair[0])
-                self.endParameterInsertion()
-                return
+        if event.key() in (Qt.Key.Key_Tab, Qt.Key.Key_Backtab) and self.parameter_manager.isActive():
+            try:
+                goBackward: bool = event.key() == Qt.Key.Key_Backtab or (event.modifiers() & Qt.KeyboardModifier.ShiftModifier).value != 0
+                self.parameter_manager.moveSelection(goBackward)
+            except Exception as e:
+                print(e.__class__.__name__, e)
         else:
             super().keyPressEvent(event)
 
