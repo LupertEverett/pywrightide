@@ -2,13 +2,14 @@ import re
 
 from PyQt6.Qsci import QsciScintilla
 from PyQt6.QtCore import Qt
-from PyQt6.QtGui import QColor
+from PyQt6.QtGui import QColor, QKeyEvent
 
 from data import EditorThemes, IDESettings
 from data.PyWrightScriptLexer import PyWrightScriptLexer
 
 
 _HIGHLIGHT_INDICATOR_ID = 30
+_PARAM_HILIGHT_INDICATOR_ID = 31 # why do we start at 30?
 
 
 class IDEScintillaWidget(QsciScintilla):
@@ -34,26 +35,123 @@ class IDEScintillaWidget(QsciScintilla):
         self.set_highlight_style(IDESettings.get_highlight_fill_rect())
         self.setIndicatorDrawUnder(True, _HIGHLIGHT_INDICATOR_ID)
 
+        # For parameter autocompletion with tab:
+        #self.parameter_amount: int = 0 # Amount of parameters coming from autocompletion DEPRECATED
+        self.parameter_position_pairs: list[(int, int)] = []    # empty if no parameters
+        self.parameter_line: int = -1
+        self.parameter_line_text: str|None = None
+        self.indicatorDefine(QsciScintilla.IndicatorStyle.BoxIndicator, _PARAM_HILIGHT_INDICATOR_ID)
+        self.textChanged.connect(self.textInserted)
+
         self._lexer = PyWrightScriptLexer(self)
         self.setup_autocompletion()
         self.setLexer(self._lexer)
 
-    def keyPressEvent(self, event):
-        if event.key() == Qt.Key.Key_Tab and self._lexer.parameter_amount > 0:
+    def startParameterInsertion(self, line: int, indices:list[int], parameter_amount: int):
+        print("<> startParameterInsertion()")
+        pairs = list((i, j+1) for i, j in zip(indices[::2], indices[1::2]))
+        if len(indices)%2 == 1:
+            pairs += (indices[-1], indices[-1])
+
+        self.parameter_position_pairs = pairs
+        self.parameter_line = line
+        self.parameter_line_text = self.text(self.positionFromLineIndex(line, 0), self.positionFromLineIndex(line+1, 0))
+
+        # Draw the boxes TODO : Make it better
+        for start, end in pairs:
+            self.fillIndicatorRange(line, start, line, end, _PARAM_HILIGHT_INDICATOR_ID)
+        
+        # Select the first occurence
+        indexA = indices[0]
+        indexB = indices[1] + 1 # +1 because we need the selection to go after the % sign
+        self.setSelection(line, indexA, line, indexB)
+        #self.parameter_amount = parameter_amount
+
+    def textInserted(self):
+        print("<> textInserted()")
+        if not len(self.parameter_position_pairs) > 0:
+            return
+
+        line, index = self.getCursorPosition()
+        # Not on the same line?
+        if line != self.parameter_line:
+            self.endParameterInsertion()
+            return
+
+        new_line_text = self.text(self.positionFromLineIndex(line, 0), self.positionFromLineIndex(line+1, 0))
+        delta = len(new_line_text) - len(self.parameter_line_text)
+        self.parameter_line_text = new_line_text
+
+        # Update
+        for k, (i, j) in enumerate(self.parameter_position_pairs):
+            if index < i:
+                self.parameter_position_pairs[k] = (i+delta, j+delta)
+            elif index <= j:
+                if j+delta < 0 or j+delta < i:
+                    self.endParameterInsertion()
+                    return
+                self.parameter_position_pairs[k] = (i, j+delta)
+                # Update the box area so that it wraps written text
+                self.fillIndicatorRange(line, i, line, j+delta, _PARAM_HILIGHT_INDICATOR_ID)
+
+
+    def endParameterInsertion(self):
+        print("<> endParameterInsertion()")
+        self.parameter_line = -1
+        self.parameter_position_pairs = []
+        self._clear_all_highlights(_PARAM_HILIGHT_INDICATOR_ID)
+
+    def keyPressEvent(self, event: QKeyEvent):
+        if event.key() == Qt.Key.Key_Escape and len(self.parameter_position_pairs) > 0:
+            self.endParameterInsertion()
+            return
+
+        if event.key() in (Qt.Key.Key_Tab, Qt.Key.Key_Backtab) and len(self.parameter_position_pairs) > 0:
             line, index = self.getCursorPosition()
-            startpos = self.positionFromLineIndex(line, index)
-            endpos = self.positionFromLineIndex(line + 1, 0)
-            searchtext = self.text(startpos, endpos)
-            try:
-                newindexes = [m.start() for m in re.finditer("%", searchtext)]
-                index_begin = newindexes[0] + index
-                index_end = newindexes[1] + index
+            
+            # Not on the same line?
+            if line != self.parameter_line:
+                self.endParameterInsertion()
+                return
 
-                self.setSelection(line, index_begin, line, index_end + 1)
+            # Find the current box, previous and next:
+            previousPair = None
+            currentPair = None
+            nextPair = None
+            nextIsLast = False
+            for k, (i, j) in enumerate(self.parameter_position_pairs):
+                if currentPair is not None:
+                    nextPair = (i, j)
+                    if k == len(self.parameter_position_pairs) - 1:
+                        nextIsLast = True
+                    break
+                if i <= index and index <= j:
+                    currentPair = (i, j)
+            previousPair = self.parameter_position_pairs[k-1] if k > 0 else None
 
-                self._lexer.parameter_amount -= 1
-            except IndexError:
-                self._lexer.parameter_amount = 0
+            # Was not in parameter selection box? (ie user moved it before pressing tab again)
+            if currentPair is None:
+                self.endParameterInsertion()
+                return
+
+            goBackward: bool = (event.modifiers() & Qt.KeyboardModifier.ShiftModifier).value != 0
+            pairToSelect = previousPair if goBackward else nextPair
+
+            if pairToSelect is None:
+                if goBackward:
+                    return
+                else:
+                    self.setCursorPosition(line, currentPair[1])
+                    self.endParameterInsertion()
+                    return
+
+            # Select the next pair or previous pair
+            self.setSelection(line, pairToSelect[0], line, pairToSelect[1])
+
+            # If the next is actually a singular position, and is the last one
+            if not goBackward and nextIsLast and nextPair[0] == nextPair[1]:
+                self.setCursorPosition(line, nextPair[0])
+                self.endParameterInsertion()
                 return
         else:
             super().keyPressEvent(event)
@@ -137,7 +235,7 @@ class IDEScintillaWidget(QsciScintilla):
 
         self._highlight_in_progress = False
 
-    def _clear_all_highlights(self):
+    def _clear_all_highlights(self, id=_HIGHLIGHT_INDICATOR_ID):
         last_line = self.lines() - 1
         last_index = self.lineLength(last_line) - 1
-        self.clearIndicatorRange(0, 0, last_line, last_index, _HIGHLIGHT_INDICATOR_ID)
+        self.clearIndicatorRange(0, 0, last_line, last_index, id)
