@@ -2,6 +2,7 @@ if __name__ == '__main__':
     from PyQt6.QtWidgets import QApplication
     from gui.IDEMainWindow import IDEMainWindow
     from gui.WelcomeDialog import WelcomeDialog
+    import gui.ErrorDialog as ErrorDialog
     from data import IDESettings
     from pathlib import Path
 
@@ -22,10 +23,11 @@ if __name__ == '__main__':
     if not IDESettings.get_autoload_last_game_check() or not game_folder_exists:
         welcome_dialog = WelcomeDialog()
         if welcome_dialog.exec():
-            main_window = IDEMainWindow(welcome_dialog.get_selected_folder_path())
-            main_window.show()
-            app.exec()
-    else:
-        main_window = IDEMainWindow()
-        main_window.show()
-        app.exec()
+            game_folder_path = welcome_dialog.get_selected_folder_path()
+        else:
+            exit()
+
+    main_window = IDEMainWindow(game_folder_path)
+    ErrorDialog.set_ide_main_window(main_window)
+    main_window.show()
+    app.exec()

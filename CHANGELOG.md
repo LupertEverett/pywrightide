@@ -10,6 +10,7 @@
     * String `{}` token completions are with parameter selection after insertion.
   * Better quote support: support for `“` and missing end quote support (by Zetrypio).
   * Allow switching to the next variable(s) with tab key after autocompletion.
+* Added an Error Dialog, that will allow user to see what caused a crash, and copy the information to Clipboard if they wish.
 
 ## Version 1.4.2 - 31.05.2025
 
