@@ -140,6 +140,9 @@ class FileEditWidget(QWidget):
         self.sci.setModified(True)
         self.file_modified.emit()
 
+    def set_highlight_style(self, fill: bool):
+        self.sci.set_highlight_style(fill)
+
     def search_in_file(self, text_to_find: str, find_type: FindType, search_scope: SearchScope):
         if find_type == FindType.FIND_NEXT:
             self.find_next_in_file(text_to_find, search_scope, from_top=False)
