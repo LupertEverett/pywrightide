@@ -153,7 +153,7 @@ class ColorEditorDialog(QDialog):
         self.selected_theme_combobox.clear()
         self.selected_theme_combobox.addItems(EditorThemes.query_available_editor_themes())
 
-    def _handle_color_button_pressed(self, row: int, col: int):
+    def _handle_color_button_pressed(self, row: int, col: int) -> bool:
         current_color = self.color_buttons[row][col].button_color
         color_picker_dialog = QColorDialog(current_color, self)
 
@@ -165,13 +165,18 @@ class ColorEditorDialog(QDialog):
                 self.selected_theme_colors.colors[row].paper_color = color_picker_dialog.currentColor().name(QColor.NameFormat.HexArgb)
             self._current_theme_modified = True
             self._set_bottom_buttons_states()
+            return True
+        return False
 
     def _handle_parameter_boxes_button_pressed(self, row: int, col: int):
         # This variation ensures that alpha is preserved
-        self._handle_color_button_pressed(row, col)
-        self._handle_alpha_spinbox_changed(row, self.parameter_boxes_spinbox.value())
+        if self._handle_color_button_pressed(row, col):
+            self._handle_alpha_spinbox_changed(row, self.parameter_boxes_spinbox.value())
 
     def _handle_alpha_spinbox_changed(self, row: int, value: int):
+        if int(self.selected_theme_colors.colors[row].paper_color[1:3], base=16) != value:
+            self._current_theme_modified = True
+            self._set_bottom_buttons_states()
         self.selected_theme_colors.colors[row].paper_color = ("#%02x"%value) + self.selected_theme_colors.colors[row].paper_color[-6:]
 
     def _handle_save_pressed(self):
