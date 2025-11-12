@@ -95,6 +95,9 @@ class AssetBrowserRootWidget(QDockWidget):
         pygame.mixer.music.stop()
 
     def _check_pygame_events(self):
+        if not pygame.get_init():
+            return
+
         for event in pygame.event.get():
             if event.type == AUDIO_END_EVENT:
                 self.sfx_browser.unset_currently_playing_icon()
