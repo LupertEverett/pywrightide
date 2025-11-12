@@ -19,6 +19,7 @@ class ParameterBoxManager:
         self.parameter_line_text: str|None = None
         self.parent = parent
         parent.indicatorDefine(QsciScintilla.IndicatorStyle.FullBoxIndicator, _PARAM_HILIGHT_INDICATOR_ID)
+        parent.setIndicatorDrawUnder(True, _PARAM_HILIGHT_INDICATOR_ID)
         parent.textChanged.connect(self.textInserted)
 
     def startParameterInsertion(self, line: int, indices:list[int], parameter_amount: int):
@@ -210,10 +211,11 @@ class IDEScintillaWidget(QsciScintilla):
                                          _HIGHLIGHT_INDICATOR_ID)
         self.setIndicatorOutlineColor(QColor(EditorThemes.current_editor_theme.match_highlight_color.paper_color),
                                       _HIGHLIGHT_INDICATOR_ID)
-        self.setIndicatorForegroundColor(QColor("#00000000"),
-                                         _PARAM_HILIGHT_INDICATOR_ID)
-        self.setIndicatorOutlineColor(QColor(EditorThemes.current_editor_theme.parameter_boxes_color.paper_color),
-                                      _PARAM_HILIGHT_INDICATOR_ID)
+
+        # Parameter boxes:
+        parameterBoxColor = EditorThemes.current_editor_theme.parameter_boxes_color.paper_color
+        self.setIndicatorForegroundColor(QColor(parameterBoxColor), _PARAM_HILIGHT_INDICATOR_ID)
+        self.setIndicatorOutlineColor(   QColor("#ff000000"),       _PARAM_HILIGHT_INDICATOR_ID) # Only the alpha channel is used for some reason, as RGB values are taken from the foreground color.
 
     def highlight_all_occurrences(self):
         """Highlights all occurrences of the selected text.
