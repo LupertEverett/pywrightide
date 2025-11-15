@@ -122,8 +122,8 @@ parameters = ["stack", "nowait", "noclear", "hide", "fade", "true", "false", "no
 # sound          str:clicksound           Change blipping sound.
 # delay          int:multiplier           Changes the delay mutliplier per character (aka relative speed), and also does {wait manual}.    
 # spd            float:speed              Change speed of dialogue. Also bypasses {_fullspeed} and {_endfullspeed}, not present in the documentation.
-# _fullspeed     (none) (automatic)       Begin instant text. Unofficially supported, internal used when returning from a macro, not present in the documentation.
-# _endfullspeed  (none) (automatic)       Restore previous speed after instant text. Unofficially supported, internal used when returning from a macro, not present in the documentation.
+# _fullspeed     (none) (automatic)       Begin instant text. Unofficially supported, internally used when returning from a macro, not present in the documentation.
+# _endfullspeed  (none) (automatic)       Restore previous speed after instant text. Unofficially supported, internally used when returning from a macro, not present in the documentation.
 # wait           str: "manual" or "auto"  Change the waiting mode to specified arguments.
 # center         (none) (preparsed)       Centers the text.
 # type           (none)                   Change blipping sound to typewriter.ogg, set delay to 2 (according to code, but 5 according to doc) and wait mode to "manual".
