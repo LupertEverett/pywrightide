@@ -12,6 +12,9 @@
   * Allow switching to the next variable(s) with tab key after autocompletion.
 * Added an Error Dialog, that will allow user to see what caused a crash, and copy the information to Clipboard if they wish.
 * Missing editor and color themes no longer crash the IDE and make it refuse to open until the theme is back somehow, instead it just switches back to defaults.
+* New Game Dialog:
+  * Fixed the error when the user cancels the folder browsing dialog.
+  * Added a link to PyWright website.
 
 ## Version 1.4.2 - 31.05.2025
 
