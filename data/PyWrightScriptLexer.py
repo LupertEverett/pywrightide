@@ -216,7 +216,8 @@ class CustomQsciAPIs(QsciAPIs):
 
                 sci.startParameterInsertion(line, indices, (len(indices) - 2) // 2)
             except Exception as e:
-                print(e)
+                import traceback
+                traceback.print_exception(e)
         elif self._completion_selected == "}":
             index += len(self._completion_selected) - 1 # before the }
             sci.setCursorPosition(line, index)

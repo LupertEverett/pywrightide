@@ -14,7 +14,7 @@ _PARAM_HILIGHT_INDICATOR_ID = 31 # why do we start at 30?
 
 class ParameterBoxManager:
     def __init__(self, parent: "IDEScintillaWidget"):
-        self.parameter_position_pairs: list[(int, int)] = []    # empty if no parameters
+        self.parameter_position_pairs: list[(int, int, bool)] = []    # empty if no parameters, values are (start, end, isStop)
         self.parameter_line: int = -1
         self.parameter_line_text: str|None = None
         self.parent = parent
@@ -23,16 +23,16 @@ class ParameterBoxManager:
         parent.textChanged.connect(self.textInserted)
 
     def startParameterInsertion(self, line: int, indices:list[int], parameter_amount: int):
-        pairs = list((i, j+1) for i, j in zip(indices[::2], indices[1::2]))
+        pairs = list((i, j+1, False) for i, j in zip(indices[::2], indices[1::2]))
         if len(indices)%2 == 1:
-            pairs.append((indices[-1], indices[-1]))
+            pairs.append((indices[-1], indices[-1], True))
 
         self.parameter_position_pairs = pairs
         self.parameter_line = line
         self.parameter_line_text = self.parent.text(line)
 
         # Draw the boxes TODO : Make it better
-        for start, end in pairs:
+        for (start, end, _) in pairs:
             self.parent.fillIndicatorRange(line, start, line, end, _PARAM_HILIGHT_INDICATOR_ID)
         
         # Select the first occurence
@@ -51,20 +51,56 @@ class ParameterBoxManager:
             return
 
         new_line_text = self.parent.text(line)
+        # Because of the way things are handled in QScintilla, if delta is negative then text has been removed,
+        # and if it is positive then text has been added. Replacements of texts are done in two steps (deletion+addition).
         delta = len(new_line_text) - len(self.parameter_line_text)
         self.parameter_line_text = new_line_text
 
+        indexBefore = index - delta if delta < 0 else index
+        indexAfter  = index + delta if delta > 0 else index
+
         # Update
-        for k, (i, j) in enumerate(self.parameter_position_pairs):
-            if index < i:
-                self.parameter_position_pairs[k] = (i+delta, j+delta)
-            elif index <= j:
-                if j+delta < 0 or j+delta < i:
+        inABox = False
+        previousJ = -1
+        for k, (i, j, isStop) in enumerate(self.parameter_position_pairs):
+            # Check Stop Tab positions
+            if index == i and isStop:
+                self.endParameterInsertion()
+                return
+
+            # Check if we are in a box
+            if i <= indexBefore and indexBefore <= j:
+                inABox = True
+
+            # Are we deleting from the first character of a box?
+            if indexBefore == i and delta < 0:
+                self.endParameterInsertion()
+                return
+
+            # Move boxes that are to the right of the selection
+            if indexBefore < i:
+                self.parameter_position_pairs[k] = (i+delta, j+delta, isStop)
+
+            # Update the selected box
+            elif indexBefore <= j:
+                # Check if the indexAfter is not in the same box, meaning it would have erased something partially in the box
+                if (indexAfter < i or indexAfter > j) and delta < 0:
                     self.endParameterInsertion()
                     return
-                self.parameter_position_pairs[k] = (i, j+delta)
-                # Update the box area so that it wraps written text
+                self.parameter_position_pairs[k] = (i, j+delta, isStop)
+
+                # Update the visible box area so that it wraps written text
                 self.parent.fillIndicatorRange(line, i, line, j+delta, _PARAM_HILIGHT_INDICATOR_ID)
+            
+            # Another check to see if boxes are now colliding
+            if previousJ >= i:
+                self.endParameterInsertion()
+                return
+            previousJ = j
+
+        if not inABox:
+            self.endParameterInsertion()
+            return
 
 
     def endParameterInsertion(self):
@@ -86,14 +122,14 @@ class ParameterBoxManager:
             currentPair = None
             nextPair = None
             nextIsLast = False
-            for k, (i, j) in enumerate(self.parameter_position_pairs):
+            for k, (i, j, isStop) in enumerate(self.parameter_position_pairs):
                 if currentPair is not None:
-                    nextPair = (i, j)
+                    nextPair = (i, j, isStop)
                     if k == len(self.parameter_position_pairs) - 1:
                         nextIsLast = True
                     break
                 if i <= index and index <= j:
-                    currentPair = (i, j)
+                    currentPair = (i, j, isStop)
                     previousPair = self.parameter_position_pairs[k-1] if k > 0 else None
 
             # Was not in parameter selection box? (ie user moved it before pressing tab again)
@@ -114,8 +150,8 @@ class ParameterBoxManager:
             # Select the next pair or previous pair
             self.parent.setSelection(line, pairToSelect[0], line, pairToSelect[1])
 
-            # If the next is actually a singular position, and is the last one
-            if not goBackward and nextIsLast and nextPair[0] == nextPair[1]:
+            # If the next is actually a singular position, and is the last one, or if it is a stop
+            if not goBackward and ((nextIsLast and nextPair[0] == nextPair[1]) or nextPair[2]):
                 self.parent.setCursorPosition(line, nextPair[0])
                 self.endParameterInsertion()
                 return
@@ -171,7 +207,8 @@ class IDEScintillaWidget(QsciScintilla):
                 goBackward: bool = event.key() == Qt.Key.Key_Backtab or (event.modifiers() & Qt.KeyboardModifier.ShiftModifier).value != 0
                 self.parameter_manager.moveSelection(goBackward)
             except Exception as e:
-                print(e.__class__.__name__, e)
+                import traceback
+                traceback.print_exception(e)
         else:
             super().keyPressEvent(event)
 
@@ -261,5 +298,5 @@ class IDEScintillaWidget(QsciScintilla):
 
     def _clear_all_highlights(self, id=_HIGHLIGHT_INDICATOR_ID):
         last_line = self.lines() - 1
-        last_index = self.lineLength(last_line) - 1
+        last_index = self.lineLength(last_line)
         self.clearIndicatorRange(0, 0, last_line, last_index, id)
