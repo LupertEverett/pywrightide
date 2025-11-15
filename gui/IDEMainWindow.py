@@ -236,6 +236,9 @@ class IDEMainWindow(QMainWindow):
     def update_toolbar_toggle_buttons(self):
         self._top_toolbar.update_toolbar_toggle_buttons()
 
+    def handle_open_image_viewer_request(self, image_path: str):
+        self.central_widget.open_image_viewer_tab(Path(image_path))
+
     def closeEvent(self, event: QCloseEvent):
         if not self.central_widget.attempt_closing_unsaved_tabs():
             event.ignore()

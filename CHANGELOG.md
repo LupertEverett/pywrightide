@@ -19,6 +19,9 @@
   * Added a "Create New Game" button.
   * Now displays the games' titles if it is provided in data.txt (otherwise it will fallback to folder name)
   * Now displays the games' actual paths, instead of the parent paths.
+* Added a simple Image Viewer that you can activate by double-clicking to an image in Asset Browser.
+  * Mouse scroll to zoom in and out, left click and drag mouse to pan (whenever possible)
+  * Their tabs don't get saved upon closing the IDE.
 
 ## Version 1.4.2 - 31.05.2025
 
