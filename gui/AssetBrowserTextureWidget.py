@@ -24,6 +24,9 @@ class AssetManagerTextureWidget(QWidget):
     # Sends the appropriate command
     command_insert_at_cursor_requested = pyqtSignal(str)
 
+    # Signals the image to be opened in image viewer
+    image_viewer_open_requested = pyqtSignal(str)
+
     def __init__(self, parent=None):
         super().__init__(parent)
         self._pywright_dir = ""
@@ -37,6 +40,7 @@ class AssetManagerTextureWidget(QWidget):
         self._textures_list_view.setSpacing(5)
         self._textures_list_view.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
         self._textures_list_view.customContextMenuRequested.connect(self._handle_texture_context_menu)
+        self._textures_list_view.doubleClicked.connect(self._handle_textures_list_double_click)
 
         self._available_folders: list[str] = []
 
@@ -137,6 +141,9 @@ class AssetManagerTextureWidget(QWidget):
         self._textures_list_view.setModel(fs_model)
         self._textures_list_view.setRootIndex(fs_model.setRootPath(str(folder_path)))
 
+    def _handle_textures_list_double_click(self):
+        self._handle_view_image()
+
     def _handle_combobox_index_changed(self):
         self._refresh_button.setEnabled(self._folders_combo_box.currentIndex() != -1)
         self._refresh_texture_view()
@@ -154,7 +161,9 @@ class AssetManagerTextureWidget(QWidget):
         menu = QMenu()
 
         # Possible actions on Textures
-
+        view_image_action = QAction("View Image", self)
+        view_image_action.triggered.connect(self._handle_view_image)
+        view_image_action.setStatusTip("Open the selected texture in the built-in Image Viewer")
         use_as_game_icon_action = QAction("Use as Game Icon", self)
         use_as_game_icon_action.triggered.connect(self._handle_use_as_game_icon)
         use_as_game_icon_action.setStatusTip("Use the selected texture as the Game Icon")
@@ -174,6 +183,7 @@ class AssetManagerTextureWidget(QWidget):
         if len(indexes) > 0:
             subfolder_name = self.__get_subfolder_name()
 
+            menu.addAction(view_image_action)
             menu.addAction(copy_texture_name_action)
             if subfolder_name in insertable_folders:
                 menu.addAction(use_as_game_icon_action)
@@ -183,6 +193,18 @@ class AssetManagerTextureWidget(QWidget):
         menu.addAction(open_folder_action)
 
         menu.exec(self.mapToGlobal(position))
+
+    def _handle_view_image(self):
+        indexes = self._textures_list_view.selectedIndexes()
+
+        if len(indexes) == 0:
+            return
+
+        index = indexes[0]
+        model: QFileSystemModel = index.model()
+        file_path = model.filePath(index)
+
+        self.image_viewer_open_requested.emit(file_path)
 
     def _handle_texture_name_copy(self):
         clipboard = QGuiApplication.clipboard()
