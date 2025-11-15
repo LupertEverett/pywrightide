@@ -33,7 +33,7 @@ class MainWindowCentralWidget(QWidget):
 
         self.setLayout(layout)
 
-        EditorThemes.current_editor_theme.load_theme(IDESettings.get_editor_color_theme())
+        self._try_loading_editor_theme(IDESettings.get_editor_color_theme())
 
         self.pywright_installation_path: str = ""
         self.selected_game_info: PyWrightGameInfo | None = None
@@ -79,6 +79,7 @@ class MainWindowCentralWidget(QWidget):
         except FileNotFoundError:
             return
         file_edit_widget.file_name_changed.connect(self.handle_rename_tab)
+        EditorThemes.current_editor_theme.load_theme(IDESettings.get_editor_color_theme())
         file_edit_widget.file_modified.connect(self._update_save_button_and_current_tab)
         if self.selected_game_info is not None:
             file_edit_widget.supply_builtin_macros_to_lexer(self.selected_game_info.builtin_macros)
@@ -90,6 +91,20 @@ class MainWindowCentralWidget(QWidget):
         file_edit_widget.selected_text_changed.connect(self._handle_text_selection_changed)
         file_name = Path(file_path).name
         self.open_new_tab(file_edit_widget, file_name if file_name != "" else "New File")
+
+    def _try_loading_editor_theme(self, theme_name: str):
+        """Try loading the editor theme named {theme_name}, on the case of theme missing, load the default editor theme instead.
+            :param theme_name: Name of the editor theme.
+        """
+        try:
+            EditorThemes.current_editor_theme.load_theme(IDESettings.get_editor_color_theme())
+        except EditorThemes.ThemeNotFoundException:
+            theme_name = IDESettings.get_editor_color_theme()
+            QMessageBox.information(self, "Editor Theme Not Found",
+                                    "PyWright IDE couldn't find the editor theme <b>{}</b>!<br>Resetting back to default editor theme.".format(theme_name),
+                                    QMessageBox.StandardButton.Ok, QMessageBox.StandardButton.Ok)
+            EditorThemes.current_editor_theme.reset_colors_to_defaults()
+            IDESettings.set_editor_color_theme("default")
 
     # ==== Changing to a new tab ====
     def _handle_tab_change(self, index: int):
@@ -359,7 +374,8 @@ class MainWindowCentralWidget(QWidget):
         return missing_tabs
 
     def apply_settings(self):
-        EditorThemes.current_editor_theme.load_theme(IDESettings.get_editor_color_theme())
+        self._try_loading_editor_theme(IDESettings.get_editor_color_theme())
+
         for idx in range(self.tabs_count()):
             if not self.is_game_properties_tab(idx):
                 tab: FileEditWidget = self.tab_widget.widget(idx)
