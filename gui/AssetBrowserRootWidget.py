@@ -110,6 +110,9 @@ class AssetBrowserRootWidget(QDockWidget):
 
     def deinit(self):
         self._pymixer_check_timer.stop()
+        while pygame.mixer.get_busy():
+            # Wait until mixer is not busy
+            pass
         pygame.quit()
 
     def _handle_top_level(self, top_level: bool):
