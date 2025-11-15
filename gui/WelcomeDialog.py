@@ -4,6 +4,7 @@ from PyQt6.QtWidgets import QLabel, QDialog, QListView, QPushButton, QHBoxLayout
 from PyQt6.QtGui import QStandardItemModel, QIcon, QCloseEvent, QPixmap, QTextDocument, \
     QAbstractTextDocumentLayout
 
+from .NewGameDialog import NewGameDialog
 from .OpenGameDialog import OpenGameDialog
 
 from data import IDESettings, IconThemes, PyWrightFolder
@@ -68,6 +69,9 @@ class WelcomeDialog(QDialog):
         self.load_selected_button.setEnabled(False)
         self.load_selected_button.clicked.connect(self._handle_load_selected_clicked)
 
+        self.new_game_button = QPushButton("Create New Game")
+        self.new_game_button.clicked.connect(self._handle_new_game_clicked)
+
         self.add_folder_button = QPushButton("Add folder")
         self.add_folder_button.clicked.connect(self._handle_add_folder_clicked)
 
@@ -76,6 +80,7 @@ class WelcomeDialog(QDialog):
 
         # Button layout
         button_layout = QHBoxLayout()
+        button_layout.addWidget(self.new_game_button)
         button_layout.addWidget(self.add_folder_button)
         button_layout.addStretch()
         button_layout.addWidget(self.load_selected_button)
@@ -101,8 +106,16 @@ class WelcomeDialog(QDialog):
 
         self.load_selected_button.setEnabled(sel_row >= 0)
 
+    def _handle_new_game_clicked(self):
+        new_game_dialog = NewGameDialog("", self)
+
+        if new_game_dialog.exec():
+            game_path = str(new_game_dialog.get_new_game().game_path)
+            self.__add_item_to_model(game_path)
+            self._recent_docs.append(game_path)
+
     def _handle_add_folder_clicked(self):
-        picker = QFileDialog.getExistingDirectory()
+        picker = QFileDialog.getExistingDirectory(self)
 
         if picker != "":
             picker = Path(picker)  # Correct the folder separators

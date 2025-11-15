@@ -15,6 +15,10 @@
 * New Game Dialog:
   * Fixed the error when the user cancels the folder browsing dialog.
   * Added a link to PyWright website.
+* Welcome Dialog:
+  * Added a "Create New Game" button.
+  * Now displays the games' titles if it is provided in data.txt (otherwise it will fallback to folder name)
+  * Now displays the games' actual paths, instead of the parent paths.
 
 ## Version 1.4.2 - 31.05.2025
 
