@@ -10,6 +10,9 @@ from data.PyWrightGame import PyWrightGameInfo
 from data import PyWrightFolder
 
 
+_PYWRIGHT_URL_TEXT = """<a href="https://pywright.dawnsoft.org/">(Download PyWright from its official website)</a>"""
+
+
 class NewGameDialog(QDialog):
     """A dialog for creating a new PyWright game"""
 
@@ -23,6 +26,10 @@ class NewGameDialog(QDialog):
         self._pywright_path_edit.setFixedWidth(255)
         self._folder_name_edit = QLineEdit()
         self._folder_name_edit.setFixedWidth(300)
+
+        self._pywright_link_label = QLabel(self)
+        self._pywright_link_label.setText(_PYWRIGHT_URL_TEXT)
+        self._pywright_link_label.setOpenExternalLinks(True)
 
         self._pywright_path_browse_button = QPushButton("...")
         self._pywright_path_browse_button.setFixedWidth(40)
@@ -50,6 +57,7 @@ class NewGameDialog(QDialog):
         main_layout = QVBoxLayout()
 
         main_layout.addLayout(pywright_folder_path_box)
+        main_layout.addWidget(self._pywright_link_label)
         main_layout.addLayout(folder_name_box)
         main_layout.addWidget(self._game_data_widget)
         main_layout.addWidget(self._dialog_box)
@@ -59,14 +67,16 @@ class NewGameDialog(QDialog):
         self.setLayout(main_layout)
 
     def _handle_browse_button_clicked(self):
-        picker = Path(QFileDialog.getExistingDirectory())
+        picker = QFileDialog.getExistingDirectory(self)
 
-        if PyWrightFolder.is_valid_pywright_folder(str(picker)):
-            self._pywright_path_edit.setText(str(picker))
-            self._game_data_widget.change_pywright_path(str(picker))
-        else:
-            QMessageBox.critical(self, "Error", "Selected folder is not a PyWright folder.",
-                                 QMessageBox.StandardButton.Ok)
+        if picker != "":
+            picker = Path(picker)
+            if PyWrightFolder.is_valid_pywright_folder(str(picker)):
+                self._pywright_path_edit.setText(str(picker))
+                self._game_data_widget.change_pywright_path(str(picker))
+            else:
+                QMessageBox.critical(self, "Error", "Selected folder is not a PyWright folder.",
+                                     QMessageBox.StandardButton.Ok)
 
     def _handle_accepted(self):
         folder = self._folder_name_edit.text()

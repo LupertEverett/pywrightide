@@ -30,10 +30,10 @@ def query_available_editor_themes() -> list[str]:
 class EditorColor:
 
     def __init__(self, color_name: str, text_color: str, paper_color: str, style_index: int):
-        self.color_name = color_name     # Color's name, written to the .editortheme file
-        self.text_color = text_color     # Text color
-        self.paper_color = paper_color   # Background color
-        self.style_index = style_index   # Supplied to Lexer
+        self.color_name = color_name  # Color's name, written to the .editortheme file
+        self.text_color = text_color  # Text color
+        self.paper_color = paper_color  # Background color
+        self.style_index = style_index  # Supplied to Lexer
 
     def __str__(self):
         if self.text_color == "":
@@ -42,24 +42,77 @@ class EditorColor:
             return "{}={},{}".format(self.color_name, self.text_color, self.paper_color)
 
 
+# Default color theme
+# For falling back in the case of a theme missing
+_DEFAULT_STYLE_TEXT_COLOR = "#ff000000"
+_DEFAULT_STYLE_PAPER_COLOR = "#ffffffff"
+
+_DEFAULT_COMMANDS_TEXT_COLOR = "#ff00007f"
+_DEFAULT_COMMANDS_PAPER_COLOR = "#ffffffff"
+
+_DEFAULT_SPECIAL_VARIABLES_TEXT_COLOR = "#ff007f00"
+_DEFAULT_SPECIAL_VARIABLES_PAPER_COLOR = "#ffffffff"
+
+_DEFAULT_PARAMETERS_TEXT_COLOR = "#ff7f0000"
+_DEFAULT_PARAMETERS_PAPER_COLOR = "#ffffffff"
+
+_DEFAULT_COMMENTS_TEXT_COLOR = "#ffa0a0a0"
+_DEFAULT_COMMENTS_PAPER_COLOR = "#ffffffff"
+
+_DEFAULT_STRINGS_TEXT_COLOR = "#ff707000"
+_DEFAULT_STRINGS_PAPER_COLOR = "#ffffffff"
+
+_DEFAULT_NUMBERS_TEXT_COLOR = "#ff00a0a0"
+_DEFAULT_NUMBERS_PAPER_COLOR = "#ffffffff"
+
+_DEFAULT_BUILTIN_MACROS_TEXT_COLOR = "#ff0000dd"
+_DEFAULT_BUILTIN_MACROS_PAPER_COLOR = "#ffffffff"
+
+_DEFAULT_GAME_MACROS_TEXT_COLOR = "#ff4f00ff"
+_DEFAULT_GAME_MACROS_PAPER_COLOR = "#ffffffff"
+
+_DEFAULT_STRING_TOKENS_TEXT_COLOR = "#ff00af00"
+_DEFAULT_STRING_TOKENS_PAPER_COLOR = "#ffffffff"
+
+_DEFAULT_EDITOR_MARGIN_TEXT_COLOR = "#ff000000"
+_DEFAULT_EDITOR_MARGIN_PAPER_COLOR = "#ffffffff"
+
+_DEFAULT_EDITOR_MARGIN_BORDER_PAPER_COLOR = "#ff303030"
+
+_DEFAULT_CARET_PAPER_COLOR = "#ffffffff"
+
+_DEFAULT_MATCHINGTEXT_PAPER_COLOR = "#ff3ee2e8"
+
+_DEFAULT_PARAMETER_BOX_PAPER_COLOR = "#2f0000ff"
+
+
 class EditorColorTheme:
 
     def __init__(self):
-        self.default_style_color = EditorColor("default",  "#ff000000", "#ffffffff", 0)
-        self.commands_color = EditorColor("commands",  "#ff00007f", "#ffffffff", 1)
-        self.special_variables_color = EditorColor("specialvars", "#ff007f00", "#ffffffff", 2)
-        self.parameters_color = EditorColor("parameters", "#ff7f0000", "#ffffffff", 3)
-        self.line_comments_color = EditorColor("comments", "#ffa0a0a0", "#ffffffff", 4)
-        self.string_literals_color = EditorColor("strings", "#ff707000", "#ffffffff", 5)
-        self.numbers_color = EditorColor("numbers", "#ff00a0a0", "#ffffffff", 6)
-        self.builtin_macros_color = EditorColor("builtinmacros", "#ff0000dd", "#ffffffff", 7)
-        self.game_macros_color = EditorColor("gamemacros", "#ff4f00ff", "#ffffffff", 8)
-        self.string_tokens_color = EditorColor("stringtokens", "#ff00af00", "#ffffffff", 9)
-        self.editor_margin_color = EditorColor("editormargin", "#ff000000", "#ffffffff", 0)
-        self.editor_margin_border_color = EditorColor("editormarginborder", "", "#ff303030", 0)
-        self.caret_color = EditorColor("caret", "", "#ffffffff", 0)
-        self.match_highlight_color = EditorColor("matchingtext", "", "#ff3ee2e8", 0)
-        self.parameter_boxes_color = EditorColor("parameterboxes", "", "#ff7f7f7f", 0)
+        self.default_style_color = EditorColor("default", _DEFAULT_STYLE_TEXT_COLOR, _DEFAULT_STYLE_PAPER_COLOR, 0)
+        self.commands_color = EditorColor("commands", _DEFAULT_COMMANDS_TEXT_COLOR, _DEFAULT_COMMANDS_PAPER_COLOR, 1)
+        self.special_variables_color = EditorColor("specialvars", _DEFAULT_SPECIAL_VARIABLES_TEXT_COLOR,
+                                                   _DEFAULT_SPECIAL_VARIABLES_PAPER_COLOR, 2)
+        self.parameters_color = EditorColor("parameters", _DEFAULT_PARAMETERS_TEXT_COLOR,
+                                            _DEFAULT_PARAMETERS_PAPER_COLOR, 3)
+        self.line_comments_color = EditorColor("comments", _DEFAULT_COMMENTS_TEXT_COLOR, _DEFAULT_COMMENTS_PAPER_COLOR,
+                                               4)
+        self.string_literals_color = EditorColor("strings", _DEFAULT_STRINGS_TEXT_COLOR, _DEFAULT_STRINGS_PAPER_COLOR,
+                                                 5)
+        self.numbers_color = EditorColor("numbers", _DEFAULT_NUMBERS_TEXT_COLOR, _DEFAULT_NUMBERS_PAPER_COLOR, 6)
+        self.builtin_macros_color = EditorColor("builtinmacros", _DEFAULT_BUILTIN_MACROS_TEXT_COLOR,
+                                                _DEFAULT_BUILTIN_MACROS_PAPER_COLOR, 7)
+        self.game_macros_color = EditorColor("gamemacros", _DEFAULT_GAME_MACROS_TEXT_COLOR,
+                                             _DEFAULT_GAME_MACROS_PAPER_COLOR, 8)
+        self.string_tokens_color = EditorColor("stringtokens", _DEFAULT_STRING_TOKENS_TEXT_COLOR,
+                                               _DEFAULT_STRING_TOKENS_PAPER_COLOR, 9)
+        self.editor_margin_color = EditorColor("editormargin", _DEFAULT_EDITOR_MARGIN_TEXT_COLOR,
+                                               _DEFAULT_EDITOR_MARGIN_PAPER_COLOR, 0)
+        self.editor_margin_border_color = EditorColor("editormarginborder", "",
+                                                      _DEFAULT_EDITOR_MARGIN_BORDER_PAPER_COLOR, 0)
+        self.caret_color = EditorColor("caret", "", _DEFAULT_CARET_PAPER_COLOR, 0)
+        self.match_highlight_color = EditorColor("matchingtext", "", _DEFAULT_MATCHINGTEXT_PAPER_COLOR, 0)
+        self.parameter_boxes_color = EditorColor("parameterboxes", "", _DEFAULT_PARAMETER_BOX_PAPER_COLOR, 0)
 
         self.colors = [self.default_style_color, self.commands_color, self.special_variables_color,
                        self.parameters_color, self.line_comments_color, self.string_literals_color,
@@ -69,7 +122,7 @@ class EditorColorTheme:
 
     def __load_from_file(self, file_path: Path):
         if not file_path.exists() or not file_path.is_file():
-            raise FileNotFoundError("Editor theme {} does not exist!".format(str(file_path)))
+            raise ThemeNotFoundException("Editor theme {} does not exist!".format(str(file_path)))
 
         with open(file_path, "r") as f:
             all_lines = f.readlines()
@@ -136,6 +189,47 @@ class EditorColorTheme:
             for color in self.colors:
                 f.write(str(color) + "\n")
 
+    def reset_colors_to_defaults(self):
+        self.default_style_color.text_color = _DEFAULT_STYLE_TEXT_COLOR
+        self.default_style_color.paper_color = _DEFAULT_STYLE_PAPER_COLOR
+
+        self.commands_color.text_color = _DEFAULT_COMMANDS_TEXT_COLOR
+        self.commands_color.paper_color = _DEFAULT_COMMANDS_PAPER_COLOR
+
+        self.special_variables_color.text_color = _DEFAULT_SPECIAL_VARIABLES_TEXT_COLOR
+        self.special_variables_color.paper_color = _DEFAULT_SPECIAL_VARIABLES_PAPER_COLOR
+
+        self.parameters_color.text_color = _DEFAULT_PARAMETERS_TEXT_COLOR
+        self.parameters_color.paper_color = _DEFAULT_PARAMETERS_PAPER_COLOR
+
+        self.line_comments_color.text_color = _DEFAULT_COMMENTS_TEXT_COLOR
+        self.line_comments_color.paper_color = _DEFAULT_COMMENTS_PAPER_COLOR
+
+        self.string_literals_color.text_color = _DEFAULT_STRINGS_TEXT_COLOR
+        self.string_literals_color.paper_color = _DEFAULT_STRINGS_PAPER_COLOR
+
+        self.numbers_color.text_color = _DEFAULT_NUMBERS_TEXT_COLOR
+        self.numbers_color.paper_color = _DEFAULT_NUMBERS_PAPER_COLOR
+
+        self.builtin_macros_color.text_color = _DEFAULT_BUILTIN_MACROS_TEXT_COLOR
+        self.builtin_macros_color.paper_color = _DEFAULT_BUILTIN_MACROS_PAPER_COLOR
+
+        self.game_macros_color.text_color = _DEFAULT_GAME_MACROS_TEXT_COLOR
+        self.game_macros_color.paper_color = _DEFAULT_GAME_MACROS_PAPER_COLOR
+
+        self.string_tokens_color.text_color = _DEFAULT_STRING_TOKENS_TEXT_COLOR
+        self.string_tokens_color.paper_color = _DEFAULT_STRING_TOKENS_PAPER_COLOR
+
+        self.editor_margin_color.text_color = _DEFAULT_EDITOR_MARGIN_TEXT_COLOR
+        self.editor_margin_color.paper_color = _DEFAULT_EDITOR_MARGIN_PAPER_COLOR
+
+        self.editor_margin_border_color.paper_color = _DEFAULT_EDITOR_MARGIN_BORDER_PAPER_COLOR
+
+        self.caret_color.paper_color = _DEFAULT_CARET_PAPER_COLOR
+
+        self.match_highlight_color.paper_color = _DEFAULT_MATCHINGTEXT_PAPER_COLOR
+        
+        self.parameter_boxes_color = _DEFAULT_PARAMETER_BOX_PAPER_COLOR
 
     @staticmethod
     def load_from_theme_name(theme_name: str):
@@ -147,3 +241,7 @@ class EditorColorTheme:
 
 # Global editor theme variable
 current_editor_theme = EditorColorTheme()
+
+
+class ThemeNotFoundException(Exception):
+    pass

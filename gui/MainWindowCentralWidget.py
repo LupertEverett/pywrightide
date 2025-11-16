@@ -8,6 +8,7 @@ from data.PyWrightGame import PyWrightGameInfo
 from .FileEditWidget import FileEditWidget
 from .FindReplaceDialog import SearchScope, FindType, ReplaceType
 from .GamePropertiesWidget import GamePropertiesWidget
+from .ImageViewerWidget import ImageViewerWidget
 
 
 class MainWindowCentralWidget(QWidget):
@@ -33,7 +34,7 @@ class MainWindowCentralWidget(QWidget):
 
         self.setLayout(layout)
 
-        EditorThemes.current_editor_theme.load_theme(IDESettings.get_editor_color_theme())
+        self._try_loading_editor_theme(IDESettings.get_editor_color_theme())
 
         self.pywright_installation_path: str = ""
         self.selected_game_info: PyWrightGameInfo | None = None
@@ -61,11 +62,21 @@ class MainWindowCentralWidget(QWidget):
 
         self.open_new_tab(self._game_properties_widget, "Game Properties")
 
+    def open_image_viewer_tab(self, image_path: Path):
+        for i in range(self.tab_widget.count()):
+            if isinstance(self.tab_widget.widget(i), ImageViewerWidget) and self.tab_widget.widget(i).get_image_path() == image_path:
+                self.tab_widget.setCurrentIndex(i)
+                return
+
+        image_viewer_widget = ImageViewerWidget(image_path, self)
+        image_name = image_path.name
+        self.open_new_tab(image_viewer_widget, "Image Viewer - {}".format(image_name))
+
     def open_new_editing_tab(self, file_path: str):
         # Don't open a file editing tab if there is already one open for a given file
         for i in range(self.tab_widget.count()):
-            # Skip Game Properties tab
-            if self.is_game_properties_tab(i):
+            # Skip non-File editor tabs
+            if not self.is_file_editing_tab(i):
                 continue
 
             opened_tab: FileEditWidget = self.tab_widget.widget(i)
@@ -79,6 +90,7 @@ class MainWindowCentralWidget(QWidget):
         except FileNotFoundError:
             return
         file_edit_widget.file_name_changed.connect(self.handle_rename_tab)
+        EditorThemes.current_editor_theme.load_theme(IDESettings.get_editor_color_theme())
         file_edit_widget.file_modified.connect(self._update_save_button_and_current_tab)
         if self.selected_game_info is not None:
             file_edit_widget.supply_builtin_macros_to_lexer(self.selected_game_info.builtin_macros)
@@ -91,10 +103,24 @@ class MainWindowCentralWidget(QWidget):
         file_name = Path(file_path).name
         self.open_new_tab(file_edit_widget, file_name if file_name != "" else "New File")
 
+    def _try_loading_editor_theme(self, theme_name: str):
+        """Try loading the editor theme named {theme_name}, on the case of theme missing, load the default editor theme instead.
+            :param theme_name: Name of the editor theme.
+        """
+        try:
+            EditorThemes.current_editor_theme.load_theme(IDESettings.get_editor_color_theme())
+        except EditorThemes.ThemeNotFoundException:
+            theme_name = IDESettings.get_editor_color_theme()
+            QMessageBox.information(self, "Editor Theme Not Found",
+                                    "PyWright IDE couldn't find the editor theme <b>{}</b>!<br>Resetting back to default editor theme.".format(theme_name),
+                                    QMessageBox.StandardButton.Ok, QMessageBox.StandardButton.Ok)
+            EditorThemes.current_editor_theme.reset_colors_to_defaults()
+            IDESettings.set_editor_color_theme("default")
+
     # ==== Changing to a new tab ====
     def _handle_tab_change(self, index: int):
         condition = self.tab_widget.count() > 0 and \
-                    not self.is_game_properties_tab(index) and \
+                    self.is_file_editing_tab(index) and \
                     self.tab_widget.currentWidget().is_file_modified()
 
         self.update_save_button_requested.emit(condition)
@@ -104,18 +130,21 @@ class MainWindowCentralWidget(QWidget):
     def _update_line_and_col(self):
         if self.tabs_count() == 0:
             self.current_tab_cursor_position_changed.emit(-1, -1)
-        elif not self.is_game_properties_tab(self.tab_widget.currentIndex()):
+        elif self.is_file_editing_tab(self.tab_widget.currentIndex()):
             (line, col) = self.tab_widget.widget(self.tab_widget.currentIndex()).get_current_cursor_position()
             self.current_tab_cursor_position_changed.emit(line + 1, col + 1)
         else:
             self.current_tab_cursor_position_changed.emit(-1, -1)
 
     def _handle_text_selection_changed(self):
-        if self.tabs_count() == 0 or self.is_game_properties_tab(self.tab_widget.currentIndex()):
+        if self.tabs_count() == 0 or not self.is_file_editing_tab(self.tab_widget.currentIndex()):
             self.selection_length_changed.emit(-1)
         else:
             selection_length = self.tab_widget.widget(self.tab_widget.currentIndex()).get_selection_length()
             self.selection_length_changed.emit(selection_length)
+
+    def is_file_editing_tab(self, index: int):
+        return isinstance(self.tab_widget.widget(index), FileEditWidget)
 
     def is_game_properties_tab(self, index: int):
         return isinstance(self.tab_widget.widget(index), GamePropertiesWidget)
@@ -126,7 +155,7 @@ class MainWindowCentralWidget(QWidget):
 
     # ==== Saving a tab ====
     def handle_save_tab(self):
-        if not self.is_game_properties_tab(self.tab_widget.currentIndex()):
+        if self.is_file_editing_tab(self.tab_widget.currentIndex()):
             self.tab_widget.currentWidget().save_to_file()
             self._update_save_button_and_current_tab()
 
@@ -136,7 +165,7 @@ class MainWindowCentralWidget(QWidget):
     def _update_tab_modified_infos(self):
         # Like _update_save_button() but for all tabs
         for idx in range(self.tab_widget.count()):
-            if self.is_game_properties_tab(idx):
+            if not self.is_file_editing_tab(idx):
                 continue
 
             self._update_file_editing_tab_info(idx)
@@ -152,7 +181,7 @@ class MainWindowCentralWidget(QWidget):
 
     # ==== Removing a tab ====
     def _handle_remove_tab(self, index):
-        if not self.is_game_properties_tab(index):
+        if self.is_file_editing_tab(index):
             tab: FileEditWidget = self.tab_widget.widget(index)
 
             if tab.is_file_modified():
@@ -174,7 +203,7 @@ class MainWindowCentralWidget(QWidget):
         for tab_idx in range(self.tabs_count()):
             if self.is_game_properties_tab(tab_idx):
                 result.append("Game Properties")
-            else:
+            elif self.is_file_editing_tab(tab_idx):
                 file_widget: FileEditWidget = self.tab_widget.widget(tab_idx)
                 result.append(file_widget.file_path)
 
@@ -211,7 +240,7 @@ class MainWindowCentralWidget(QWidget):
             # If nothing is open, inform the user and do nothing.
             QMessageBox.information(self, "Find/Replace", "There are no tabs open.")
             return
-        if not self.is_game_properties_tab(self.tab_widget.currentIndex()):
+        if self.is_file_editing_tab(self.tab_widget.currentIndex()):
             file_widget: FileEditWidget = self.tab_widget.currentWidget()
             file_widget.search_in_file(text, find_type, search_scope)
 
@@ -224,7 +253,7 @@ class MainWindowCentralWidget(QWidget):
         if replace_type == ReplaceType.REPLACE_ALL and search_scope == SearchScope.OPEN_TABS:
             self.replace_all_in_all_open_tabs(text_to_find, text_to_replace)
             return
-        if not self.is_game_properties_tab(self.tab_widget.currentIndex()):
+        if self.is_file_editing_tab(self.tab_widget.currentIndex()):
             file_widget: FileEditWidget = self.tab_widget.currentWidget()
             file_widget.replace_in_file(text_to_find, text_to_replace, replace_type, search_scope)
 
@@ -243,7 +272,7 @@ class MainWindowCentralWidget(QWidget):
             return
 
         for idx in range(current_position + 1, tabs_count):
-            if self.is_game_properties_tab(idx):
+            if not self.is_file_editing_tab(idx):
                 continue
 
             curr_widget: FileEditWidget = self.tab_widget.widget(idx)
@@ -271,7 +300,7 @@ class MainWindowCentralWidget(QWidget):
             return
 
         for idx in range(current_position).__reversed__():
-            if self.is_game_properties_tab(idx):
+            if not self.is_file_editing_tab(idx):
                 continue
 
             curr_widget: FileEditWidget = self.tab_widget.widget(idx)
@@ -301,7 +330,7 @@ class MainWindowCentralWidget(QWidget):
             return
 
         for idx in range(current_position + 1, tabs_count):
-            if self.is_game_properties_tab(idx):
+            if not self.is_file_editing_tab(idx):
                 continue
 
             curr_widget: FileEditWidget = self.tab_widget.widget(idx)
@@ -320,7 +349,7 @@ class MainWindowCentralWidget(QWidget):
         tab_count = self.tab_widget.count()
 
         for idx in range(tab_count):
-            if self.is_game_properties_tab(idx):
+            if not self.is_file_editing_tab(idx):
                 continue
 
             curr_tab: FileEditWidget = self.tab_widget.widget(idx)
@@ -359,9 +388,10 @@ class MainWindowCentralWidget(QWidget):
         return missing_tabs
 
     def apply_settings(self):
-        EditorThemes.current_editor_theme.load_theme(IDESettings.get_editor_color_theme())
+        self._try_loading_editor_theme(IDESettings.get_editor_color_theme())
+
         for idx in range(self.tabs_count()):
-            if not self.is_game_properties_tab(idx):
+            if self.is_file_editing_tab(idx):
                 tab: FileEditWidget = self.tab_widget.widget(idx)
                 tab.supply_font_properties_to_lexer(IDESettings.get_font_name(),
                                                     IDESettings.get_font_size(),
@@ -376,8 +406,8 @@ class MainWindowCentralWidget(QWidget):
             QMessageBox.critical(self, "Error", "There are no tabs open!")
             return
 
-        # Don't do anything if Game Properties is open
-        if self.is_game_properties_tab(self.tab_widget.currentIndex()):
+        # Don't do anything if the open tab isn't a file editing tab
+        if not self.is_file_editing_tab(self.tab_widget.currentIndex()):
             QMessageBox.critical(self, "Error", "Current tab is not a script editing tab!")
             return
 
@@ -398,7 +428,7 @@ class MainWindowCentralWidget(QWidget):
         result = []
 
         for i in range(self.tabs_count()):
-            if self.is_game_properties_tab(i):
+            if not self.is_file_editing_tab(i):
                 continue
 
             tab: FileEditWidget = self.tab_widget.widget(i)

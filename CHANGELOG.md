@@ -10,7 +10,20 @@
     * String `{}` token completions are with parameter selection after insertion.
   * Better quote support: support for `“` and missing end quote support (by Zetrypio).
   * Allow switching to the next variable(s) with tab key after autocompletion.
+  * Added new preferences configuration for the parameter boxes color and opacity values.
+    * Note that if you're using a custom editor color theme, you might need to update it to account for the boxes color and opacity.
 * Added an Error Dialog, that will allow user to see what caused a crash, and copy the information to Clipboard if they wish.
+* Missing editor and color themes no longer crash the IDE and make it refuse to open until the theme is back somehow, instead it just switches back to defaults.
+* New Game Dialog:
+  * Fixed the error when the user cancels the folder browsing dialog.
+  * Added a link to PyWright website.
+* Welcome Dialog:
+  * Added a "Create New Game" button.
+  * Now displays the games' titles if it is provided in data.txt (otherwise it will fallback to folder name)
+  * Now displays the games' actual paths, instead of the parent paths.
+* Added a simple Image Viewer that you can activate by double-clicking to an image in Asset Browser.
+  * Mouse scroll to zoom in and out, left click and drag mouse to pan (whenever possible)
+  * Their tabs don't get saved upon closing the IDE.
 
 ## Version 1.4.2 - 31.05.2025
 

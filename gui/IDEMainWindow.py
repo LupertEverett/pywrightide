@@ -214,7 +214,18 @@ class IDEMainWindow(QMainWindow):
         self._top_toolbar.update_recent_folders_list()
 
     def _apply_new_color_theme(self):
-        self.setStyleSheet(ColorThemes.load_current_color_theme())
+        try:
+            stylesheet = ColorThemes.load_current_color_theme()
+        except FileNotFoundError:
+            theme_name = IDESettings.get_color_theme()
+            QMessageBox.information(self, "Color Theme Not Found",
+                                    "PyWright IDE couldn't find the color theme <b>{}</b>!<br>Resetting back to system theme.".format(
+                                        theme_name),
+                                    QMessageBox.StandardButton.Ok, QMessageBox.StandardButton.Ok)
+            IDESettings.set_color_theme("System Theme")
+            stylesheet = ""
+
+        self.setStyleSheet(stylesheet)
 
     def attempt_closing_unsaved_tabs(self) -> bool:
         return self.central_widget.attempt_closing_unsaved_tabs()
@@ -224,6 +235,9 @@ class IDEMainWindow(QMainWindow):
 
     def update_toolbar_toggle_buttons(self):
         self._top_toolbar.update_toolbar_toggle_buttons()
+
+    def handle_open_image_viewer_request(self, image_path: str):
+        self.central_widget.open_image_viewer_tab(Path(image_path))
 
     def closeEvent(self, event: QCloseEvent):
         if not self.central_widget.attempt_closing_unsaved_tabs():

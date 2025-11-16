@@ -54,6 +54,8 @@ class AssetBrowserRootWidget(QDockWidget):
         self.music_browser = AssetBrowserAudioWidget(AudioType.Music, self)
         self.sfx_browser = AssetBrowserAudioWidget(AudioType.Sfx, self)
 
+        self.texture_browser.image_viewer_open_requested.connect(self._handle_image_viewer_open_request)
+
         self.music_browser.audio_play_requested.connect(self._handle_audio_player_play)
         self.music_browser.audio_stop_requested.connect(self._handle_audio_player_stop)
 
@@ -82,6 +84,11 @@ class AssetBrowserRootWidget(QDockWidget):
         from .IDEMainWindow import IDEMainWindow
         ide_main_window: IDEMainWindow = self.parent()
         ide_main_window.update_toolbar_toggle_buttons()
+
+    def _handle_image_viewer_open_request(self, image_path):
+        from .IDEMainWindow import IDEMainWindow
+        ide_main_window: IDEMainWindow = self.parent()
+        ide_main_window.handle_open_image_viewer_request(image_path)
 
     def _handle_audio_player_play(self, path: str):
         if pygame.mixer.get_busy():
