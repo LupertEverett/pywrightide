@@ -1,5 +1,5 @@
-from PyQt6.QtCore import Qt, QPoint
-from PyQt6.QtGui import QPalette, QImageReader, QPixmap, QWheelEvent, QMouseEvent
+from PyQt6.QtCore import Qt
+from PyQt6.QtGui import QPalette, QImageReader, QPixmap, QWheelEvent
 from PyQt6.QtWidgets import QMessageBox, QGraphicsView, QGraphicsScene, QGraphicsPixmapItem
 
 from pathlib import Path
