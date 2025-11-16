@@ -19,9 +19,6 @@ class ImageViewerWidget(QGraphicsView):
 
         self._photo = QGraphicsPixmapItem()
 
-        self._panning_mode = False
-        self._mouse_start_pos = QPoint()
-
         self._graphics_scene.addItem(self._photo)
         self.setScene(self._graphics_scene)
 
@@ -30,6 +27,8 @@ class ImageViewerWidget(QGraphicsView):
         self.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         self.setBackgroundRole(QPalette.ColorRole.Dark)
+
+        self.setDragMode(QGraphicsView.DragMode.ScrollHandDrag)
 
         if str(image_path) != "":
             self.load_image()
@@ -73,33 +72,3 @@ class ImageViewerWidget(QGraphicsView):
             return
 
         self.scale(zoom_factor, zoom_factor)
-
-    def mousePressEvent(self, event: QMouseEvent):
-        if event.buttons() == Qt.MouseButton.LeftButton:
-            self._panning_mode = True
-            self._mouse_start_pos = event.pos()
-            self.setCursor(Qt.CursorShape.ClosedHandCursor)
-            event.accept()
-            return
-        else:
-            super().mousePressEvent(event)
-
-    def mouseMoveEvent(self, event: QMouseEvent):
-        if self._panning_mode and event.buttons() == Qt.MouseButton.LeftButton:
-            delta = event.pos() - self._mouse_start_pos
-            self._mouse_start_pos = event.pos()
-
-            self.horizontalScrollBar().setValue(self.horizontalScrollBar().value() - delta.x())
-            self.verticalScrollBar().setValue(self.verticalScrollBar().value() - delta.y())
-
-            event.accept()
-        else:
-            super().mouseMoveEvent(event)
-
-    def mouseReleaseEvent(self, event: QMouseEvent):
-        self.setCursor(Qt.CursorShape.ArrowCursor)
-        if event.buttons() == Qt.MouseButton.LeftButton and self._panning_mode:
-            self._panning_mode = False
-            event.accept()
-        else:
-            super().mouseReleaseEvent(event)
