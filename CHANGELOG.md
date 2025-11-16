@@ -10,6 +10,8 @@
     * String `{}` token completions are with parameter selection after insertion.
   * Better quote support: support for `“` and missing end quote support (by Zetrypio).
   * Allow switching to the next variable(s) with tab key after autocompletion.
+  * Added new preferences configuration for the parameter boxes color and opacity values.
+    * Note that if you're using a custom editor color theme, you might need to update it to account for the boxes color and opacity.
 * Added an Error Dialog, that will allow user to see what caused a crash, and copy the information to Clipboard if they wish.
 * Missing editor and color themes no longer crash the IDE and make it refuse to open until the theme is back somehow, instead it just switches back to defaults.
 * New Game Dialog:

@@ -122,8 +122,8 @@ parameters = ["stack", "nowait", "noclear", "hide", "fade", "true", "false", "no
 # sound          str:clicksound           Change blipping sound.
 # delay          int:multiplier           Changes the delay mutliplier per character (aka relative speed), and also does {wait manual}.    
 # spd            float:speed              Change speed of dialogue. Also bypasses {_fullspeed} and {_endfullspeed}, not present in the documentation.
-# _fullspeed     (none) (automatic)       Begin instant text. Unofficially supported, internal used when returning from a macro, not present in the documentation.
-# _endfullspeed  (none) (automatic)       Restore previous speed after instant text. Unofficially supported, internal used when returning from a macro, not present in the documentation.
+# _fullspeed     (none) (automatic)       Begin instant text. Unofficially supported, internally used when returning from a macro, not present in the documentation.
+# _endfullspeed  (none) (automatic)       Restore previous speed after instant text. Unofficially supported, internally used when returning from a macro, not present in the documentation.
 # wait           str: "manual" or "auto"  Change the waiting mode to specified arguments.
 # center         (none) (preparsed)       Centers the text.
 # type           (none)                   Change blipping sound to typewriter.ogg, set delay to 2 (according to code, but 5 according to doc) and wait mode to "manual".
@@ -175,7 +175,7 @@ class CustomQsciAPIs(QsciAPIs):
 
         self._has_just_inserted = 0                 # counter for _after_completion_is_applied()
         self._completion_selected :str|None = None  # Either the text to insert or None if no such text
-        
+
         # Connect events
         sci: QsciScintilla = self.lexer().parent()
         sci.selectionChanged.connect(self._after_completion_is_applied)
@@ -197,20 +197,27 @@ class CustomQsciAPIs(QsciAPIs):
 
         # Here we know that we are on the correct invocation, therefore make sure it will not be triggered again before the next completion
         self._has_just_inserted = 0
-        
+
         # Get cursor position
-        sci: QsciScintilla = self.lexer().parent()
         lexer: PyWrightScriptLexer = self.lexer()
+        sci: QsciScintilla = lexer.parent()
         line, index = sci.getCursorPosition()
 
         # Move cursor: if there are a pair of %, then select it, otherwise move the cursor right before the } if it is only that, otherwise move it after.
         if self._completion_selected.count("%") >= 2:
-            indexes = [m.start() for m in re.finditer("%", self._completion_selected)]
+            try:
+                indices = [index + m.start() for m in re.finditer("%", self._completion_selected)]
+                lineText = sci.text(line).lstrip()
+                
+                # When completing in a quote line, it must be from a {} token, therefore add a tab position after the }
+                if lineText.startswith('"') or lineText.startswith('“'):
+                    tabPosition = index + len(self._completion_selected)
+                    indices.append(tabPosition)
 
-            indexA = index + indexes[0]
-            indexB = index + indexes[1] + 1 # +1 because we need the selection to go after the % sign
-            sci.setSelection(line, indexA, line, indexB)
-            lexer.parameter_amount = (len(indexes) - 2) // 2
+                sci.startParameterInsertion(line, indices, (len(indices) - 2) // 2)
+            except Exception as e:
+                import traceback
+                traceback.print_exception(e)
         elif self._completion_selected == "}":
             index += len(self._completion_selected) - 1 # before the }
             sci.setCursorPosition(line, index)
@@ -309,8 +316,6 @@ class PyWrightScriptLexer(QsciLexerCustom):
 
         self.builtin_macros: list[str] = []
         self.game_macros: list[str] = []
-
-        self.parameter_amount: int = 0 # Amount of parameters coming from autocompletion
 
         # Create a custom API to manage custom autocompletion
         api = CustomQsciAPIs(self)

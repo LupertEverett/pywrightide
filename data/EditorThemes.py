@@ -16,6 +16,7 @@
 # editormarginborder: Special margin reserved for acting like a border between line number area and text area
 # caret: The vertical line on the text editing area that indicates the position, and also blinks.
 # matchingtext: Highlight color on matching text occurrences.
+# parameterboxes: Outline of the parameter boxes
 #
 # Lines follow the format: "[Text Color],[Paper (Background) Color]", where each color is formatted as "#aarrggbb"
 
@@ -82,6 +83,8 @@ _DEFAULT_CARET_PAPER_COLOR = "#ffffffff"
 
 _DEFAULT_MATCHINGTEXT_PAPER_COLOR = "#ff3ee2e8"
 
+_DEFAULT_PARAMETER_BOX_PAPER_COLOR = "#2f0000ff"
+
 
 class EditorColorTheme:
 
@@ -109,12 +112,13 @@ class EditorColorTheme:
                                                       _DEFAULT_EDITOR_MARGIN_BORDER_PAPER_COLOR, 0)
         self.caret_color = EditorColor("caret", "", _DEFAULT_CARET_PAPER_COLOR, 0)
         self.match_highlight_color = EditorColor("matchingtext", "", _DEFAULT_MATCHINGTEXT_PAPER_COLOR, 0)
+        self.parameter_boxes_color = EditorColor("parameterboxes", "", _DEFAULT_PARAMETER_BOX_PAPER_COLOR, 0)
 
         self.colors = [self.default_style_color, self.commands_color, self.special_variables_color,
                        self.parameters_color, self.line_comments_color, self.string_literals_color,
                        self.numbers_color, self.builtin_macros_color, self.game_macros_color,
                        self.string_tokens_color, self.editor_margin_color, self.editor_margin_border_color,
-                       self.caret_color, self.match_highlight_color]
+                       self.caret_color, self.match_highlight_color, self.parameter_boxes_color]
 
     def __load_from_file(self, file_path: Path):
         if not file_path.exists() or not file_path.is_file():
@@ -171,6 +175,8 @@ class EditorColorTheme:
                         self.caret_color.paper_color = values[0]
                     case "matchingtext":
                         self.match_highlight_color.paper_color = values[0]
+                    case "parameterboxes":
+                        self.parameter_boxes_color.paper_color = values[0]
 
     def load_theme(self, theme_name: str):
         self.__load_from_file(Path("res/editorcolorthemes/{}.editortheme".format(theme_name)))
@@ -222,6 +228,8 @@ class EditorColorTheme:
         self.caret_color.paper_color = _DEFAULT_CARET_PAPER_COLOR
 
         self.match_highlight_color.paper_color = _DEFAULT_MATCHINGTEXT_PAPER_COLOR
+        
+        self.parameter_boxes_color = _DEFAULT_PARAMETER_BOX_PAPER_COLOR
 
     @staticmethod
     def load_from_theme_name(theme_name: str):

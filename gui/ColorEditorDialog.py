@@ -3,12 +3,12 @@
 from data import EditorThemes
 
 from PyQt6.QtWidgets import QDialog, QPushButton, QColorDialog, QComboBox, QVBoxLayout, QHBoxLayout, QLabel, QGroupBox, \
-    QGridLayout, QInputDialog, QLineEdit, QMessageBox, QLayout
+    QGridLayout, QInputDialog, QLineEdit, QMessageBox, QLayout, QSpinBox
 from PyQt6.QtGui import QColor
 
 PROTECTED_EDITOR_THEMES = ("default", "darkmode")
 
-SINGLE_COLORS_COUNT = 3
+SINGLE_COLORS_COUNT = 4
 
 class ColorEditorDialog(QDialog):
 
@@ -70,6 +70,8 @@ class ColorEditorDialog(QDialog):
         theme_colors_layout.addWidget(QLabel("Line Column Border:"), 12, 0)
         theme_colors_layout.addWidget(QLabel("Caret:"), 13, 0)
         theme_colors_layout.addWidget(QLabel("Matching Text Highlight:"), 14, 0)
+        theme_colors_layout.addWidget(QLabel("Parameter boxes:"), 15, 0)
+        theme_colors_layout.addWidget(QLabel("Parameter boxes alpha:"), 16, 0)
 
         ## Prepare the color buttons
         self.color_buttons = []
@@ -102,9 +104,19 @@ class ColorEditorDialog(QDialog):
         self.matching_text_button.pressed.connect(lambda r=13, c=1: self._handle_color_button_pressed(r, c))
         theme_colors_layout.addWidget(self.matching_text_button, 14, 2)
 
+        self.parameter_boxes_button = ColorButton()
+        self.parameter_boxes_button.pressed.connect(lambda r=14, c=1: self._handle_parameter_boxes_button_pressed(r, c))
+        theme_colors_layout.addWidget(self.parameter_boxes_button, 15, 2)
+
+        self.parameter_boxes_spinbox = QSpinBox()
+        self.parameter_boxes_spinbox.setRange(0, 255)
+        self.parameter_boxes_spinbox.valueChanged.connect(lambda value: self._handle_alpha_spinbox_changed(row=14, value=value))
+        theme_colors_layout.addWidget(self.parameter_boxes_spinbox, 16, 2)
+
         self.color_buttons.append([None, self.line_column_border_color_button])
         self.color_buttons.append([None, self.caret_color_button])
         self.color_buttons.append([None, self.matching_text_button])
+        self.color_buttons.append([None, self.parameter_boxes_button])
 
         self._colorize_buttons_from_selected_theme()
 
@@ -141,7 +153,7 @@ class ColorEditorDialog(QDialog):
         self.selected_theme_combobox.clear()
         self.selected_theme_combobox.addItems(EditorThemes.query_available_editor_themes())
 
-    def _handle_color_button_pressed(self, row: int, col: int):
+    def _handle_color_button_pressed(self, row: int, col: int) -> bool:
         current_color = self.color_buttons[row][col].button_color
         color_picker_dialog = QColorDialog(current_color, self)
 
@@ -153,6 +165,19 @@ class ColorEditorDialog(QDialog):
                 self.selected_theme_colors.colors[row].paper_color = color_picker_dialog.currentColor().name(QColor.NameFormat.HexArgb)
             self._current_theme_modified = True
             self._set_bottom_buttons_states()
+            return True
+        return False
+
+    def _handle_parameter_boxes_button_pressed(self, row: int, col: int):
+        # This variation ensures that alpha is preserved
+        if self._handle_color_button_pressed(row, col):
+            self._handle_alpha_spinbox_changed(row, self.parameter_boxes_spinbox.value())
+
+    def _handle_alpha_spinbox_changed(self, row: int, value: int):
+        if int(self.selected_theme_colors.colors[row].paper_color[1:3], base=16) != value:
+            self._current_theme_modified = True
+            self._set_bottom_buttons_states()
+        self.selected_theme_colors.colors[row].paper_color = ("#%02x"%value) + self.selected_theme_colors.colors[row].paper_color[-6:]
 
     def _handle_save_pressed(self):
         self._save_theme_to_file(self.selected_theme_combobox.currentText())
@@ -279,10 +304,15 @@ class ColorEditorDialog(QDialog):
         line_column_border_color = QColor.fromString(self.selected_theme_colors.editor_margin_border_color.paper_color)
         caret_color = QColor.fromString(self.selected_theme_colors.caret_color.paper_color)
         matching_text_color = QColor.fromString(self.selected_theme_colors.match_highlight_color.paper_color)
+        parameter_boxes_color = QColor.fromString(self.selected_theme_colors.parameter_boxes_color.paper_color)
+        parameter_boxes_alpha = parameter_boxes_color.alpha()
+        parameter_boxes_color.setAlpha(255)
 
         self.line_column_border_color_button.set_button_color(line_column_border_color)
         self.caret_color_button.set_button_color(caret_color)
         self.matching_text_button.set_button_color(matching_text_color)
+        self.parameter_boxes_button.set_button_color(parameter_boxes_color)
+        self.parameter_boxes_spinbox.setValue(parameter_boxes_alpha)
 
 
 class ColorButton(QPushButton):
