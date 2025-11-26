@@ -24,8 +24,8 @@ class ImageViewerWidget(QGraphicsView):
 
         self.setTransformationAnchor(QGraphicsView.ViewportAnchor.AnchorUnderMouse)
         self.setResizeAnchor(QGraphicsView.ViewportAnchor.AnchorUnderMouse)
-        self.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
-        self.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        # self.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
+        # self.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
         self.setBackgroundRole(QPalette.ColorRole.Dark)
 
         self.setDragMode(QGraphicsView.DragMode.ScrollHandDrag)
@@ -53,22 +53,30 @@ class ImageViewerWidget(QGraphicsView):
     def _set_image(self, new_image):
         self._image = new_image
         self._photo.setPixmap(QPixmap.fromImage(self._image))
-        self._zoom_level = 0
+        self._zoom_level = 1
 
     def wheelEvent(self, event: QWheelEvent):
-        zoom_in = event.angleDelta().y() > 0
-        zoom_delta = event.angleDelta() / 8
-        num_steps = zoom_delta / 15
+        if event.modifiers() & Qt.KeyboardModifier.ControlModifier:
+            # Zoom
+            zoom_factor = 1.5 ** (event.angleDelta().y()/120)
 
-        zoom_factor = 1.5 if zoom_in else 1 / 1.5
+            previous_zoom_level = self._zoom_level
+            self._zoom_level *= zoom_factor
 
-        self._zoom_level += num_steps.y()
-
-        if self._zoom_level < 0:
-            self._zoom_level = 0
-            return
-        elif self._zoom_level > 10:
-            self._zoom_level = 10
-            return
-
-        self.scale(zoom_factor, zoom_factor)
+            # Limit zoom level:
+            if self._zoom_level < 1:
+                self._zoom_level = 1
+                zoom_factor = self._zoom_level / previous_zoom_level
+            elif self._zoom_level > 20:
+                self._zoom_level = 20
+                zoom_factor = self._zoom_level / previous_zoom_level
+    
+            self.scale(zoom_factor, zoom_factor)
+        else:
+            # Pan
+            delta = event.angleDelta() if event.pixelDelta().isNull() else event.pixelDelta()
+            x, y = delta.x(), delta.y()
+            if event.modifiers() & Qt.KeyboardModifier.ShiftModifier:
+                x, y = y, -x
+            self.horizontalScrollBar().setValue(self.horizontalScrollBar().value() - x)
+            self.verticalScrollBar()  .setValue(self.verticalScrollBar()  .value() - y)
