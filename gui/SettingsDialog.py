@@ -27,6 +27,7 @@ class SettingsDialog(QDialog):
 
         main_layout = QVBoxLayout()
 
+        # General Options
         general_group_box = QGroupBox("General")
         general_group_layout = QVBoxLayout()
 
@@ -71,6 +72,7 @@ class SettingsDialog(QDialog):
 
         general_group_box.setLayout(general_group_layout)
 
+        # Editor Options
         editor_group_box = QGroupBox("Editor")
         editor_group_layout = QVBoxLayout()
 
@@ -129,6 +131,23 @@ class SettingsDialog(QDialog):
         editor_group_layout.addLayout(highlight_style_layout)
         editor_group_box.setLayout(editor_group_layout)
 
+        # Image viewer Options
+        image_viewer_group_box = QGroupBox("Image viewer")
+        image_viewer_group_layout = QVBoxLayout()
+
+        self.zoom_style_combobox = QComboBox()
+        self.zoom_style_combobox.addItems(["MouseWheel", "Ctrl + MouseWheel"])  # See how to handle this on other OS maybe
+        self.zoom_style_combobox.setCurrentIndex(IDESettings.get_image_viewer_zoom_style())
+        
+        zoom_style_group_layout = QHBoxLayout()
+        zoom_style_group_layout.addWidget(QLabel("Zoom style"))
+        zoom_style_group_layout.addStretch()
+        zoom_style_group_layout.addWidget(self.zoom_style_combobox)
+        
+        image_viewer_group_layout.addLayout(zoom_style_group_layout)
+        image_viewer_group_box.setLayout(image_viewer_group_layout)
+
+        # Advanced Options
         advanced_group_box = QGroupBox("Advanced")
         advanced_group_layout = QHBoxLayout()
 
@@ -151,6 +170,7 @@ class SettingsDialog(QDialog):
 
         main_layout.addWidget(general_group_box)
         main_layout.addWidget(editor_group_box)
+        main_layout.addWidget(image_viewer_group_box)
         main_layout.addWidget(advanced_group_box)
         main_layout.addWidget(self.button_box)
 
@@ -208,6 +228,7 @@ class SettingsDialog(QDialog):
         self.autocompletion_threshold_spinbox.setValue(IDESettings.get_autocompletion_trigger_threshold())
         self.highlight_matching_text_checkbox.setChecked(IDESettings.get_highlight_matching_text())
         self.highlight_style_combobox.setCurrentIndex(IDESettings.get_highlight_fill_rect())
+        self.zoom_style_combobox.setCurrentIndex(IDESettings.get_image_viewer_zoom_style())
 
 
     def _handle_apply(self):
@@ -223,6 +244,7 @@ class SettingsDialog(QDialog):
         IDESettings.set_autocompletion_trigger_threshold(self.autocompletion_threshold_spinbox.value())
         IDESettings.set_hightlight_matching_text(self.highlight_matching_text_checkbox.isChecked())
         IDESettings.set_highlight_fill_rect(self.highlight_style_combobox.currentIndex())
+        IDESettings.set_image_viewer_zoom_style(self.zoom_style_combobox.currentIndex())
         self.settings_changed.emit()
 
     def _handle_accept(self):

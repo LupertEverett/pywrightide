@@ -25,6 +25,7 @@ ENABLE_AUTOCOMPLETION_KEY = "enable_autocompletion"
 AUTOCOMPLETION_THRESHOLD_KEY = "autocompletion_suggestions_threshold"
 HIGHLIGHT_MATCHING_TEXT_KEY = "editor/highlight_matching_text"
 HIGHLIGHT_FILL_RECT_KEY = "editor/highlight_fill_rect"
+IMAGE_VIEWER_USE_CONTROL_TO_ZOOM_KEY = "image_viewer/use_control_to_zoom"
 
 # Functions
 
@@ -197,6 +198,14 @@ def set_highlight_fill_rect(new_value: bool):
     __program_settings.setValue(HIGHLIGHT_FILL_RECT_KEY, new_value)
 
 
+def get_image_viewer_zoom_style() -> bool:
+    return __program_settings.value(IMAGE_VIEWER_USE_CONTROL_TO_ZOOM_KEY, False, bool)
+
+
+def set_image_viewer_zoom_style(new_value: bool):
+    __program_settings.setValue(IMAGE_VIEWER_USE_CONTROL_TO_ZOOM_KEY, new_value)
+
+
 def all_keys() -> list[str]:
     return __program_settings.allKeys()
 
@@ -228,3 +237,4 @@ def reset_settings():
     __program_settings.setValue(AUTOCOMPLETION_THRESHOLD_KEY, 1)
     __program_settings.setValue(HIGHLIGHT_MATCHING_TEXT_KEY, True)
     __program_settings.setValue(HIGHLIGHT_FILL_RECT_KEY, True)
+    __program_settings.setValue(IMAGE_VIEWER_USE_CONTROL_TO_ZOOM_KEY, False)

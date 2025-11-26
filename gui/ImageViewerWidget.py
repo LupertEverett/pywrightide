@@ -2,6 +2,8 @@ from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QPalette, QImageReader, QPixmap, QWheelEvent
 from PyQt6.QtWidgets import QMessageBox, QGraphicsView, QGraphicsScene, QGraphicsPixmapItem
 
+from data import IDESettings
+
 from pathlib import Path
 
 class ImageViewerWidget(QGraphicsView):
@@ -56,7 +58,10 @@ class ImageViewerWidget(QGraphicsView):
         self._zoom_level = 1
 
     def wheelEvent(self, event: QWheelEvent):
-        if event.modifiers() & Qt.KeyboardModifier.ControlModifier:
+        hasShift = bool(event.modifiers() & Qt.KeyboardModifier.ShiftModifier)
+        hasControl = bool(event.modifiers() & Qt.KeyboardModifier.ControlModifier)
+
+        if not hasShift and hasControl == IDESettings.get_image_viewer_zoom_style():
             # Zoom
             zoom_factor = 1.5 ** (event.angleDelta().y()/120)
 
@@ -76,7 +81,7 @@ class ImageViewerWidget(QGraphicsView):
             # Pan
             delta = event.angleDelta() if event.pixelDelta().isNull() else event.pixelDelta()
             x, y = delta.x(), delta.y()
-            if event.modifiers() & Qt.KeyboardModifier.ShiftModifier:
+            if hasShift:
                 x, y = y, -x
             self.horizontalScrollBar().setValue(self.horizontalScrollBar().value() - x)
             self.verticalScrollBar()  .setValue(self.verticalScrollBar()  .value() - y)
