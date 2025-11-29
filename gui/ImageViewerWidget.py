@@ -1,3 +1,10 @@
+""" Image Viewer Widget: A simple built-in image viewer for PyWright IDE
+
+Note:
+Qt's mouse/touch event handling is broken. For SOME REASON it can detect ACTUAL-HONEST-TO-GOD-MICE as Touchpads.
+
+This sadly prevents us from using `event.device()` to detect touchpads to handle panning using only two fingers on Linux."""
+
 from PyQt6.QtCore import Qt, QEvent
 from PyQt6.QtGui import QPalette, QImageReader, QPixmap, QWheelEvent, QNativeGestureEvent, QInputDevice
 from PyQt6.QtWidgets import QMessageBox, QGraphicsView, QGraphicsScene, QGraphicsPixmapItem
