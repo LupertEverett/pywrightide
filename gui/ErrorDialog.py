@@ -69,7 +69,7 @@ class ErrorDialog(QDialog):
 
         self._stack_trace_textedit = QPlainTextEdit(self)
         self._stack_trace_textedit.setPlainText(stacktrace)
-        self._stack_trace_textedit.setEnabled(False)
+        self._stack_trace_textedit.setReadOnly(True)
 
         self._copy_to_clipboard_button = QPushButton("Copy to Clipboard", self)
         self._copy_to_clipboard_button.clicked.connect(self._handle_copy_to_clipboard)
