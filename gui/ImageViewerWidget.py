@@ -59,24 +59,18 @@ class ImageViewerWidget(QGraphicsView):
         has_shift = bool(event.modifiers() & Qt.KeyboardModifier.ShiftModifier)
         has_control = bool(event.modifiers() & Qt.KeyboardModifier.ControlModifier)
 
-        if event.deviceType() == QInputDevice.DeviceType.TouchPad:
-            # Pan on Linux
-            delta = event.angleDelta() if event.pixelDelta().isNull() else event.pixelDelta()
-            x, y = delta.x(), delta.y()
-            self.do_panning(x, y)
-
-        elif not has_shift and has_control == IDESettings.get_image_viewer_zoom_style():
-            # Zoom
-            zoom_factor = 1.5 ** (event.angleDelta().y()/120)
-            self.do_zoom(zoom_factor)
-
-        else:
+        if has_shift or event.deviceType() == QInputDevice.DeviceType.TouchPad or has_control != IDESettings.get_image_viewer_zoom_style():
             # Pan
             delta = event.angleDelta() if event.pixelDelta().isNull() else event.pixelDelta()
             x, y = delta.x(), delta.y()
             if has_shift:
                 x, y = y, -x
             self.do_panning(x, y)
+
+        else:
+            # Zoom
+            zoom_factor = 1.5 ** (event.angleDelta().y()/120)
+            self.do_zoom(zoom_factor)
 
     def event(self, event: QEvent)->bool:
         if isinstance(event, QNativeGestureEvent):
