@@ -93,7 +93,7 @@ class ImageViewerWidget(QGraphicsView):
     def on_native_pan_gesture_event(self, event: QNativeGestureEvent):
         delta = event.delta()
         x, y = delta.x(), delta.y()
-        self.do_panning(x, y)
+        self.do_panning(int(x), int(y))
         return True
 
     def do_zoom(self, zoom_factor):
@@ -110,7 +110,7 @@ class ImageViewerWidget(QGraphicsView):
 
         self.scale(zoom_factor, zoom_factor)
 
-    def do_panning(self, x, y):
+    def do_panning(self, x: int, y: int):
         self.horizontalScrollBar().setValue(self.horizontalScrollBar().value() - x)
         self.verticalScrollBar().setValue(self.verticalScrollBar().value() - y)
 
