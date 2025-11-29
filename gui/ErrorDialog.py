@@ -31,7 +31,6 @@ def show_error_dialog(log_msg):
     if QApplication.instance() is not None:
         errordialog = ErrorDialog(_ide_main_window_ref, log_msg)
         errordialog.exec()
-        QApplication.instance().quit()
     else:
         log.debug("No QApplication instance available.")
 
@@ -76,7 +75,7 @@ class ErrorDialog(QDialog):
         self._copy_to_clipboard_button.clicked.connect(self._handle_copy_to_clipboard)
 
         self._quit_pywright_ide_button = QPushButton("Quit PyWright IDE", self)
-        self._quit_pywright_ide_button.clicked.connect(self.accept)
+        self._quit_pywright_ide_button.clicked.connect(self._handle_quit_ide)
 
         self._dialog_button_box = QDialogButtonBox()
 
@@ -94,6 +93,9 @@ class ErrorDialog(QDialog):
     def _handle_copy_to_clipboard(self):
         clipboard = QGuiApplication.clipboard()
         clipboard.setText(self._stack_trace_textedit.toPlainText())
+
+    def _handle_quit_ide(self):
+        QApplication.instance().quit()
 
 # Register hook
 uncaught_exception_hook = UncaughtHook()
