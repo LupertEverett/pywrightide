@@ -1,5 +1,5 @@
 from PyQt6.QtCore import Qt, QEvent
-from PyQt6.QtGui import QPalette, QImageReader, QPixmap, QWheelEvent, QNativeGestureEvent
+from PyQt6.QtGui import QPalette, QImageReader, QPixmap, QWheelEvent, QNativeGestureEvent, QInputDevice
 from PyQt6.QtWidgets import QMessageBox, QGraphicsView, QGraphicsScene, QGraphicsPixmapItem
 
 from data import IDESettings
@@ -59,7 +59,13 @@ class ImageViewerWidget(QGraphicsView):
         has_shift = bool(event.modifiers() & Qt.KeyboardModifier.ShiftModifier)
         has_control = bool(event.modifiers() & Qt.KeyboardModifier.ControlModifier)
 
-        if not has_shift and has_control == IDESettings.get_image_viewer_zoom_style():
+        if event.deviceType() == QInputDevice.DeviceType.TouchPad:
+            # Pan on Linux
+            delta = event.angleDelta() if event.pixelDelta().isNull() else event.pixelDelta()
+            x, y = delta.x(), delta.y()
+            self.do_panning(x, y)
+
+        elif not has_shift and has_control == IDESettings.get_image_viewer_zoom_style():
             # Zoom
             zoom_factor = 1.5 ** (event.angleDelta().y()/120)
             self.do_zoom(zoom_factor)
@@ -80,20 +86,12 @@ class ImageViewerWidget(QGraphicsView):
 
             if gesture_type == Qt.NativeGestureType.ZoomNativeGesture:
                 return self.on_native_zoom_gesture_event(event)
-            if gesture_type == Qt.NativeGestureType.PanNativeGesture:
-                return self.on_native_pan_gesture_event(event)
 
         return super().event(event)
 
     def on_native_zoom_gesture_event(self, event: QNativeGestureEvent):
         zoom_factor = 2 ** event.value()
         self.do_zoom(zoom_factor)
-        return True
-
-    def on_native_pan_gesture_event(self, event: QNativeGestureEvent):
-        delta = event.delta()
-        x, y = delta.x(), delta.y()
-        self.do_panning(int(x), int(y))
         return True
 
     def do_zoom(self, zoom_factor):
