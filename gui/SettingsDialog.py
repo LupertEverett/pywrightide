@@ -140,7 +140,7 @@ class SettingsDialog(QDialog):
         self.zoom_style_combobox.setCurrentIndex(IDESettings.get_image_viewer_zoom_style())
         
         zoom_style_group_layout = QHBoxLayout()
-        zoom_style_group_layout.addWidget(QLabel("Zoom style"))
+        zoom_style_group_layout.addWidget(QLabel("Zoom with:"))
         zoom_style_group_layout.addStretch()
         zoom_style_group_layout.addWidget(self.zoom_style_combobox)
         
