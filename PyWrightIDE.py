@@ -25,7 +25,7 @@ if __name__ == '__main__':
         if welcome_dialog.exec():
             game_folder_path = welcome_dialog.get_selected_folder_path()
         else:
-            exit()
+            sys.exit(0)
 
     main_window = IDEMainWindow(game_folder_path)
     ErrorDialog.set_ide_main_window(main_window)
