@@ -1,6 +1,6 @@
 # PyWright IDE Changelog
 
-## Unreleased
+## Version 1.5 - 30.11.2025
 
 * Lexer improvements:
   * Add more parameters from docs/index.html (by Zetrypio)
@@ -25,6 +25,7 @@
   * Mouse scroll to zoom in and out, left click and drag mouse to pan (whenever possible)
     * There's now an option in Preferences to choose if you want to zoom using Ctrl or not (by Zetrypio)
   * Their tabs don't get saved upon closing the IDE.
+* Compiled versions of PyWright IDE are now bundled with PyQt 6.10.0
 
 ## Version 1.4.2 - 31.05.2025
 
