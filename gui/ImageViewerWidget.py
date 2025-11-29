@@ -55,33 +55,38 @@ class ImageViewerWidget(QGraphicsView):
         self._photo.setPixmap(QPixmap.fromImage(self._image))
         self._zoom_level = 1
 
-    def wheelEvent(self, event: QWheelEvent):
+    def wheelEvent(self, event):
+        # Mousewheel events are managed in event() instead
+        event.ignore()
+
+    def event(self, event: QEvent)->bool:
+        if isinstance(event, QNativeGestureEvent):
+            # Handle touchpad events on Linux:
+            gesture_type = event.gestureType()
+            if gesture_type == Qt.NativeGestureType.ZoomNativeGesture:
+                return self.on_native_zoom_gesture_event(event)
+
+        if isinstance(event, QWheelEvent):
+            self.handle_wheel_event(event)
+            return True
+
+        return super().event(event)
+
+    def handle_wheel_event(self, event: QWheelEvent):
         has_shift = bool(event.modifiers() & Qt.KeyboardModifier.ShiftModifier)
         has_control = bool(event.modifiers() & Qt.KeyboardModifier.ControlModifier)
 
-        if has_shift or event.deviceType() == QInputDevice.DeviceType.TouchPad or has_control != IDESettings.get_image_viewer_zoom_style():
+        if has_shift or has_control != IDESettings.get_image_viewer_zoom_style():
             # Pan
             delta = event.angleDelta() if event.pixelDelta().isNull() else event.pixelDelta()
             x, y = delta.x(), delta.y()
             if has_shift:
                 x, y = y, -x
             self.do_panning(x, y)
-
         else:
             # Zoom
             zoom_factor = 1.5 ** (event.angleDelta().y()/120)
             self.do_zoom(zoom_factor)
-
-    def event(self, event: QEvent)->bool:
-        if isinstance(event, QNativeGestureEvent):
-            
-            # Handle touchpad events on Linux:
-            gesture_type = event.gestureType()
-
-            if gesture_type == Qt.NativeGestureType.ZoomNativeGesture:
-                return self.on_native_zoom_gesture_event(event)
-
-        return super().event(event)
 
     def on_native_zoom_gesture_event(self, event: QNativeGestureEvent):
         zoom_factor = 2 ** event.value()
