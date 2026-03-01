@@ -92,9 +92,14 @@ class MainWindowCentralWidget(QWidget):
         file_edit_widget.file_name_changed.connect(self.handle_rename_tab)
         EditorThemes.current_editor_theme.load_theme(IDESettings.get_editor_color_theme())
         file_edit_widget.file_modified.connect(self._update_save_button_and_current_tab)
+
         if self.selected_game_info is not None:
             file_edit_widget.supply_builtin_macros_to_lexer(self.selected_game_info.builtin_macros)
             file_edit_widget.supply_game_macros_to_lexer(self.selected_game_info.game_macros)
+            case_name = Path(file_path).parent.name
+            if case_name in self.selected_game_info.case_macros:
+                file_edit_widget.supply_case_macros_to_lexer(self.selected_game_info.case_macros[case_name])
+
         file_edit_widget.supply_editor_color_theme_to_lexer()
         file_edit_widget.move_to_tab_requested.connect(self._handle_move_to_tab)
         file_edit_widget.replace_next_in_next_tabs_requested.connect(self.replace_next_in_next_tabs)

@@ -6,6 +6,9 @@
 * Switched to PyGame Community Edition as it is more actively developed. (by in1tiate)
 * Changed PyQt version requirement to be "6.10.0 *or later*". (by in1tiate)
 * Case background image can now be configured from Case Properties dialog.
+* Fixed path for macro detection, adding case-specific macros as well (by Zetrypio)
+* Lexer improvement:
+  * Added some undocumented commands found in the engine source code (by Zetrypio)
 
 ## Version 1.5 - 30.11.2025
 

@@ -96,6 +96,9 @@ class FileEditWidget(QWidget):
     def supply_game_macros_to_lexer(self, game_macros: list[str]):
         self.sci.supply_game_macros_to_lexer(game_macros)
 
+    def supply_case_macros_to_lexer(self, case_macros: list[str]):
+        self.sci.supply_case_macros_to_lexer(case_macros)
+
     def supply_font_properties_to_lexer(self, font_name: str, font_size: int, bold_font: bool):
         self.sci.supply_font_properties_to_lexer(font_name, font_size, bold_font)
 

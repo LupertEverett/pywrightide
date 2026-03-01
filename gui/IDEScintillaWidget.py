@@ -234,6 +234,9 @@ class IDEScintillaWidget(QsciScintilla):
     def supply_game_macros_to_lexer(self, game_macros: list[str]):
         self._lexer.set_game_macros(game_macros)
 
+    def supply_case_macros_to_lexer(self, case_macros: list[str]):
+        self._lexer.set_case_macros(case_macros)
+
     def supply_font_properties_to_lexer(self, font_name: str, font_size: int, bold_font: bool):
         self._lexer.set_font_properties(font_name, font_size, bold_font)
 
