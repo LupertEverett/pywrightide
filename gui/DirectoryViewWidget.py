@@ -335,9 +335,22 @@ class DirectoryViewWidget(QDockWidget):
             model.remove(index)
 
     def _handle_visibility_change(self):
+        main_window = self._find_ide_main_window()
+
+        if main_window is not None:
+            main_window.update_toolbar_toggle_buttons()
+
+    def _find_ide_main_window(self):
         from .IDEMainWindow import IDEMainWindow
-        ide_main_window: IDEMainWindow = self.parent()
-        ide_main_window.update_toolbar_toggle_buttons()
+
+        parent = self.parent() # We're already NOT a main window, so no need to check ourselves
+
+        while parent is not None:
+            if isinstance(parent, IDEMainWindow):
+                return parent
+            parent = parent.parent()
+
+        return None
 
 
 class DeselectableTreeView(QTreeView):
