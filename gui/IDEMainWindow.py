@@ -11,6 +11,7 @@ from .MainWindowCentralWidget import MainWindowCentralWidget
 from .MainWindowStatusBar import MainWindowStatusBar
 from .NewGameDialog import NewGameDialog
 from .OpenGameDialog import OpenGameDialog
+from .FolderExplorerWidget import FolderExplorerWidget
 from .DirectoryViewWidget import DirectoryViewWidget
 from .PyWrightLoggerWidget import PyWrightLoggerWidget
 from .SettingsDialog import SettingsDialog
@@ -78,15 +79,22 @@ class IDEMainWindow(QMainWindow):
         self.central_widget.current_tab_cursor_position_changed.connect(self.status_bar.set_cursor_position_info)
         self.central_widget.selection_length_changed.connect(self.status_bar.set_selection_length_info)
 
+        self.folder_explorer = FolderExplorerWidget(self)
+
         self.directory_view.open_new_tab.connect(self.central_widget.open_new_editing_tab)
         self.directory_view.open_game_properties_tab.connect(
+            lambda: self.central_widget.open_game_properties_tab()
+        )
+
+        self.folder_explorer.open_new_tab.connect(self.central_widget.open_new_editing_tab)
+        self.folder_explorer.open_game_properties_tab.connect(
             lambda: self.central_widget.open_game_properties_tab()
         )
 
         # Toolbar and the central widget
         self.addToolBar(self._top_toolbar)
         self.setCentralWidget(self.central_widget)
-        self.addDockWidget(Qt.DockWidgetArea.LeftDockWidgetArea, self.directory_view)
+        self.addDockWidget(Qt.DockWidgetArea.LeftDockWidgetArea, self.folder_explorer)
         self.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, self.asset_manager_widget)
         self.addDockWidget(Qt.DockWidgetArea.BottomDockWidgetArea, self.logger_view)
 
@@ -123,6 +131,8 @@ class IDEMainWindow(QMainWindow):
             self.directory_view.clear_directory_view()
             if self.central_widget.tabs_count() > 0:
                 self.central_widget.clear_tabs()
+
+            self.folder_explorer.set_pywright_game(self.selected_game_info)
 
             self.status_bar.set_installation_path_info(self.selected_pywright_installation)
 
