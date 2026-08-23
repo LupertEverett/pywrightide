@@ -9,7 +9,7 @@
 * Fixed path for macro detection, adding case-specific macros as well (by Zetrypio)
 * Lexer improvement:
   * Added some undocumented commands found in the engine source code (by Zetrypio)
-* Added a Character Viewer dialog.
+* Added a Character Viewer dialog, which can also import characters from a single .gif/.webp image or a folder that contains animated images.
 * The IDE will now warn the user of missing case folders and remove them from the list instead of crashing.
 
 ## Version 1.5 - 30.11.2025
