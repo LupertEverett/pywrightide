@@ -179,7 +179,7 @@ class AnimationData:
                     f.write("sfx {} {}\n".format(frame_num, self.sound_effects_at_frames[frame_num]))
 
 
-def convert_to_spritesheet(input_file: Path):
+def convert_to_spritesheet(input_file: Path, output_path: Path | None = None):
     """Converts a single .gif or .webp file to a .png spritesheet and animation data"""
     if input_file.suffix not in [".gif", ".webp"]:
         raise ValueError("Input file must be a .gif file or a .webp file")
@@ -217,5 +217,9 @@ def convert_to_spritesheet(input_file: Path):
                 col = 0
                 row += 1
 
-        resulting_image.save(input_file.with_suffix(".png"))
-        anim_data.write_to_file(input_file.with_suffix(".txt"))
+        if output_path is not None:
+            resulting_image.save(output_path)
+            anim_data.write_to_file(output_path.with_suffix(".txt"))
+        else:
+            resulting_image.save(input_file.with_suffix(".png"))
+            anim_data.write_to_file(input_file.with_suffix(".txt"))
