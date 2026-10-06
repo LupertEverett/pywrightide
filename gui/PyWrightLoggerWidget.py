@@ -2,9 +2,11 @@ from pathlib import Path
 
 from PyQt6.QtWidgets import QWidget, QDockWidget, QPlainTextEdit, QHBoxLayout, QLabel, QPushButton
 from PyQt6.QtGui import QIcon, QHideEvent
-from PyQt6.QtCore import QProcess
+from PyQt6.QtCore import QProcess, QThread, pyqtSignal
 
 import data.IconThemes as IconThemes
+
+import time
 
 
 class PyWrightLoggerWidget(QDockWidget):
@@ -16,7 +18,7 @@ class PyWrightLoggerWidget(QDockWidget):
         self.setObjectName("LoggerWidget")
 
         self.logger_text_edit = QPlainTextEdit()
-        self.logger_text_edit.setEnabled(False)
+        self.logger_text_edit.setReadOnly(True)
 
         self.pywright_process = QProcess(None)
         self.pywright_process.setProcessChannelMode(QProcess.ProcessChannelMode.MergedChannels)
@@ -68,8 +70,13 @@ class PyWrightLoggerWidget(QDockWidget):
     def _on_process_started(self):
         full_path = Path("{}/{}".format(self._program_path, self._executable_name))
         self.logger_text_edit.appendPlainText("Running PyWright executable in path {}".format(str(full_path)))
+        self._reader_thread = LogWatcherThread(str(Path(self._program_path)/"lastlog.txt"))
+        self._reader_thread.new_line_signal.connect(self.logger_text_edit.appendPlainText)
+        self._reader_thread.start()
 
     def _on_process_finished(self, exit_code, exit_status):
+        self._reader_thread.stop()
+        self._reader_thread.wait(100)
         if exit_code == 0:
             self.logger_text_edit.appendPlainText("PyWright exited successfully!")
         else:
@@ -79,3 +86,37 @@ class PyWrightLoggerWidget(QDockWidget):
         from .IDEMainWindow import IDEMainWindow
         ide_main_window: IDEMainWindow = self.parent()
         ide_main_window.update_toolbar_toggle_buttons()
+
+
+class LogWatcherThread(QThread):
+    new_line_signal = pyqtSignal(str)
+    
+    def __init__(self, file: str):
+        super().__init__()
+        self._file: str = file
+        self._running: bool = False
+
+    def run(self):
+        self._running = True
+        print("Start of thread")
+        time.sleep(1) # Initial wait to be sure the file is ready (ie. cleared from previous logs) before reading
+        try:
+            with open(self._file, 'r') as f:
+                while self._running:
+                    line = f.readline()
+                    if line:
+                        self.new_line_signal.emit(line.rstrip('\r\n'))
+                    else:
+                        time.sleep(.25)
+                line = f.readline()
+                if line:
+                    self.new_line_signal.emit(line.rstrip('\r\n'))
+        except Exception as e:
+            self.new_line_signal.emit(f"[File Read Error]: {e.__class__.__name}: {e}")
+        finally:
+            print("End of thread")
+            self._running = False
+
+    def stop(self):
+        self._running = False
+
