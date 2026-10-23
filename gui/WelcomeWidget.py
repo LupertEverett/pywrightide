@@ -1,0 +1,199 @@
+from pathlib import Path
+
+from PyQt6.QtCore import QSize, pyqtSignal
+from PyQt6.QtGui import QPixmap, QIcon
+from PyQt6.QtWidgets import QWidget, QLabel, QPushButton, QVBoxLayout, QHBoxLayout, QFrame, \
+    QCheckBox, QTreeWidget, QTreeWidgetItem, QFileDialog, QMessageBox
+
+from data import IDESettings, IconThemes, PyWrightFolder
+from data.PyWrightGame import PyWrightGameInfo
+from gui.NewGameDialog import NewGameDialog
+from gui.OpenGameDialog import OpenGameDialog
+
+_welcome_label_text = "<h1>Welcome to PyWright IDE!</h1>"
+
+_folder_does_not_exist_notice_text = """<p><b>Notice:</b> Last open game ({})'s folder has been either moved or deleted.</p>
+<p>Please select a different folder from below.</p>
+""".format(Path(IDESettings.get_autoload_last_game_path()).stem)
+
+FALLBACK_GAME_ICON_PATH = IconThemes.icon_path_from_theme(IconThemes.ICON_NAME_PYWRIGHT)
+
+
+class WelcomeWidget(QWidget):
+    game_path_selected = pyqtSignal(Path)
+
+    def __init__(self, parent):
+        super().__init__(parent)
+
+        self._recent_docs = [path for path in IDESettings.get_recent_games()
+                             if Path(path).exists() and Path(path).is_dir()]
+
+        # Header widgets
+        ide_icon_label = QLabel("")
+        icon_pixmap = QPixmap("res/icons/ideicon.png")
+        icon_pixmap = icon_pixmap.scaled(48, 48)
+        ide_icon_label.setPixmap(icon_pixmap)
+        label_size = QSize(icon_pixmap.width() + 2, icon_pixmap.height() + 2)
+        ide_icon_label.setFixedSize(label_size)
+        welcome_label = QLabel(_welcome_label_text)
+
+        separator_line = QFrame()
+        separator_line.setFrameShape(QFrame.Shape.VLine)
+
+        self._new_game_button = QPushButton("Create New Game")
+        new_game_icon = IconThemes.icon_path_from_theme(IconThemes.ICON_NAME_NEW_GAME)
+        self._new_game_button.setIcon(QIcon(new_game_icon))
+        self._new_game_button.setStyleSheet("text-align: left")
+        self._new_game_button.setFlat(True)
+        self._new_game_button.pressed.connect(self._handle_new_game_clicked)
+
+        self._open_game_button = QPushButton("Open Game")
+        open_game_icon = IconThemes.icon_path_from_theme(IconThemes.ICON_NAME_OPEN_GAME)
+        self._open_game_button.setIcon(QIcon(open_game_icon))
+        self._open_game_button.setStyleSheet("text-align: left")
+        self._open_game_button.setFlat(True)
+        self._open_game_button.pressed.connect(self._handle_load_game_clicked)
+
+        self._always_autoload_checkbox = QCheckBox("Always load the last opened game at startup (skips this screen)")
+        self._always_autoload_checkbox.setChecked(IDESettings.get_autoload_last_game_check())
+
+        self.previous_games_list = QTreeWidget()
+
+        self.previous_games_list.setColumnCount(3)
+        self.previous_games_list.setHeaderLabels(["Name", "Author", "Path"])
+        self.previous_games_list.setIconSize(QSize(64, 64))
+
+        self.previous_games_list.clicked.connect(self._handle_load_selected_clicked)
+
+        for path in self._recent_docs:
+            self.__add_item_to_model(path)
+
+        self.previous_games_list.resizeColumnToContents(0)
+        self.previous_games_list.resizeColumnToContents(1)
+
+        buttons_layout = QVBoxLayout()
+
+        previous_games_layout = QVBoxLayout()
+
+        header_layout = QHBoxLayout()
+
+        body_layout = QHBoxLayout()
+
+        main_layout = QVBoxLayout()
+
+        header_layout.addStretch()
+        header_layout.addWidget(ide_icon_label)
+        header_layout.addWidget(welcome_label)
+        header_layout.addStretch()
+
+        buttons_layout.addWidget(self._new_game_button)
+        buttons_layout.addWidget(self._open_game_button)
+        buttons_layout.addStretch()
+
+        previous_games_layout.addWidget(QLabel("Previous Games:"))
+        previous_games_layout.addWidget(self.previous_games_list)
+        previous_games_layout.addWidget(self._always_autoload_checkbox)
+
+        body_layout.addSpacing(20)
+        body_layout.addLayout(buttons_layout)
+        body_layout.addWidget(separator_line)
+        body_layout.addLayout(previous_games_layout)
+        body_layout.addSpacing(20)
+
+        main_layout.addSpacing(20)
+        main_layout.addLayout(header_layout)
+        main_layout.addLayout(body_layout)
+        main_layout.addSpacing(20)
+
+        self.setLayout(main_layout)
+
+    def _handle_new_game_clicked(self):
+        new_game_dialog = NewGameDialog("", self)
+
+        if new_game_dialog.exec():
+            game_path = new_game_dialog.get_new_game().game_path
+
+            if str(game_path) not in self._recent_docs:
+                self._recent_docs.insert(0, str(game_path))
+                IDESettings.set_recent_games(self._recent_docs)
+
+            self._emit_game_path_selected(game_path)
+
+    def _handle_load_game_clicked(self):
+        picker = QFileDialog.getExistingDirectory(self)
+
+        if picker != "":
+            picker = Path(picker)  # Correct the folder separators
+
+            if PyWrightGameInfo.is_valid_game_folder(Path(picker)):
+                if str(picker) not in self._recent_docs:
+                    self._recent_docs.insert(0, str(picker))
+                    IDESettings.set_recent_games(self._recent_docs)
+
+                self._emit_game_path_selected(picker)
+            elif PyWrightFolder.is_valid_pywright_folder(str(picker)):
+                open_game_dialog = OpenGameDialog(str(picker), self)
+
+                if open_game_dialog.exec():
+                    final_path = picker / "games" / open_game_dialog.selected_game
+
+                    # Check if the item has already added before
+                    if str(final_path) not in self._recent_docs:
+                        self._recent_docs.insert(0, str(final_path))
+                        IDESettings.set_recent_games(self._recent_docs)
+
+                    self._emit_game_path_selected(final_path)
+            else:
+                QMessageBox.critical(self, "Error", "Could not find a PyWright game!")
+
+    def _handle_load_selected_clicked(self):
+        indexes = self.previous_games_list.selectedIndexes()
+
+        if len(indexes) < 1:
+            return
+
+        idx = indexes[0].row()
+
+        game_path = self._recent_docs.pop(idx)
+
+        # Move the selected path to the top
+        self._recent_docs.insert(0, game_path)
+
+        self._emit_game_path_selected(Path(game_path))
+
+    def _emit_game_path_selected(self, path: Path):
+        IDESettings.set_autoload_last_game_check(self._always_autoload_checkbox.isChecked())
+        if self._always_autoload_checkbox.isChecked():
+            IDESettings.set_autoload_last_game_path(str(path))
+
+        self.game_path_selected.emit(path)
+
+    def is_autoload_checkbox_ticked(self):
+        return self._always_autoload_checkbox.isChecked()
+
+    def __add_item_to_model(self, text: str):
+        try:
+            (title, author, version, icon_path) = PyWrightGameInfo.get_game_data_info(Path(text))
+            # Try to load the game's icon
+            # Use the fallback icon if loading fails
+            if str(icon_path) != "":
+                icon_pixmap = QPixmap(str(icon_path))
+            else:
+                icon_pixmap = QPixmap(FALLBACK_GAME_ICON_PATH)
+
+            if title != "":
+                title = Path(text).stem
+
+            if author == "":
+                author = "Unknown Author"
+
+            new_row = QTreeWidgetItem()
+            new_row.setIcon(0, QIcon(icon_pixmap))
+            new_row.setText(0, title)
+            new_row.setText(1, author)
+            new_row.setText(2, text)
+
+            self.previous_games_list.addTopLevelItem(new_row)
+
+        except FileNotFoundError:
+            pass
