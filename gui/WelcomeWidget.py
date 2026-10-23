@@ -12,8 +12,7 @@ from gui.OpenGameDialog import OpenGameDialog
 
 _welcome_label_text = "<h1>Welcome to PyWright IDE!</h1>"
 
-_folder_does_not_exist_notice_text = """<p><b>Notice:</b> Last open game ({})'s folder has been either moved or deleted.</p>
-<p>Please select a different folder from below.</p>
+_folder_does_not_exist_notice_text = """<b>Notice:</b> Last open game ({})'s folder has been either moved or deleted. Please select a different folder from below.
 """.format(Path(IDESettings.get_autoload_last_game_path()).stem)
 
 FALLBACK_GAME_ICON_PATH = IconThemes.icon_path_from_theme(IconThemes.ICON_NAME_PYWRIGHT)
@@ -36,6 +35,13 @@ class WelcomeWidget(QWidget):
         label_size = QSize(icon_pixmap.width() + 2, icon_pixmap.height() + 2)
         ide_icon_label.setFixedSize(label_size)
         welcome_label = QLabel(_welcome_label_text)
+
+        last_game_path = Path(IDESettings.get_autoload_last_game_path())
+        last_game_exists = last_game_path.exists() and last_game_path.is_dir()
+
+        info_label = InfoBannerWidget(_folder_does_not_exist_notice_text, self)
+
+        info_label.setVisible(not last_game_exists)
 
         separator_line = QFrame()
         separator_line.setFrameShape(QFrame.Shape.VLine)
@@ -102,6 +108,7 @@ class WelcomeWidget(QWidget):
 
         main_layout.addSpacing(20)
         main_layout.addLayout(header_layout)
+        main_layout.addWidget(info_label)
         main_layout.addLayout(body_layout)
         main_layout.addSpacing(20)
 
@@ -197,3 +204,50 @@ class WelcomeWidget(QWidget):
 
         except FileNotFoundError:
             pass
+
+
+class InfoBannerWidget(QFrame):
+
+    def __init__(self, text: str, parent):
+        super().__init__(parent)
+
+        self._info_label = QLabel(text)
+        self._quit_button = QPushButton("X")
+        self.setObjectName("InfoBox")
+
+        self._quit_button.setFixedWidth(25)
+        self._quit_button.setFlat(True)
+        self._quit_button.pressed.connect(self.hide)
+        self._quit_button.setToolTip("Dismiss")
+        self.setFrameStyle(QFrame.Shape.StyledPanel)
+
+        self.setStyleSheet(""" QFrame#InfoBox {
+            background-color: #62fcd8;
+            border: 1px solid #1bd3a8;
+            border-radius: 4px;
+        }""")
+
+        self._quit_button.setStyleSheet("""QPushButton:hover {
+            color: white;
+            background-color: #e52d3d;
+            border: 1px solid #ef1527;
+            border-radius: 4px;
+        }
+        QPushButton:pressed {
+            color: white;
+            background-color: #ef1527;
+            border: 1px solid #e52d3d;
+            border-radius: 4px;
+        }
+        """)
+
+        main_layout = QHBoxLayout()
+
+        main_layout.addWidget(self._info_label)
+        main_layout.addStretch()
+        main_layout.addWidget(self._quit_button)
+
+        self.setLayout(main_layout)
+
+    def set_info_text(self, new_text: str):
+        self._info_label.setText(new_text)
