@@ -212,10 +212,22 @@ QGroupBox {
     color: #FFF;
 }
 
+QPushButton::flat {
+    color: white;
+}
+
 QRadioButton {
     color: #FFF;
 }
 
 QStatusBar QLabel {
     color: #FFF;
+}
+
+QFrame[frameShape="5"] { /* VLine Style */
+    color: white;
+}
+
+QFrame#InfoBox * {
+    color: black;
 }
