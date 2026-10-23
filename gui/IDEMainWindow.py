@@ -101,23 +101,23 @@ class IDEMainWindow(QMainWindow):
         self._is_asset_browser_hidden = not IDESettings.get_show_asset_browser()
         self._is_logger_view_hidden = not IDESettings.get_show_logger_view()
 
+        game_open_condition = selected_game_path != "" and Path(selected_game_path).exists() and Path(selected_game_path).is_dir()
+
         # Try to load the last open game here, if the option is enabled, and the game folder still exists.
-        if selected_game_path != "":
-            self.pick_game_folder_and_open_game_properties_tab(Path(selected_game_path))
-        elif IDESettings.get_autoload_last_game_check():
-            autoload_path: str = IDESettings.get_autoload_last_game_path()
-            if autoload_path != "" and PyWrightGameInfo.is_valid_game_folder(Path(autoload_path)):
-                self.pick_game_folder(Path(autoload_path))
+        if game_open_condition:
+            self.pick_game_folder(Path(selected_game_path))
 
-                # Also restore previously open tabs
-                open_tabs = IDESettings.get_last_open_tabs()
-                if len(open_tabs) > 0:
-                    last_tab_index = IDESettings.get_last_open_tab_index()
-                    missing_files = self.central_widget.restore_last_open_tabs(open_tabs, last_tab_index)
+            # Also restore previously open tabs
+            open_tabs = IDESettings.get_last_open_tabs()
+            if len(open_tabs) > 0:
+                last_tab_index = IDESettings.get_last_open_tab_index()
+                missing_files = self.central_widget.restore_last_open_tabs(open_tabs, last_tab_index)
 
-                    if len(missing_files) > 0:
-                        missing_files_dialog = MissingFilesDialog(self, missing_files)
-                        missing_files_dialog.exec()
+                if len(missing_files) > 0:
+                    missing_files_dialog = MissingFilesDialog(self, missing_files)
+                    missing_files_dialog.exec()
+            else:
+                self.central_widget.open_game_properties_tab()
         else:
             self.setCentralWidget(self.welcome_widget)
             self.central_widget.hide()
