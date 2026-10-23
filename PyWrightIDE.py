@@ -20,14 +20,9 @@ if __name__ == '__main__':
     game_folder_path = Path(IDESettings.get_autoload_last_game_path())
     game_folder_exists = game_folder_path.exists() and game_folder_path.is_dir()
 
-    if not IDESettings.get_autoload_last_game_check() or not game_folder_exists:
-        welcome_dialog = WelcomeDialog()
-        if welcome_dialog.exec():
-            game_folder_path = welcome_dialog.get_selected_folder_path()
-        else:
-            sys.exit(0)
+    cond = IDESettings.get_autoload_last_game_check() and game_folder_exists
 
-    main_window = IDEMainWindow(game_folder_path)
+    main_window = IDEMainWindow(str(game_folder_path) if cond else "")
     ErrorDialog.set_ide_main_window(main_window)
     main_window.show()
     app.exec()
