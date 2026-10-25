@@ -215,17 +215,20 @@ def get_show_directory_view() -> bool:
 def set_show_directory_view(new_value: bool):
     __program_settings.setValue(SHOW_DIRECTORY_VIEW_KEY, new_value)
 
+
 def get_show_asset_browser() -> bool:
     return __program_settings.value(SHOW_ASSET_BROWSER_KEY, True, bool)
 
 def set_show_asset_browser(new_value: bool):
     __program_settings.setValue(SHOW_ASSET_BROWSER_KEY, new_value)
 
+
 def get_show_logger_view() -> bool:
     return __program_settings.value(SHOW_LOGGER_VIEW_KEY, False, bool)
 
 def set_show_logger_view(new_value: bool):
     __program_settings.setValue(SHOW_LOGGER_VIEW_KEY, new_value)
+
 
 def all_keys() -> list[str]:
     return __program_settings.allKeys()
@@ -259,3 +262,6 @@ def reset_settings():
     __program_settings.setValue(HIGHLIGHT_MATCHING_TEXT_KEY, True)
     __program_settings.setValue(HIGHLIGHT_FILL_RECT_KEY, True)
     __program_settings.setValue(IMAGE_VIEWER_USE_CONTROL_TO_ZOOM_KEY, False)
+    __program_settings.setValue(SHOW_DIRECTORY_VIEW_KEY, True)
+    __program_settings.setValue(SHOW_ASSET_BROWSER_KEY, True)
+    __program_settings.setValue(SHOW_LOGGER_VIEW_KEY, False)
