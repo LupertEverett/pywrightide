@@ -231,11 +231,3 @@ QFrame[frameShape="5"] { /* VLine Style */
 QFrame#InfoBox * {
     color: black;
 }
-
-a {
-    color: #1ae8ef;
-}
-
-a:visited {
-    color: #ef1a93;
-}
