@@ -42,7 +42,7 @@ class IDEMainWindow(QMainWindow):
         self.setWindowTitle("PyWright IDE")
         self.setWindowIcon(QIcon("res/icons/ideicon.png"))
         self.setMinimumSize(720, 540)
-        if IDESettings.window_geometry_data_exists():
+        if IDESettings.window_geometry_data_exists() and IDESettings.get_settings_version() is not None:
             self.restoreGeometry(IDESettings.get_window_geometry())
 
         self.directory_view = DirectoryViewWidget(self)
@@ -94,7 +94,7 @@ class IDEMainWindow(QMainWindow):
         self.addDockWidget(Qt.DockWidgetArea.BottomDockWidgetArea, self.logger_view)
 
         # Try loading the window state (docks positions, visibility, etc.)
-        if IDESettings.window_state_data_exists():
+        if IDESettings.window_state_data_exists() and IDESettings.get_settings_version() is not None:
             self.restoreState(IDESettings.get_window_state())
 
         self._is_directory_view_hidden = not IDESettings.get_show_directory_view()
