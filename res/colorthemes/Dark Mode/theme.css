@@ -73,7 +73,7 @@ QTabWidget::pane {
 QTabBar::tab {
     padding: 4px 12px 4px 12px;
     background-color: #373737;
-    margin-right: 4px;
+    /*margin-right: 4px;*/
     color: #FFF;
 }
 
@@ -230,4 +230,12 @@ QFrame[frameShape="5"] { /* VLine Style */
 
 QFrame#InfoBox * {
     color: black;
+}
+
+a {
+    color: #1ae8ef;
+}
+
+a:visited {
+    color: #ef1a93;
 }
