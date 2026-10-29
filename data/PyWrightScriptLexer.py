@@ -173,11 +173,11 @@ def is_string_float(string: str) -> bool:
 class CustomQsciAPIs(QsciAPIs):
     """This class allows us to do custom behaviour on autocompletion."""
     
-    def __init__(self, lexer:'QsciLexer')->None:
+    def __init__(self, lexer: 'QsciLexer') -> None:
         super().__init__(lexer)
 
         self._has_just_inserted = 0                 # counter for _after_completion_is_applied()
-        self._completion_selected :str|None = None  # Either the text to insert or None if no such text
+        self._completion_selected : str | None = None  # Either the text to insert or None if no such text
 
         # Connect events
         sci: QsciScintilla = self.lexer().parent()
@@ -257,7 +257,7 @@ class CustomQsciAPIs(QsciAPIs):
             self._completion_selected = textToInsert
             self._has_just_inserted = 2
 
-    def updateAutoCompletionList(self, context:[str], list:[str])->[str]:
+    def updateAutoCompletionList(self, context: list[str], list: list[str]) -> list[str]:
         """
         Triggered when the autocompletion list is about to pop-up,
         to fill with custom proposals depending on the context.
@@ -517,5 +517,3 @@ class PyWrightScriptLexer(QsciLexerCustom):
                     self.setStyling(len(bytearray(token, "utf-8")), 9)
                 else:
                     self.setStyling(len(bytearray(token, "utf-8")), 5)
-
-
