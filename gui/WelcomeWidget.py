@@ -20,6 +20,8 @@ FALLBACK_GAME_ICON_PATH = IconThemes.icon_path_from_theme(IconThemes.ICON_NAME_P
 
 class WelcomeWidget(QWidget):
     game_path_selected = pyqtSignal(Path)
+    settings_selected = pyqtSignal()
+    about_selected = pyqtSignal()
 
     def __init__(self, parent):
         super().__init__(parent)
@@ -60,8 +62,23 @@ class WelcomeWidget(QWidget):
         self._open_game_button.setFlat(True)
         self._open_game_button.pressed.connect(self._handle_load_game_clicked)
 
+        self._settings_button = QPushButton("Settings")
+        settings_icon = IconThemes.icon_path_from_theme(IconThemes.ICON_NAME_SETTINGS)
+        self._settings_button.setIcon(QIcon(settings_icon))
+        self._settings_button.setStyleSheet("text-align: left")
+        self._settings_button.setFlat(True)
+        self._settings_button.pressed.connect(lambda: self.settings_selected.emit())
+
+        self._about_button = QPushButton("About")
+        about_icon = IconThemes.icon_path_from_theme(IconThemes.ICON_NAME_ABOUT)
+        self._about_button.setIcon(QIcon(about_icon))
+        self._about_button.setStyleSheet("text-align: left")
+        self._about_button.setFlat(True)
+        self._about_button.pressed.connect(lambda: self.about_selected.emit())
+
         self._always_autoload_checkbox = QCheckBox("Always load the last opened game at startup (skips this screen)")
         self._always_autoload_checkbox.setChecked(IDESettings.get_autoload_last_game_check())
+        self._always_autoload_checkbox.checkStateChanged.connect(lambda: IDESettings.set_autoload_last_game_check(self._always_autoload_checkbox.isChecked()))
 
         self.previous_games_list = QTreeWidget()
 
@@ -95,6 +112,8 @@ class WelcomeWidget(QWidget):
         buttons_layout.addWidget(self._new_game_button)
         buttons_layout.addWidget(self._open_game_button)
         buttons_layout.addStretch()
+        buttons_layout.addWidget(self._settings_button)
+        buttons_layout.addWidget(self._about_button)
 
         previous_games_layout.addWidget(QLabel("Previous Games:"))
         previous_games_layout.addWidget(self.previous_games_list)
@@ -177,6 +196,9 @@ class WelcomeWidget(QWidget):
 
     def is_autoload_checkbox_ticked(self):
         return self._always_autoload_checkbox.isChecked()
+
+    def set_autoload_checkbox_ticked(self, new_value: bool):
+        self._always_autoload_checkbox.setChecked(new_value)
 
     def __add_item_to_model(self, text: str):
         try:

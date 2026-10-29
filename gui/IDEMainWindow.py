@@ -20,6 +20,7 @@ from .FindReplaceDialog import FindReplaceDialog
 from .AssetBrowserRootWidget import AssetBrowserRootWidget
 from .FileEditWidget import FileEditWidget
 from .MissingFilesDialog import MissingFilesDialog
+from .AboutDialog import about_pywright_ide
 
 from data import IDESettings, ColorThemes, PyWrightFolder
 from data.PyWrightGame import PyWrightGameInfo, CurrentPyWrightGame
@@ -52,6 +53,8 @@ class IDEMainWindow(QMainWindow):
 
         self.welcome_widget = WelcomeWidget(self)
         self.welcome_widget.game_path_selected.connect(self.pick_game_folder_and_open_game_properties_tab)
+        self.welcome_widget.settings_selected.connect(self._handle_settings)
+        self.welcome_widget.about_selected.connect(lambda: about_pywright_ide(self))
 
         self.central_widget = MainWindowCentralWidget(self)
 
@@ -250,6 +253,7 @@ class IDEMainWindow(QMainWindow):
 
     def _apply_settings(self):
         self.central_widget.apply_settings()
+        self.welcome_widget.set_autoload_checkbox_ticked(IDESettings.get_autoload_last_game_check())
         self._apply_new_color_theme()
         self._top_toolbar.update_toolbar_icons()
 
