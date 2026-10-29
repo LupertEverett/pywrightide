@@ -348,12 +348,16 @@ class PyWrightScriptLexer(QsciLexerCustom):
 
     def set_editor_color_theme(self):
         # Default Text Settings
-        self.setDefaultColor(QColor(EditorThemes.current_editor_theme.colors[0].text_color))
-        self.setDefaultPaper(QColor(EditorThemes.current_editor_theme.colors[0].paper_color))
+        self.setDefaultColor(QColor.fromString(EditorThemes.current_editor_theme.get_color_string(EditorThemes.ColorName.DEFAULT, EditorThemes.ColorTarget.TEXT)))
+        self.setDefaultPaper(QColor.fromString(EditorThemes.current_editor_theme.get_color_string(EditorThemes.ColorName.DEFAULT, EditorThemes.ColorTarget.PAPER)))
 
-        for color_index in range(len(EditorThemes.current_editor_theme.colors)):
-            self.setColor(QColor(EditorThemes.current_editor_theme.colors[color_index].text_color), color_index)
-            self.setPaper(QColor(EditorThemes.current_editor_theme.colors[color_index].paper_color), color_index)
+        for color_enum in EditorThemes.ColorName:
+            if color_enum > EditorThemes.ColorName.STRING_TOKENS:
+                break
+            text_color = EditorThemes.current_editor_theme.get_color_string(color_enum, EditorThemes.ColorTarget.TEXT)
+            self.setColor(QColor.fromString(text_color), int(color_enum))
+            paper_color = EditorThemes.current_editor_theme.get_color_string(color_enum, EditorThemes.ColorTarget.PAPER)
+            self.setPaper(QColor.fromString(paper_color), int(color_enum))
 
     def language(self):
         return "PyWright Script"
