@@ -134,7 +134,7 @@ class IDEMainWindow(QMainWindow):
         self._apply_new_color_theme()
 
     def switch_to_editor_mode(self):
-        self.welcome_widget.hide()
+        self.welcome_widget = None
         self.central_widget.show()
         self.setCentralWidget(self.central_widget)
         self._top_toolbar.show()
@@ -253,7 +253,9 @@ class IDEMainWindow(QMainWindow):
 
     def _apply_settings(self):
         self.central_widget.apply_settings()
-        self.welcome_widget.set_autoload_checkbox_ticked(IDESettings.get_autoload_last_game_check())
+        # Setting a different central widget destroys the previous one
+        if self.welcome_widget is not None:
+            self.welcome_widget.set_autoload_checkbox_ticked(IDESettings.get_autoload_last_game_check())
         self._apply_new_color_theme()
         self._top_toolbar.update_toolbar_icons()
 
