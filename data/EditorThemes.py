@@ -17,14 +17,41 @@
 # caret: The vertical line on the text editing area that indicates the position, and also blinks.
 # matchingtext: Highlight color on matching text occurrences.
 # parameterboxes: Outline of the parameter boxes
+# foldmargin(1/2): Background color for fold margin. There are two different colors used in a checkerboard pattern
 #
 # Lines follow the format: "[Text Color],[Paper (Background) Color]", where each color is formatted as "#aarrggbb"
 
 from pathlib import Path
+from enum import IntEnum
 
 
 def query_available_editor_themes() -> list[str]:
     return [x.stem for x in Path("res/editorcolorthemes").iterdir() if x.is_file() and x.suffix == ".editortheme"]
+
+
+class ColorName(IntEnum):
+    DEFAULT = 0
+    COMMANDS = 1
+    SPECIAL_VARS = 2
+    PARAMETERS = 3
+    LINE_COMMENTS = 4
+    STRING_LITERALS = 5
+    NUMBERS = 6
+    BUILTIN_MACROS = 7
+    GAME_MACROS = 8
+    STRING_TOKENS = 9
+    EDITOR_MARGIN = 10
+    EDITOR_MARGIN_BORDER = 11
+    CARET = 12
+    MATCH_HIGHLIGHT = 13
+    PARAMETER_BOXES = 14
+    FOLD_MARGIN_1 = 15
+    FOLD_MARGIN_2 = 16
+
+
+class ColorTarget(IntEnum):
+    TEXT = 0
+    PAPER = 1
 
 
 class EditorColor:
@@ -79,6 +106,10 @@ _DEFAULT_EDITOR_MARGIN_PAPER_COLOR = "#ffffffff"
 
 _DEFAULT_EDITOR_MARGIN_BORDER_PAPER_COLOR = "#ff303030"
 
+# Folding margins use two colors for its background
+_DEFAULT_FOLD_MARGIN_PAPER_COLOR_1 = "#ffffffff"
+_DEFAULT_FOLD_MARGIN_PAPER_COLOR_2 = "#ffffffff"
+
 _DEFAULT_CARET_PAPER_COLOR = "#ffffffff"
 
 _DEFAULT_MATCHINGTEXT_PAPER_COLOR = "#ff3ee2e8"
@@ -114,11 +145,42 @@ class EditorColorTheme:
         self.match_highlight_color = EditorColor("matchingtext", "", _DEFAULT_MATCHINGTEXT_PAPER_COLOR, 0)
         self.parameter_boxes_color = EditorColor("parameterboxes", "", _DEFAULT_PARAMETER_BOX_PAPER_COLOR, 0)
 
-        self.colors = [self.default_style_color, self.commands_color, self.special_variables_color,
-                       self.parameters_color, self.line_comments_color, self.string_literals_color,
-                       self.numbers_color, self.builtin_macros_color, self.game_macros_color,
-                       self.string_tokens_color, self.editor_margin_color, self.editor_margin_border_color,
-                       self.caret_color, self.match_highlight_color, self.parameter_boxes_color]
+        self.fold_margin_color_1 = EditorColor("foldmargin1", "", _DEFAULT_FOLD_MARGIN_PAPER_COLOR_1, 0)
+        self.fold_margin_color_2 = EditorColor("foldmargin2", "", _DEFAULT_FOLD_MARGIN_PAPER_COLOR_2, 0)
+
+        self.colors_dict = {
+            ColorName.DEFAULT : self.default_style_color,
+            ColorName.COMMANDS : self.commands_color,
+            ColorName.SPECIAL_VARS : self.special_variables_color,
+            ColorName.PARAMETERS : self.parameters_color,
+            ColorName.LINE_COMMENTS : self.line_comments_color,
+            ColorName.STRING_LITERALS : self.string_literals_color,
+            ColorName.NUMBERS : self.numbers_color,
+            ColorName.BUILTIN_MACROS : self.builtin_macros_color,
+            ColorName.GAME_MACROS : self.game_macros_color,
+            ColorName.STRING_TOKENS : self.string_tokens_color,
+            ColorName.EDITOR_MARGIN : self.editor_margin_color,
+            ColorName.EDITOR_MARGIN_BORDER : self.editor_margin_border_color,
+            ColorName.CARET : self.caret_color,
+            ColorName.MATCH_HIGHLIGHT : self.match_highlight_color,
+            ColorName.PARAMETER_BOXES : self.parameter_boxes_color,
+            ColorName.FOLD_MARGIN_1 : self.fold_margin_color_1,
+            ColorName.FOLD_MARGIN_2 : self.fold_margin_color_2
+        }
+
+    def get_color_string(self, color_name: ColorName, color_target: ColorTarget) -> str:
+        match color_target:
+            case ColorTarget.TEXT:
+                return self.colors_dict[color_name].text_color
+            case ColorTarget.PAPER:
+                return self.colors_dict[color_name].paper_color
+
+    def set_color_string(self, color_name: ColorName, color_target: ColorTarget, new_color_str: str):
+        match color_target:
+            case ColorTarget.TEXT:
+                self.colors_dict[color_name].text_color = new_color_str
+            case ColorTarget.PAPER:
+                self.colors_dict[color_name].paper_color = new_color_str
 
     def __load_from_file(self, file_path: Path):
         if not file_path.exists() or not file_path.is_file():
@@ -177,6 +239,10 @@ class EditorColorTheme:
                         self.match_highlight_color.paper_color = values[0]
                     case "parameterboxes":
                         self.parameter_boxes_color.paper_color = values[0]
+                    case "foldmargin1":
+                        self.fold_margin_color_1.paper_color = values[0]
+                    case "foldmargin2":
+                        self.fold_margin_color_2.paper_color = values[0]
 
     def load_theme(self, theme_name: str):
         self.__load_from_file(Path("res/editorcolorthemes/{}.editortheme".format(theme_name)))
@@ -224,6 +290,9 @@ class EditorColorTheme:
         self.editor_margin_color.paper_color = _DEFAULT_EDITOR_MARGIN_PAPER_COLOR
 
         self.editor_margin_border_color.paper_color = _DEFAULT_EDITOR_MARGIN_BORDER_PAPER_COLOR
+
+        self.fold_margin_color_1.paper_color = _DEFAULT_FOLD_MARGIN_PAPER_COLOR_1
+        self.fold_margin_color_2.paper_color = _DEFAULT_FOLD_MARGIN_PAPER_COLOR_2
 
         self.caret_color.paper_color = _DEFAULT_CARET_PAPER_COLOR
 
