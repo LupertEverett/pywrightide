@@ -38,6 +38,8 @@ class FileEditWidget(QWidget):
 
         self.sci.cursorPositionChanged.connect(self._handle_cursor_position_changed)
 
+        self.sci.textChanged.connect(lambda: self.sci.apply_code_folding())
+
         self.pywright_working_dir = pywright_dir
 
         self.layout.addWidget(self.sci)

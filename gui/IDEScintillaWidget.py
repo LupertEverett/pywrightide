@@ -176,10 +176,13 @@ class IDEScintillaWidget(QsciScintilla):
         self.setWrapMode(QsciScintilla.WrapMode.WrapWord)
 
         # First margin is the line number margin by default. We set a preset width value to it here.
-        self.setMargins(2)
+        self.setMargins(3)
         self.setMarginType(1, QsciScintilla.MarginType.SymbolMarginColor)
         self.setMarginWidth(0, 50)
         self.setMarginWidth(1, 1)
+        self.setMarginType(2, QsciScintilla.MarginType.TextMargin)
+
+        self.setFolding(QsciScintilla.FoldStyle.PlainFoldStyle, 2)
 
         self.set_highlight_style(IDESettings.get_highlight_fill_rect())
         self.setIndicatorDrawUnder(True, _HIGHLIGHT_INDICATOR_ID)
@@ -298,6 +301,43 @@ class IDEScintillaWidget(QsciScintilla):
             self._clear_all_highlights()
 
         self._highlight_in_progress = False
+
+    def apply_code_folding(self):
+        lines = self.text().splitlines()
+
+        # Scintilla's code folding works as follows:
+        # Any fold levels bigger than the current line's are treated as the "children" of that line
+        # So on the example below (every one of these numbers at the beginning correspond to a line's fold level):
+        # 0 int main() {
+        # 1   (...)
+        # 1   (...)
+        # 1 }
+        # 0
+        # 0 int func() {
+        # 1     if (...) {
+        # 2         (...)
+        # 2     }
+        # 1 }
+        # 0
+        # The first line with fold level 0 "owns" the following lines with fold level 1
+        # The third line with fold level 0 "owns" the following lines with fold level 1
+        # (and the inner line with fold level 1 "owns" the following lines with fold level 2) and so on
+
+        # This currently only covers macros as they are the only keywords that has definite beginning and end points.
+        fold_level = 0
+        for line_number, line in enumerate(lines):
+            if line.startswith("macro"):
+                self.SendScintilla(QsciScintilla.SCI_SETFOLDLEVEL, line_number,
+                                   fold_level | QsciScintilla.SC_FOLDLEVELHEADERFLAG)
+                fold_level = 1
+            elif line.startswith("endmacro"):
+                self.SendScintilla(QsciScintilla.SCI_SETFOLDLEVEL, line_number,
+                                   fold_level)
+                fold_level = 0
+            else:
+                # Keep propagating the same fold level
+                self.SendScintilla(QsciScintilla.SCI_SETFOLDLEVEL, line_number,
+                                   fold_level | QsciScintilla.SC_FOLDLEVELHEADERFLAG)
 
     def _clear_all_highlights(self, id=_HIGHLIGHT_INDICATOR_ID):
         last_line = self.lines() - 1
