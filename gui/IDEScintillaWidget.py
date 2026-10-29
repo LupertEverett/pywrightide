@@ -179,10 +179,10 @@ class IDEScintillaWidget(QsciScintilla):
         self.setMargins(3)
         self.setMarginType(1, QsciScintilla.MarginType.SymbolMarginColor)
         self.setMarginWidth(0, 50)
-        self.setMarginWidth(1, 1)
-        self.setMarginType(2, QsciScintilla.MarginType.TextMargin)
+        self.setMarginWidth(1, 30)
+        self.setMarginWidth(2, 1)
 
-        self.setFolding(QsciScintilla.FoldStyle.PlainFoldStyle, 2)
+        self.setFolding(QsciScintilla.FoldStyle.PlainFoldStyle, 1)
 
         self.set_highlight_style(IDESettings.get_highlight_fill_rect())
         self.setIndicatorDrawUnder(True, _HIGHLIGHT_INDICATOR_ID)
@@ -247,7 +247,9 @@ class IDEScintillaWidget(QsciScintilla):
         self._lexer.set_editor_color_theme()
         self.setMarginsBackgroundColor(QColor(EditorThemes.current_editor_theme.editor_margin_color.paper_color))
         self.setMarginsForegroundColor(QColor(EditorThemes.current_editor_theme.editor_margin_color.text_color))
-        self.setMarginBackgroundColor(1, QColor(EditorThemes.current_editor_theme.
+        self.setFoldMarginColors(QColor(EditorThemes.current_editor_theme.fold_margin_color_1.paper_color),
+                                 QColor(EditorThemes.current_editor_theme.fold_margin_color_2.paper_color))
+        self.setMarginBackgroundColor(2, QColor(EditorThemes.current_editor_theme.
                                                 editor_margin_border_color.paper_color))
         self.setCaretForegroundColor(QColor(EditorThemes.current_editor_theme.caret_color.paper_color))
         self.setIndicatorForegroundColor(QColor(EditorThemes.current_editor_theme.match_highlight_color.paper_color),
@@ -337,7 +339,7 @@ class IDEScintillaWidget(QsciScintilla):
             else:
                 # Keep propagating the same fold level
                 self.SendScintilla(QsciScintilla.SCI_SETFOLDLEVEL, line_number,
-                                   fold_level | QsciScintilla.SC_FOLDLEVELHEADERFLAG)
+                                   fold_level)
 
     def _clear_all_highlights(self, id=_HIGHLIGHT_INDICATOR_ID):
         last_line = self.lines() - 1
