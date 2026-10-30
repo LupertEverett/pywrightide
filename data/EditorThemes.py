@@ -252,7 +252,7 @@ class EditorColorTheme:
 
     def save_to_file(self, theme_file_name: str):
         with open("res/editorcolorthemes/{}.editortheme".format(theme_file_name), "w") as f:
-            for color in self.colors:
+            for color in self.colors_dict.values():
                 f.write(str(color) + "\n")
 
     def reset_colors_to_defaults(self):
