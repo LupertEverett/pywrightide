@@ -141,9 +141,14 @@ class ColorEditorDialog(QDialog):
             lambda: self._handle_color_button_pressed(str_tokens_paper_color)
         )
 
-        margin_color = ColorButton(EditorThemes.ColorName.EDITOR_MARGIN, EditorThemes.ColorTarget.PAPER)
-        margin_color.pressed.connect(
-            lambda: self._handle_color_button_pressed(margin_color)
+        margin_text_color = ColorButton(EditorThemes.ColorName.EDITOR_MARGIN, EditorThemes.ColorTarget.TEXT)
+        margin_text_color.pressed.connect(
+            lambda: self._handle_color_button_pressed(margin_text_color)
+        )
+
+        margin_paper_color = ColorButton(EditorThemes.ColorName.EDITOR_MARGIN, EditorThemes.ColorTarget.PAPER)
+        margin_paper_color.pressed.connect(
+            lambda: self._handle_color_button_pressed(margin_paper_color)
         )
 
         border_margin_color = ColorButton(EditorThemes.ColorName.EDITOR_MARGIN_BORDER, EditorThemes.ColorTarget.PAPER)
@@ -182,8 +187,8 @@ class ColorEditorDialog(QDialog):
             comment_text_color, comment_paper_color, strings_text_color, strings_paper_color,
             numbers_text_color, numbers_paper_color, builtin_macros_text_color, builtin_macros_paper_color,
             game_macros_text_color, game_macros_paper_color, str_tokens_text_color, str_tokens_paper_color,
-            margin_color, border_margin_color, caret_color, matching_text_highlight_color,
-            param_box_color, fold_margin_1_color, fold_margin_2_color
+            margin_text_color, margin_paper_color, border_margin_color, caret_color,
+            matching_text_highlight_color, param_box_color, fold_margin_1_color, fold_margin_2_color
         ]
 
         theme_colors_layout.addWidget(QLabel("<b>Color Name</b>"), 0, 0)
@@ -235,7 +240,8 @@ class ColorEditorDialog(QDialog):
         editor_colors_layout.addWidget(QLabel("<b>Color 2</b>"), 0, 2)
 
         editor_colors_layout.addWidget(QLabel("Margin:"), 1, 0)
-        editor_colors_layout.addWidget(margin_color, 1, 1)
+        editor_colors_layout.addWidget(margin_text_color, 1, 1)
+        editor_colors_layout.addWidget(margin_paper_color, 1, 2)
 
         editor_colors_layout.addWidget(QLabel("Margin Border:"), 2, 0)
         editor_colors_layout.addWidget(border_margin_color, 2, 1)
