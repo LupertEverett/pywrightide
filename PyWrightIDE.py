@@ -22,6 +22,7 @@ if __name__ == '__main__':
 
     cond = IDESettings.get_autoload_last_game_check() and game_folder_exists
 
+    ErrorDialog.set_app_instance(app)
     main_window = IDEMainWindow(str(game_folder_path) if cond else "")
     ErrorDialog.set_ide_main_window(main_window)
     main_window.show()

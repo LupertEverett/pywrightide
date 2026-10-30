@@ -15,6 +15,7 @@ _ERROR_LABEL_TEXT = """PyWright IDE has encountered a fatal error and will be sh
 Error message and stack trace is available down below:"""
 
 _ide_main_window_ref : IDEMainWindow | None = None
+_app : QApplication | None = None
 
 log = logging.getLogger(__name__)
 handler = logging.StreamHandler(stream=sys.stdout)
@@ -25,6 +26,10 @@ def set_ide_main_window(main_window: IDEMainWindow):
     """Set the main window the Error Dialog will be parented on"""
     global _ide_main_window_ref
     _ide_main_window_ref = main_window
+
+def set_app_instance(app: QApplication):
+    global _app
+    _app = app
 
 def show_error_dialog(log_msg):
     """Shows the Error Dialog if QApplication is running"""
@@ -95,7 +100,8 @@ class ErrorDialog(QDialog):
         clipboard.setText(self._stack_trace_textedit.toPlainText())
 
     def _handle_quit_ide(self):
-        QApplication.instance().quit()
+        _app.closeAllWindows()
+        _app.quit()
 
 # Register hook
 uncaught_exception_hook = UncaughtHook()
