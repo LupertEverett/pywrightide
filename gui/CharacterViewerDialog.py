@@ -261,6 +261,8 @@ class CharacterViewerDialog(QDialog):
         self._play_button.setIcon(self._stop_icon if self._is_playing_anim else self._play_icon)
         self._play_button.setToolTip("Stop animation" if self._is_playing_anim else "Play animation")
 
+        self._import_single_image_action.setEnabled(not self._is_playing_anim)
+        self._import_image_folder_action.setEnabled(not self._is_playing_anim)
         self._frame_number_spinbox.setEnabled(not self._is_playing_anim)
         self._frame_slider.setEnabled(not self._is_playing_anim)
         self._character_combobox.setEnabled(not self._is_playing_anim)
