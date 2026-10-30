@@ -177,8 +177,9 @@ class IDEScintillaWidget(QsciScintilla):
 
         # First margin is the line number margin by default. We set a preset width value to it here.
         self.setMargins(3)
+        self.setMarginType(0, QsciScintilla.MarginType.NumberMargin)
         self.setMarginType(1, QsciScintilla.MarginType.SymbolMarginColor)
-        self.setMarginWidth(0, 50)
+        self.setMarginWidth(0, "00")
         self.setMarginWidth(1, 30)
         self.setMarginWidth(2, 1)
 

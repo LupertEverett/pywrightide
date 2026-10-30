@@ -13,7 +13,8 @@
 * The IDE will now warn the user of missing case folders and remove them from the list instead of crashing.
 * Logger view now displays PyWright's own logs too (by Zetrypio)
 * Welcome dialog is now "embedded" into the main window, with improved user interface.
-* Added code folding for macros
+* Added code folding for macros.
+* Line number column now dynamically resizes with the amount of lines.
 
 ## Version 1.5 - 30.11.2025
 
