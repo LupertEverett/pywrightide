@@ -86,6 +86,18 @@ class MainWindowTopToolbar(QToolBar):
             self.save_file_action.shortcut().toString()
         ))
 
+        undo_icon_path = IconThemes.icon_path_from_theme(IconThemes.ICON_NAME_UNDO)
+        self.undo_action = QAction(QIcon(undo_icon_path), "Undo")
+        # Undo action already has a shortcut so we don't need to set it again
+        self.undo_action.setEnabled(False)
+        self.undo_action.setStatusTip("Undo last action [Ctrl+Z]")
+
+        redo_icon_path = IconThemes.icon_path_from_theme(IconThemes.ICON_NAME_REDO)
+        self.redo_action = QAction(QIcon(redo_icon_path), "Redo")
+        # Undo action already has a shortcut so we don't need to set it again
+        self.redo_action.setEnabled(False)
+        self.redo_action.setStatusTip("Redo previous action [Ctrl+Y]")
+
         find_replace_icon_path = IconThemes.icon_path_from_theme(IconThemes.ICON_NAME_FIND_REPLACE)
         self.find_replace_dialog_action = QAction(QIcon(find_replace_icon_path), "Find/Replace")
         # self.find_replace_dialog_action.triggered.connect(self._handle_find_replace)
@@ -155,6 +167,9 @@ class MainWindowTopToolbar(QToolBar):
         self.addAction(self.open_file_action)
         self.addAction(self.save_file_action)
         self.addSeparator()
+        self.addAction(self.undo_action)
+        self.addAction(self.redo_action)
+        self.addSeparator()
         self.addAction(self.find_replace_dialog_action)
         self.addSeparator()
         self.addAction(self.directory_view_toggle_action)
@@ -197,6 +212,10 @@ class MainWindowTopToolbar(QToolBar):
         self.directory_view_toggle_action.setChecked(self.ide_main_window.directory_view.isVisible())
         self.asset_browser_toggle_action.setChecked(self.ide_main_window.asset_manager_widget.isVisible())
         self.logger_toggle_action.setChecked(self.ide_main_window.logger_view.isVisible())
+
+    def update_undo_redo_buttons(self, undo_available: bool, redo_available: bool):
+        self.undo_action.setEnabled(undo_available)
+        self.redo_action.setEnabled(redo_available)
 
     def update_recent_folders_list(self):
         self.recent_folders_menu.clear()
