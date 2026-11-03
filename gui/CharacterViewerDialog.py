@@ -145,10 +145,10 @@ class CharacterViewerDialog(QDialog):
 
         sub_layout.addLayout(viewer_layout)
 
-        sub_layout.setSizeConstraint(QLayout.SizeConstraint.SetFixedSize)
-
         main_layout.addWidget(self._toolbar)
         main_layout.addLayout(sub_layout)
+
+        main_layout.setSizeConstraint(QLayout.SizeConstraint.SetFixedSize)
 
         self.setLayout(main_layout)
 
