@@ -4,8 +4,9 @@
 from enum import Enum
 
 from PyQt6.QtWidgets import (QDialog, QPushButton, QRadioButton,
-                             QButtonGroup, QGroupBox, QVBoxLayout,
-                             QHBoxLayout, QLineEdit, QLabel, QMessageBox)
+                             QButtonGroup, QGroupBox, QVBoxLayout, QLayout,
+                             QHBoxLayout, QGridLayout, QLineEdit, QLabel,
+                             QMessageBox)
 from PyQt6.QtCore import pyqtSignal
 
 
@@ -83,13 +84,11 @@ class FindReplaceDialog(QDialog):
         # self._scope_group_box_layout.addWidget(self._scope_entire_project_radio_button)
         self._scope_group_box.setLayout(self._scope_group_box_layout)
 
-        find_row_layout = QHBoxLayout()
-        find_row_layout.addWidget(QLabel("Find:"))
-        find_row_layout.addWidget(self._find_line_edit)
-
-        replace_row_layout = QHBoxLayout()
-        replace_row_layout.addWidget(QLabel("Replace:"))
-        replace_row_layout.addWidget(self._replace_line_edit)
+        find_replace_layout = QGridLayout()
+        find_replace_layout.addWidget(QLabel("Find:"), 0, 0, 1, 1)
+        find_replace_layout.addWidget(self._find_line_edit, 0, 1, 1, 1)
+        find_replace_layout.addWidget(QLabel("Replace:"), 1, 0, 1, 1)
+        find_replace_layout.addWidget(self._replace_line_edit, 1, 1, 1, 1)
 
         bottom_buttons_layout = QHBoxLayout()
 
@@ -102,10 +101,13 @@ class FindReplaceDialog(QDialog):
 
         main_layout = QVBoxLayout()
 
-        main_layout.addLayout(find_row_layout)
-        main_layout.addLayout(replace_row_layout)
+        # main_layout.addLayout(find_row_layout)
+        # main_layout.addLayout(replace_row_layout)
+        main_layout.addLayout(find_replace_layout)
         main_layout.addWidget(self._scope_group_box)
         main_layout.addLayout(bottom_buttons_layout)
+
+        main_layout.setSizeConstraint(QLayout.SizeConstraint.SetFixedSize)
 
         self.setLayout(main_layout)
 
