@@ -73,6 +73,8 @@ class IDEMainWindow(QMainWindow):
         self._top_toolbar.new_file_action.triggered.connect(lambda: self.central_widget.open_new_editing_tab(""))
         self._top_toolbar.open_file_action.triggered.connect(self._handle_open_file)
         self._top_toolbar.save_file_action.triggered.connect(self.central_widget.handle_save_tab)
+        self._top_toolbar.undo_action.triggered.connect(self._handle_undo)
+        self._top_toolbar.redo_action.triggered.connect(self._handle_redo)
         self._top_toolbar.character_viewer_action.triggered.connect(self._handle_character_viewer)
         self._top_toolbar.find_replace_dialog_action.triggered.connect(self._handle_find_replace)
         self._top_toolbar.settings_action.triggered.connect(self._handle_settings)
@@ -84,6 +86,7 @@ class IDEMainWindow(QMainWindow):
         self.central_widget.update_save_button_requested.connect(self._top_toolbar.update_save_button)
         self.central_widget.current_tab_cursor_position_changed.connect(self.status_bar.set_cursor_position_info)
         self.central_widget.selection_length_changed.connect(self.status_bar.set_selection_length_info)
+        self.central_widget.undo_redo_info_changed.connect(self._top_toolbar.update_undo_redo_buttons)
 
         self.directory_view.open_new_tab.connect(self.central_widget.open_new_editing_tab)
         self.directory_view.open_game_properties_tab.connect(
@@ -226,6 +229,12 @@ class IDEMainWindow(QMainWindow):
 
         if open_dialog[0] != "":
             self.central_widget.open_new_editing_tab(open_dialog[0])
+
+    def _handle_undo(self):
+        self.central_widget.handle_undo_request()
+
+    def _handle_redo(self):
+        self.central_widget.handle_redo_request()
 
     def _handle_find_replace(self):
         string_to_find = ""

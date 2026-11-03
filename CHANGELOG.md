@@ -16,7 +16,8 @@
 * Added code folding for macros.
 * Line number column now dynamically resizes with the amount of lines.
 * Error Dialog now closes all open IDE windows upon clicking "Quit PyWright IDE"
-* Find/Replace Dialog is no longer resizable
+* Find/Replace Dialog is no longer resizable.
+* Added Undo and Redo buttons to the toolbar.
 
 ## Version 1.5 - 30.11.2025
 

@@ -15,6 +15,7 @@ class MainWindowCentralWidget(QWidget):
     update_save_button_requested = pyqtSignal(bool)
     current_tab_cursor_position_changed = pyqtSignal(int, int)
     selection_length_changed = pyqtSignal(int)
+    undo_redo_info_changed = pyqtSignal(bool, bool)
 
     def __init__(self, parent=None):
         """Central widget for the main window. Handles the open tabs.
@@ -139,9 +140,13 @@ class MainWindowCentralWidget(QWidget):
                     self.is_file_editing_tab(index) and \
                     self.tab_widget.currentWidget().is_file_modified()
 
+        undo_cond = self.is_file_editing_tab(index) and self.tab_widget.currentWidget().can_undo()
+        redo_cond = self.is_file_editing_tab(index) and self.tab_widget.currentWidget().can_redo()
+
         self.update_save_button_requested.emit(condition)
         self._update_line_and_col()
         self._handle_text_selection_changed()
+        self.undo_redo_info_changed.emit(undo_cond, redo_cond)
 
     def _update_line_and_col(self):
         if self.tabs_count() == 0:
@@ -194,6 +199,7 @@ class MainWindowCentralWidget(QWidget):
         tab_text = file_edit_widget.file_name
         # Prepend a * to the tab name if the file is modified
         self.tab_widget.setTabText(tab_index, "*" + tab_text if condition else tab_text)
+        self.undo_redo_info_changed.emit(file_edit_widget.can_undo(), file_edit_widget.can_redo())
 
     # ==== Removing a tab ====
     def _handle_remove_tab(self, index):
@@ -439,6 +445,22 @@ class MainWindowCentralWidget(QWidget):
 
         if self._game_properties_widget is not None:
             self._game_properties_widget.set_game_icon_path(icon_path)
+
+    def handle_undo_request(self):
+        if not self.is_file_editing_tab(self.tab_widget.currentIndex()):
+            return
+
+        file_edit_widget: FileEditWidget = self.tab_widget.currentWidget()
+        file_edit_widget.do_undo()
+        self.undo_redo_info_changed.emit(file_edit_widget.can_undo(), file_edit_widget.can_redo())
+
+    def handle_redo_request(self):
+        if not self.is_file_editing_tab(self.tab_widget.currentIndex()):
+            return
+
+        file_edit_widget: FileEditWidget = self.tab_widget.currentWidget()
+        file_edit_widget.do_redo()
+        self.undo_redo_info_changed.emit(file_edit_widget.can_undo(), file_edit_widget.can_redo())
 
     def _get_modified_files_tab_indexes(self) -> list[int]:
         result = []
