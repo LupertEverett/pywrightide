@@ -231,6 +231,18 @@ class FileEditWidget(QWidget):
     def get_current_cursor_position(self) -> tuple[int, int]:
         return self.sci.getCursorPosition()[0], self.sci.getCursorPosition()[1]
 
+    def can_undo(self) -> bool:
+        return self.sci.isUndoAvailable()
+
+    def can_redo(self):
+        return self.sci.isRedoAvailable()
+
+    def do_undo(self):
+        self.sci.undo()
+
+    def do_redo(self):
+        self.sci.redo()
+
     def _handle_cursor_position_changed(self, line, column):
         self.cursor_position_changed.emit()
 
