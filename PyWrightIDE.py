@@ -1,7 +1,6 @@
 if __name__ == '__main__':
     from PyQt6.QtWidgets import QApplication
     from gui.IDEMainWindow import IDEMainWindow
-    from gui.WelcomeDialog import WelcomeDialog
     import gui.ErrorDialog as ErrorDialog
     from data import IDESettings
     from pathlib import Path
@@ -15,8 +14,6 @@ if __name__ == '__main__':
     if sys.platform == "win32":
         app.setStyle("WindowsVista")
 
-    # Check if the autoload path exists and is still a valid path
-    # If that's the case, then launch the IDE, otherwise launch the Welcome dialog instead
     game_folder_path = Path(IDESettings.get_autoload_last_game_path())
     game_folder_exists = game_folder_path.exists() and game_folder_path.is_dir()
 
