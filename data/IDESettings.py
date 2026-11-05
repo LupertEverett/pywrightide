@@ -21,6 +21,7 @@ WINDOW_STATE_KEY = "window_state"
 ICON_THEME_KEY = "icon_theme"
 COLOR_THEME_KEY = "color_theme"
 EDITOR_THEME_KEY = "editor/color_theme"
+EDITOR_WORD_WRAP_KEY = "editor/enable_word_wrap"
 RECENT_GAMES_KEY = "recent_games"
 LAST_OPEN_TABS_KEY = "last_open_tabs"
 LAST_OPEN_TAB_INDEX_KEY = "last_open_tab_index"
@@ -119,6 +120,14 @@ def set_editor_color_theme(new_editor_theme_name: str):
     if new_editor_theme_name == "":
         raise ValueError("Empty Editor Color Theme Name!")
     __program_settings.setValue(EDITOR_THEME_KEY, new_editor_theme_name)
+
+
+def get_editor_enable_word_wrap() -> bool:
+    return __program_settings.value(EDITOR_WORD_WRAP_KEY, True, bool)
+
+
+def set_editor_enable_word_wrap(new_word_wrap: bool):
+    __program_settings.setValue(EDITOR_WORD_WRAP_KEY, new_word_wrap)
 
 
 def get_recent_games() -> list[str]:
@@ -265,6 +274,7 @@ def reset_settings():
     __program_settings.setValue(ICON_THEME_KEY, "default")
     __program_settings.setValue(COLOR_THEME_KEY, "System Theme")
     __program_settings.setValue(EDITOR_THEME_KEY, "default")
+    __program_settings.setValue(EDITOR_WORD_WRAP_KEY, True)
     __program_settings.setValue(ENABLE_AUTOCOMPLETION_KEY, True)
     __program_settings.setValue(AUTOCOMPLETION_THRESHOLD_KEY, 1)
     __program_settings.setValue(HIGHLIGHT_MATCHING_TEXT_KEY, True)
