@@ -59,6 +59,9 @@ class SettingsDialog(QDialog):
         editor_theme_selection_layout.addWidget(self.editor_theme_combobox)
         editor_theme_selection_layout.addWidget(self.color_editor_dialog_button)
 
+        self.enable_word_wrap_checkbox = QCheckBox("Enable word wrapping")
+        self.enable_word_wrap_checkbox.setChecked(IDESettings.get_editor_enable_word_wrap())
+
         self.highlight_matching_text_checkbox = QCheckBox("Highlight other occurrences of the selected text")
         self.highlight_matching_text_checkbox.setChecked(IDESettings.get_highlight_matching_text())
 
@@ -123,6 +126,7 @@ class SettingsDialog(QDialog):
         highlight_style_layout.addStretch()
         highlight_style_layout.addWidget(self.highlight_style_combobox)
 
+        editor_group_layout.addWidget(self.enable_word_wrap_checkbox)
         editor_group_layout.addWidget(self.enable_autocompletion_checkbox)
         editor_group_layout.addLayout(autocompletion_threshold_layout)
         editor_group_layout.addLayout(font_name_layout)
@@ -224,6 +228,7 @@ class SettingsDialog(QDialog):
         self.icon_theme_combobox.setCurrentText(IDESettings.get_icon_theme())
         self.font_size_spinbox.setValue(IDESettings.get_font_size())
         self.bold_toggle_button.setChecked(IDESettings.get_font_boldness())
+        self.enable_word_wrap_checkbox.setChecked(IDESettings.get_editor_enable_word_wrap())
         self.enable_autocompletion_checkbox.setChecked(IDESettings.get_enable_autocompletion_check())
         self.autocompletion_threshold_spinbox.setValue(IDESettings.get_autocompletion_trigger_threshold())
         self.highlight_matching_text_checkbox.setChecked(IDESettings.get_highlight_matching_text())
@@ -240,6 +245,7 @@ class SettingsDialog(QDialog):
         IDESettings.set_icon_theme(self.icon_theme_combobox.currentText())
         IDESettings.set_color_theme(self.color_theme_combobox.currentText())
         IDESettings.set_editor_color_theme(self.editor_theme_combobox.currentText())
+        IDESettings.set_editor_enable_word_wrap(self.enable_word_wrap_checkbox.isChecked())
         IDESettings.set_enable_autocompletion_check(self.enable_autocompletion_checkbox.isChecked())
         IDESettings.set_autocompletion_trigger_threshold(self.autocompletion_threshold_spinbox.value())
         IDESettings.set_hightlight_matching_text(self.highlight_matching_text_checkbox.isChecked())
