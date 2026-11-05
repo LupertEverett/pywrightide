@@ -421,6 +421,7 @@ class MainWindowCentralWidget(QWidget):
                 tab.supply_editor_color_theme_to_lexer()
                 tab.setup_autocompletion()
                 tab.set_highlight_style(IDESettings.get_highlight_fill_rect())
+                tab.set_word_wrap(IDESettings.get_editor_enable_word_wrap())
 
     def handle_insert_into_cursor(self, command: str):
         # Don't do anything if there are no tabs open

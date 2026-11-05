@@ -172,9 +172,6 @@ class IDEScintillaWidget(QsciScintilla):
 
         self.setUtf8(True)
 
-        # Enable word wrapping
-        self.setWrapMode(QsciScintilla.WrapMode.WrapWord)
-
         # First margin is the line number margin by default. We set a preset width value to it here.
         self.setMargins(3)
         self.setMarginType(0, QsciScintilla.MarginType.NumberMargin)

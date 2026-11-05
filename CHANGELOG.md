@@ -13,8 +13,10 @@
 * The IDE will now warn the user of missing case folders and remove them from the list instead of crashing.
 * Logger view now displays PyWright's own logs too (by Zetrypio)
 * Welcome dialog is now "embedded" into the main window, with improved user interface.
-* Added code folding for macros.
-* Line number column now dynamically resizes with the amount of lines.
+* Editor:
+  * Added code folding for macros.
+  * Line number column now dynamically resizes with the amount of lines.
+  * Word wrapping can now be disabled.
 * Error Dialog now closes all open IDE windows upon clicking "Quit PyWright IDE"
 * Find/Replace Dialog is no longer resizable.
 * Added Undo and Redo buttons to the toolbar.

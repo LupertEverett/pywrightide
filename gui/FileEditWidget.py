@@ -2,11 +2,13 @@
 # Used with the tabs
 from pathlib import Path
 
+from PyQt6.QtGui import QFont, QFontMetrics
 from PyQt6.QtWidgets import QWidget, QVBoxLayout, QFileDialog, QMessageBox
 from PyQt6.QtCore import pyqtSignal
 
 from PyQt6.Qsci import *
 
+from data import IDESettings
 from gui.IDEScintillaWidget import IDEScintillaWidget
 from .FindReplaceDialog import FindType, ReplaceType, SearchScope
 
@@ -50,6 +52,12 @@ class FileEditWidget(QWidget):
 
         self.setLayout(self.layout)
 
+        # Keep track of font metrics
+        self._font = QFont(IDESettings.get_font_name(), IDESettings.get_font_size())
+        self._font.setBold(IDESettings.get_font_boldness())
+
+        self._font_metrics = QFontMetrics(self._font)
+
         self.file_path = selected_file
         self.file_folder = str(Path(self.file_path).parent.name)
         self.file_name = "New File"
@@ -75,6 +83,16 @@ class FileEditWidget(QWidget):
         self.sci.setText(text)
 
         self.sci.setMarginWidth(0, "0" + str(len(lines)))
+
+        enable_word_wrap = IDESettings.get_editor_enable_word_wrap()
+
+        self.sci.setScrollWidthTracking(False)
+
+        if not enable_word_wrap:
+            word_lengths = [self._font_metrics.boundingRect(line).width() for line in lines]
+            self.sci.setScrollWidth(max(word_lengths))
+            # Prevents awkward jumps when adding/deleting letters
+            self.sci.SendScintilla(QsciScintilla.SCI_SETXCARETPOLICY, QsciScintilla.CARET_STRICT, 2)
 
         # Common sense: Newly opened files aren't modified.
         self.sci.setModified(False)
@@ -106,6 +124,11 @@ class FileEditWidget(QWidget):
 
     def supply_font_properties_to_lexer(self, font_name: str, font_size: int, bold_font: bool):
         self.sci.supply_font_properties_to_lexer(font_name, font_size, bold_font)
+
+        self._font = QFont(font_name, font_size)
+        self._font.setBold(bold_font)
+
+        self._font_metrics = QFontMetrics(self._font)
 
     def supply_editor_color_theme_to_lexer(self):
         self.sci.supply_editor_color_theme_to_lexer()
@@ -148,6 +171,15 @@ class FileEditWidget(QWidget):
     def _emit_file_modified(self):
         self.sci.setModified(True)
         self.file_modified.emit()
+
+    def set_word_wrap(self, enable: bool):
+        wrap_mode = QsciScintilla.WrapMode.WrapWord if enable else QsciScintilla.WrapMode.WrapNone
+        self.sci.setWrapMode(wrap_mode)
+
+        if not enable:
+            # self.sci.setScrollWidthTracking(True)
+            # Prevents awkward jumps when adding/deleting letters
+            self.sci.SendScintilla(QsciScintilla.SCI_SETXCARETPOLICY, QsciScintilla.CARET_STRICT, 2)
 
     def set_highlight_style(self, fill: bool):
         self.sci.set_highlight_style(fill)
@@ -254,3 +286,9 @@ class FileEditWidget(QWidget):
         linecount = self.sci.text().count('\n') + 1
         self.sci.setMarginWidth(0, "0" + str(linecount))
         self.sci.apply_code_folding()
+
+        # Readjust the horizontal scrollbar
+        if not IDESettings.get_editor_enable_word_wrap():
+            lines = self.sci.text().split('\n')
+            word_lengths = [self._font_metrics.boundingRect(line).width() for line in lines]
+            self.sci.setScrollWidth(max(word_lengths))
