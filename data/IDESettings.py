@@ -59,7 +59,7 @@ def get_font_boldness() -> bool:
 
 
 def set_font_boldness(new_value: bool):
-    return __program_settings.setValue(FONT_BOLD_KEY, new_value)
+    __program_settings.setValue(FONT_BOLD_KEY, new_value)
 
 
 def get_autoload_last_game_check() -> bool:
