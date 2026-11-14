@@ -9,6 +9,7 @@ from .FileEditWidget import FileEditWidget
 from .FindReplaceDialog import SearchScope, FindType, ReplaceType
 from .GamePropertiesWidget import GamePropertiesWidget
 from .ImageViewerWidget import ImageViewerWidget
+from .WelcomeWidget import WelcomeWidget
 
 
 class MainWindowCentralWidget(QWidget):
@@ -16,6 +17,10 @@ class MainWindowCentralWidget(QWidget):
     current_tab_cursor_position_changed = pyqtSignal(int, int)
     selection_length_changed = pyqtSignal(int)
     undo_redo_info_changed = pyqtSignal(bool, bool)
+    welcome_screen_opened = pyqtSignal()
+    welcome_screen_game_selected = pyqtSignal(Path)
+    welcome_screen_settings_selected = pyqtSignal()
+    welcome_screen_about_selected = pyqtSignal()
 
     def __init__(self, parent=None):
         """Central widget for the main window. Handles the open tabs.
@@ -28,10 +33,16 @@ class MainWindowCentralWidget(QWidget):
         self.tab_widget.tabCloseRequested.connect(self._handle_remove_tab)
         self.tab_widget.currentChanged.connect(self._handle_tab_change)
 
+        self._welcome_widget = WelcomeWidget(self)
+        self._welcome_widget.game_path_selected.connect(lambda p: self.welcome_screen_game_selected.emit(p))
+        self._welcome_widget.settings_selected.connect(lambda: self.welcome_screen_settings_selected.emit())
+        self._welcome_widget.about_selected.connect(lambda: self.welcome_screen_about_selected.emit())
+
         layout = QVBoxLayout()
         layout.setContentsMargins(4, 4, 4, 4)
 
         layout.addWidget(self.tab_widget)
+        layout.addWidget(self._welcome_widget)
 
         self.setLayout(layout)
 
@@ -72,6 +83,15 @@ class MainWindowCentralWidget(QWidget):
         image_viewer_widget = ImageViewerWidget(image_path, self)
         image_name = image_path.name
         self.open_new_tab(image_viewer_widget, "Image Viewer - {}".format(image_name))
+
+    def open_welcome_screen(self):
+        self.tab_widget.hide()
+        self._welcome_widget.show()
+        self.welcome_screen_opened.emit()
+
+    def close_welcome_screen(self):
+        self._welcome_widget.hide()
+        self.tab_widget.show()
 
     def open_new_editing_tab(self, file_path: str):
         # Don't open a file editing tab if there is already one open for a given file
@@ -169,6 +189,9 @@ class MainWindowCentralWidget(QWidget):
 
     def is_game_properties_tab(self, index: int):
         return isinstance(self.tab_widget.widget(index), GamePropertiesWidget)
+
+    def is_welcome_tab(self, index: int):
+        return isinstance(self.tab_widget.widget(index), WelcomeWidget)
 
     # ==== Renaming a tab ====
     def handle_rename_tab(self, new_name: str):
@@ -411,6 +434,7 @@ class MainWindowCentralWidget(QWidget):
 
     def apply_settings(self):
         self._try_loading_editor_theme(IDESettings.get_editor_color_theme())
+        self._welcome_widget.set_autoload_checkbox_ticked(IDESettings.get_autoload_last_game_check())
 
         for idx in range(self.tabs_count()):
             if self.is_file_editing_tab(idx):
