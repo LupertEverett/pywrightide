@@ -2,7 +2,7 @@
 
 from pathlib import Path
 
-from PyQt6.QtWidgets import (QMainWindow, QStatusBar, QFileDialog, QLabel, QMessageBox)
+from PyQt6.QtWidgets import QMainWindow, QFileDialog, QMessageBox
 from PyQt6.QtGui import QIcon, QCloseEvent
 from PyQt6.QtCore import Qt
 
@@ -51,11 +51,6 @@ class IDEMainWindow(QMainWindow):
         self.logger_view = PyWrightLoggerWidget()
         self.logger_view.hide()
 
-        self.welcome_widget = WelcomeWidget(self)
-        self.welcome_widget.game_path_selected.connect(self.pick_game_folder_and_open_game_properties_tab)
-        self.welcome_widget.settings_selected.connect(self._handle_settings)
-        self.welcome_widget.about_selected.connect(lambda: about_pywright_ide(self))
-
         self.central_widget = MainWindowCentralWidget(self)
 
         self.asset_manager_widget.texture_browser\
@@ -87,6 +82,10 @@ class IDEMainWindow(QMainWindow):
         self.central_widget.current_tab_cursor_position_changed.connect(self.status_bar.set_cursor_position_info)
         self.central_widget.selection_length_changed.connect(self.status_bar.set_selection_length_info)
         self.central_widget.undo_redo_info_changed.connect(self._top_toolbar.update_undo_redo_buttons)
+        self.central_widget.welcome_screen_opened.connect(self._handle_open_welcome_screen)
+        self.central_widget.welcome_screen_game_selected.connect(self.pick_game_folder_and_open_game_properties_tab)
+        self.central_widget.welcome_screen_settings_selected.connect(self._handle_settings)
+        self.central_widget.welcome_screen_about_selected.connect(lambda: about_pywright_ide(self))
 
         self.directory_view.open_new_tab.connect(self.central_widget.open_new_editing_tab)
         self.directory_view.open_game_properties_tab.connect(
@@ -95,6 +94,7 @@ class IDEMainWindow(QMainWindow):
 
         # Toolbar and the central widget
         self.addToolBar(self._top_toolbar)
+        self.setCentralWidget(self.central_widget)
         self.addDockWidget(Qt.DockWidgetArea.LeftDockWidgetArea, self.directory_view)
         self.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, self.asset_manager_widget)
         self.addDockWidget(Qt.DockWidgetArea.BottomDockWidgetArea, self.logger_view)
@@ -125,21 +125,13 @@ class IDEMainWindow(QMainWindow):
             else:
                 self.central_widget.open_game_properties_tab()
         else:
-            self.setCentralWidget(self.welcome_widget)
-            self.central_widget.hide()
-            self._top_toolbar.hide()
-            self.status_bar.hide()
-            self.directory_view.hide()
-            self.logger_view.hide()
-            self.asset_manager_widget.hide()
+            self.central_widget.open_welcome_screen()
 
         # Apply the color theme
         self._apply_new_color_theme()
 
     def switch_to_editor_mode(self):
-        self.welcome_widget = None
-        self.central_widget.show()
-        self.setCentralWidget(self.central_widget)
+        self.central_widget.close_welcome_screen()
         self._top_toolbar.show()
         self.status_bar.show()
         self.directory_view.setVisible(not self._is_directory_view_hidden)
@@ -230,6 +222,13 @@ class IDEMainWindow(QMainWindow):
         if open_dialog[0] != "":
             self.central_widget.open_new_editing_tab(open_dialog[0])
 
+    def _handle_open_welcome_screen(self):
+        self._top_toolbar.hide()
+        self.status_bar.hide()
+        self.directory_view.hide()
+        self.logger_view.hide()
+        self.asset_manager_widget.hide()
+
     def _handle_undo(self):
         self.central_widget.handle_undo_request()
 
@@ -262,9 +261,6 @@ class IDEMainWindow(QMainWindow):
 
     def _apply_settings(self):
         self.central_widget.apply_settings()
-        # Setting a different central widget destroys the previous one
-        if self.welcome_widget is not None:
-            self.welcome_widget.set_autoload_checkbox_ticked(IDESettings.get_autoload_last_game_check())
         self._apply_new_color_theme()
         self._top_toolbar.update_toolbar_icons()
 
