@@ -138,7 +138,7 @@ class GameDataWidget(QWidget):
 
     def _handle_icon_picker_clicked(self):
         if self._pywright_root_dir != "":
-            icon_picker = IconPickerDialog([], self)
+            icon_picker = IconPickerDialog(Path(self._pywright_root_dir), self._game_info, self, [])
 
             if icon_picker.exec():
                 self._game_icon_lineedit.setText(icon_picker.selected_icon)

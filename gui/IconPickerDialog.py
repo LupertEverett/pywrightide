@@ -9,7 +9,7 @@ from PyQt6.QtWidgets import (QDialog, QDialogButtonBox, QComboBox, QCheckBox,
 from PyQt6.QtGui import QPixmap, QIcon, QFileSystemModel
 from PyQt6.QtCore import QDir, QSize, Qt
 
-from data.PyWrightGame import CurrentPyWrightGame
+from data.PyWrightGame import PyWrightGameInfo
 
 accepted_types = (".png", ".jpg")
 ICON_SIZE = QSize(128, 128)
@@ -17,14 +17,14 @@ ICON_SIZE = QSize(128, 128)
 
 class IconPickerDialog(QDialog):
 
-    def __init__(self, limit_to_folders: list[str] = [], parent=None):
+    def __init__(self, pywright_root_dir: Path, selected_game_info: PyWrightGameInfo | None, parent= None, limit_to_folders: list[str] = []):
         super().__init__(parent)
 
         self.setWindowTitle("Pick an Icon")
 
-        self._pywright_root_dir = CurrentPyWrightGame().current_pywright_folder_path
+        self._pywright_root_dir = pywright_root_dir
 
-        self._selected_game_info = CurrentPyWrightGame().current_game
+        self._selected_game_info = selected_game_info
 
         self._limit_to_folders = limit_to_folders
 
@@ -81,9 +81,9 @@ class IconPickerDialog(QDialog):
     def _query_subfolders(self):
         checking_root_art = self._global_folder_checkbox.isChecked()
 
-        selected_root_folder = self._pywright_root_dir if checking_root_art else str(self._selected_game_info.game_path)
+        selected_root_folder = self._pywright_root_dir if checking_root_art or self._selected_game_info is None else self._selected_game_info.game_path
 
-        art_folder_path = Path("{}/art/".format(selected_root_folder))
+        art_folder_path = selected_root_folder / "art"
 
         if not art_folder_path.exists() or not art_folder_path.is_dir():
             raise FileNotFoundError("art folder doesn't exist!")
@@ -103,9 +103,9 @@ class IconPickerDialog(QDialog):
         subfolder_name = self._subfolder_combobox.currentText()
 
         checking_root_art = self._global_folder_checkbox.isChecked()
-        selected_root_folder = self._pywright_root_dir if checking_root_art else str(self._selected_game_info.game_path)
+        selected_root_folder = self._pywright_root_dir if checking_root_art or self._selected_game_info is None else self._selected_game_info.game_path
 
-        folder_path = Path("{}/art/{}".format(selected_root_folder, subfolder_name))
+        folder_path = selected_root_folder / "art" / subfolder_name
 
         fs_model = QFileSystemModel()
         icon_provider = ThumbnailIconProvider()

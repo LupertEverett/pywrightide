@@ -20,6 +20,7 @@
 * Error Dialog now closes all open IDE windows upon clicking "Quit PyWright IDE"
 * Find/Replace Dialog is no longer resizable.
 * Added Undo and Redo buttons to the toolbar.
+* Fixed the crash when trying to pick an icon from the Create New Game dialog.
 
 ## Version 1.5 - 30.11.2025
 

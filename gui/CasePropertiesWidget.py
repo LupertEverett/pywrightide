@@ -100,7 +100,7 @@ class CasePropertiesWidget(QWidget):
         return self.case_name_line_edit.text()
 
     def _handle_case_bg_picker_button_clicked(self):
-        icon_picker = IconPickerDialog(["bg"], self)
+        icon_picker = IconPickerDialog(self._current_game.pywright_folder_path, self._current_game, self, ["bg"])
 
         if icon_picker.exec():
             icon_name = Path(icon_picker.selected_icon).stem
